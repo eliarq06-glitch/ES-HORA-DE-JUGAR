@@ -253,7 +253,7 @@ export default function Champion({ teams, matches, matchEvents, onFinalize }) {
           </button>
           <button className="btn btn-danger" style={{ padding: '1rem 2rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--accent-danger)', color: 'black' }} onClick={() => {
             if(window.confirm('¿Estás seguro de Finalizar el Torneo? Esto guardará las estadísticas en el Historial General y borrará el progreso para empezar una nueva jornada.')) {
-              onFinalize(championTeam ? championTeam.id : null);
+              onFinalize();
             }
           }}>
             <Crown size={20} /> Cerrar Jornada y Guardar Historial

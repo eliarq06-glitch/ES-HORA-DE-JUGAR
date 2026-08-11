@@ -2,14 +2,39 @@ import React, { useState } from 'react';
 import { Award, ChevronUp, Users, Lock, Share2 } from 'lucide-react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
-export default function MVP({ players, isAdmin }) {
-  // votesData format: { "NombreDelVotante": playerId }
+export default function MVP({ isAdmin, historicalTournaments, setHistoricalTournaments }) {
   const [votesData, setVotesData] = useLocalStorage('ehdj_mvp_votes', {});
   const [myVoterName, setMyVoterName] = useLocalStorage('ehdj_mvp_my_name', '');
   const [isVotingClosed, setIsVotingClosed] = useLocalStorage('ehdj_mvp_closed', false);
 
+  const lastTournament = historicalTournaments && historicalTournaments.length > 0 ? historicalTournaments[0] : null;
+
+  if (!lastTournament) {
+    return (
+      <div style={{ width: '100%', maxWidth: '800px', textAlign: 'center', padding: '3rem 1rem' }}>
+        <Award size={64} color="var(--dark-text-muted)" style={{ margin: '0 auto 1rem auto' }} />
+        <h2 className="title-main" style={{ color: 'var(--dark-text-muted)' }}>Aún no hay Jornadas Finalizadas</h2>
+        <p>La votación del MVP se abrirá una vez que se finalice una jornada.</p>
+      </div>
+    );
+  }
+
+  // Extraer jugadores y estadísticas del último torneo
+  const playersStats = {};
+  
+  if (lastTournament.matchEvents) {
+    lastTournament.matchEvents.forEach(e => {
+      const pId = e.player.id;
+      if (!playersStats[pId]) {
+        playersStats[pId] = { ...e.player, goals: 0, assists: 0 };
+      }
+      if (e.type === 'goal') playersStats[pId].goals++;
+      if (e.type === 'assist') playersStats[pId].assists++;
+    });
+  }
+
   // Calculate scores to determine podium
-  const podium = [...players].sort((a, b) => {
+  const podium = Object.values(playersStats).sort((a, b) => {
     const scoreA = (a.goals * 2) + a.assists + (a.ovr * 0.1);
     const scoreB = (b.goals * 2) + b.assists + (b.ovr * 0.1);
     return scoreB - scoreA;
@@ -56,13 +81,43 @@ export default function MVP({ players, isAdmin }) {
   };
 
   const handleCloseVoting = () => {
-    if (window.confirm("¿Seguro que quieres cerrar la votación? Ya nadie podrá votar.")) {
+    if (window.confirm("¿Seguro que quieres cerrar la votación? Ya nadie podrá votar y se guardará el ganador definitivo en el historial.")) {
       setIsVotingClosed(true);
+      
+      // Guardar el ganador en el historial
+      const finalPodium = [...podium].sort((a,b) => getPlayerVotes(b.id).count - getPlayerVotes(a.id).count);
+      const mvpWinner = finalPodium.length > 0 ? finalPodium[0] : null;
+      
+      if (mvpWinner && setHistoricalTournaments) {
+        const updatedTournaments = [...historicalTournaments];
+        updatedTournaments[0] = {
+          ...updatedTournaments[0],
+          mvpWinner: mvpWinner,
+          mvpVotes: votesData
+        };
+        setHistoricalTournaments(updatedTournaments);
+      }
     }
   };
 
   const handleOpenVoting = () => {
-    if (window.confirm("¿Reabrir la votación?")) {
+    if (window.confirm("¿Reabrir la votación? Se podrá volver a votar.")) {
+      setIsVotingClosed(false);
+      // Remove winner from history temporarily
+      if (setHistoricalTournaments) {
+        const updatedTournaments = [...historicalTournaments];
+        updatedTournaments[0] = {
+          ...updatedTournaments[0],
+          mvpWinner: null
+        };
+        setHistoricalTournaments(updatedTournaments);
+      }
+    }
+  };
+
+  const handleResetVotes = () => {
+    if (window.confirm("¿Eliminar todos los votos actuales y empezar de cero la votación para esta jornada?")) {
+      setVotesData({});
       setIsVotingClosed(false);
     }
   };
@@ -73,6 +128,7 @@ export default function MVP({ players, isAdmin }) {
 
   const getShareText = () => {
     let text = isVotingClosed ? `🏆 *RESULTADOS FINALES DEL MVP* 🏆\n\n` : `🏆 *VOTACIÓN DEL MVP (EN VIVO)* 🏆\n\n`;
+    text += `Jornada: ${lastTournament.sessionName} (${lastTournament.date})\n\n`;
     
     if (isVotingClosed && mvpWinner) {
       text += `👑 *EL MVP DE LA JORNADA ES: ${mvpWinner.firstName} "${mvpWinner.nickname}"*\n\n`;
@@ -112,7 +168,8 @@ export default function MVP({ players, isAdmin }) {
         
         <Award size={48} color={isVotingClosed ? "var(--accent-primary)" : "var(--accent-warning)"} style={{ margin: '0 auto 1rem auto' }} />
         <h2 className="title-main" style={{ color: '#000' }}>{isVotingClosed ? 'Resultados del MVP' : 'Votación del MVP'}</h2>
-        <p className="subtitle" style={{ color: 'var(--light-text-muted)' }}>Podio de la Jornada (Top 5 Rendimientos)</p>
+        <p className="subtitle" style={{ color: 'var(--light-text-muted)', marginBottom: '0.5rem' }}>{lastTournament.sessionName} ({lastTournament.date})</p>
+        <p style={{ fontSize: '0.85rem', color: '#666' }}>Podio de la Jornada (Top 5 Rendimientos)</p>
         
         {!isVotingClosed && myVoterName && (
           <div style={{ marginTop: '1rem', display: 'inline-block', background: 'rgba(0,0,0,0.05)', padding: '0.5rem 1rem', borderRadius: '100px', fontSize: '0.85rem' }}>
@@ -128,7 +185,7 @@ export default function MVP({ players, isAdmin }) {
         )}
 
         {isAdmin && (
-          <div style={{ marginTop: '1rem' }}>
+          <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem', justifyContent: 'center', borderTop: '1px solid var(--light-glass-border)', paddingTop: '1.5rem' }}>
             {!isVotingClosed ? (
               <button className="btn btn-danger" style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }} onClick={handleCloseVoting}>
                  <Lock size={14} style={{ marginRight: '4px' }} /> Cerrar Votación
@@ -138,6 +195,10 @@ export default function MVP({ players, isAdmin }) {
                  Reabrir Votación
               </button>
             )}
+            
+            <button className="btn btn-dark" style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', background: 'rgba(255,0,0,0.1)', color: 'red' }} onClick={handleResetVotes}>
+               Limpiar Todos los Votos
+            </button>
           </div>
         )}
       </div>
@@ -195,7 +256,7 @@ export default function MVP({ players, isAdmin }) {
         })}
         {podium.length === 0 && (
           <div style={{ textAlign: 'center', padding: '2rem', background: 'rgba(255,255,255,0.8)', borderRadius: '16px' }}>
-            Aún no hay suficientes datos para armar el podio.
+            Aún no hay suficientes datos para armar el podio de esta jornada.
           </div>
         )}
       </div>

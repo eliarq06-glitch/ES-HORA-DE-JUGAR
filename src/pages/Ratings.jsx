@@ -1,17 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { Star, Calculator } from 'lucide-react';
 
-export default function Ratings({ players, updatePlayerRating, matchEvents }) {
+export default function Ratings({ players, updatePlayerRating, matchEvents, activeSessionId }) {
   const [scores, setScores] = useState({});
 
   useEffect(() => {
-    if (Object.keys(scores).length === 0 && matchEvents && matchEvents.length > 0) {
+    // Inicializar scores con los que ya estén guardados para esta jornada
+    const initialScores = {};
+    players.forEach(p => {
+      const savedForSession = (p.ratings || []).find(r => typeof r === 'object' && r.sessionId === activeSessionId);
+      if (savedForSession) {
+        initialScores[p.id] = savedForSession.rating;
+      }
+    });
+
+    if (Object.keys(initialScores).length > 0) {
+      setScores(initialScores);
+    } else if (matchEvents && matchEvents.length > 0) {
       calculateAutoRatings();
     }
-  }, [players, matchEvents]); // Solo al inicio
+  }, [players, matchEvents, activeSessionId]);
 
   const calculateAutoRatings = () => {
-    const newScores = {};
+    const newScores = { ...scores };
     players.forEach(p => {
       let rating = 6.0; // Base Sofascore
       const events = matchEvents.filter(e => e.player.id === p.id);
@@ -32,15 +43,17 @@ export default function Ratings({ players, updatePlayerRating, matchEvents }) {
       });
 
       rating = Math.max(1.0, Math.min(10.0, rating));
-      newScores[p.id] = rating.toFixed(1);
+      // Solo sobreescribir si no había una calificación manual y tiene eventos
+      if (!newScores[p.id] || events.length > 0) {
+        newScores[p.id] = rating.toFixed(1);
+      }
     });
     setScores(newScores);
   };
 
   const handleSave = (playerId) => {
     if (!scores[playerId]) return;
-    updatePlayerRating(playerId, parseFloat(scores[playerId]));
-    setScores(prev => ({ ...prev, [playerId]: '' }));
+    updatePlayerRating(playerId, parseFloat(scores[playerId]), activeSessionId);
     alert('Calificación guardada para el jugador');
   };
 

@@ -36,10 +36,24 @@ export default function Confirm({ isAdmin, activeSession, confirmedPlayers, allP
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '100%', maxWidth: '600px' }}>
       <div className="glass-panel-light">
-        <h2 className="title-main" style={{ fontSize: '1.8rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <UserPlus size={28} /> Confirmar Asistencia
-        </h2>
-        <p className="subtitle" style={{ marginBottom: '2rem' }}>Jornada: {activeSession?.name} ({activeSession?.date})</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <h2 className="title-main" style={{ fontSize: '1.8rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <UserPlus size={28} /> Confirmar Asistencia
+            </h2>
+            <p className="subtitle" style={{ marginBottom: '2rem' }}>Jornada: {activeSession?.name} ({activeSession?.date})</p>
+          </div>
+          <button 
+            className="btn btn-dark" 
+            style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}
+            onClick={() => {
+              navigator.clipboard.writeText(`¡Confirma tu asistencia para la jornada de hoy!\n👉 ${window.location.origin}`);
+              alert('¡Mensaje copiado! Pégalo en el grupo de WhatsApp.');
+            }}
+          >
+            <Shield size={16} /> Compartir Link
+          </button>
+        </div>
         
         <h4 style={{ marginBottom: '1rem', color: 'var(--light-text)' }}>Selecciona tu perfil existente:</h4>
         <form onSubmit={handleConfirmExisting} style={{ marginBottom: '2rem', display: 'flex', gap: '1rem' }}>

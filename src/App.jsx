@@ -71,8 +71,9 @@ function App() {
 
   const getPlayersWithStats = () => {
     return playersDB.map(p => {
-      const avgRating = p.ratings.length > 0 ? (p.ratings.reduce((a, b) => a + b, 0) / p.ratings.length) : 5;
-      const ovr = p.ratings.length > 0 ? Math.round(avgRating * 10) : 50;
+      const validRatings = (p.ratings || []).map(r => typeof r === 'object' ? r.rating : r);
+      const avgRating = validRatings.length > 0 ? (validRatings.reduce((a, b) => a + b, 0) / validRatings.length) : 5;
+      const ovr = validRatings.length > 0 ? Math.round(avgRating * 10) : 50;
       
       const events = matchEvents.filter(e => e.player.id === p.id);
       const goals = (p.historicalGoals || 0) + events.filter(e => e.type === 'goal').length;
@@ -110,16 +111,22 @@ function App() {
     setSessions(sessions.map(s => s.id === activeSessionId ? { ...s, confirmedIds: newIds } : s));
   };
 
-  const updatePlayerRating = (playerId, rating) => {
+  const updatePlayerRating = (playerId, rating, sessionId) => {
     setPlayersDB(playersDB.map(p => {
-      if (p.id === playerId) return { ...p, ratings: [...p.ratings, rating] };
+      if (p.id === playerId) {
+        // Remover calificación anterior de esta misma jornada si existe
+        const otherRatings = (p.ratings || []).filter(r => (typeof r === 'object' ? r.sessionId : null) !== sessionId);
+        return { ...p, ratings: [...otherRatings, { sessionId, rating }] };
+      }
       return p;
     }));
   };
 
-  const handleFinalizeTournament = (championTeamId) => {
+  const [championId, setChampionId] = useState(null);
+
+  const handleFinalizeTournament = () => {
     // 1. Guardar stats en histórico de jugadores
-    const champTeam = teams.find(t => t.id === championTeamId);
+    const champTeam = teams.find(t => t.id === championId);
     
     setPlayersDB(playersDB.map(p => {
       const events = matchEvents.filter(e => e.player.id === p.id);
@@ -158,7 +165,10 @@ function App() {
     setTeams([]);
     setMatches([]);
     setMatchEvents([]);
-    // Limpiar config de MVP en Supabase
+    setChampionId(null);
+    localStorage.removeItem('ehdj_mvp_votes'); // Clean up votes for next time
+    localStorage.setItem('ehdj_mvp_closed', 'false'); // Reset voting status
+
     setActiveSessionId(sessions.find(s => s.status !== 'closed')?.id || 1);
     
     alert('¡Torneo finalizado! El historial ha sido guardado. Ve a "Jornadas" para consultarlo.');
@@ -166,6 +176,8 @@ function App() {
   };
 
   const isPitch = route === 'confirm' || route === 'mvp' || route === 'champion';
+
+  console.log("Loading states:", { loadingPlayers, loadingSessions, authLoading, isLoading });
 
   // Loading screen mientras carga Supabase
   if (isLoading || authLoading) {
@@ -187,74 +199,90 @@ function App() {
 
   return (
     <div className={isPitch ? 'pitch-bg' : 'night-bg'}>
-      <nav className="top-nav">
-        <div className="logo" style={{ cursor: 'pointer' }} onClick={() => setRoute('confirm')}>
-          <Trophy color="var(--accent-neon)" /> EHDJ
-        </div>
+      <nav className="top-nav" style={{ display: 'flex', flexDirection: 'column', gap: 0, padding: 0 }}>
         
-        <div style={{ display: 'flex', gap: '0.5rem', flex: 1, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button className={`btn ${route === 'confirm' ? 'btn-neon' : 'btn-dark'}`} style={{ padding: '0.5rem 1rem' }} onClick={() => setRoute('confirm')}>
-            <CheckSquare size={16} /> Confirmar
-          </button>
-          <button className={`btn ${route === 'players' ? 'btn-neon' : 'btn-dark'}`} style={{ padding: '0.5rem 1rem' }} onClick={() => setRoute('players')}>
-            <UsersIcon size={16} /> Jugadores
-          </button>
-          <button className={`btn ${route === 'history' ? 'btn-neon' : 'btn-dark'}`} style={{ padding: '0.5rem 1rem' }} onClick={() => setRoute('history')}>
-            <BarChart3 size={16} /> Historial
-          </button>
-          <button className={`btn ${route === 'mvp' ? 'btn-neon' : 'btn-dark'}`} style={{ padding: '0.5rem 1rem' }} onClick={() => setRoute('mvp')}>
-            <Award size={16} /> Votar MVP
-          </button>
-          {isAdmin && (
-             <>
-               <div style={{ width: '2px', background: 'rgba(255,255,255,0.2)', margin: '0 0.5rem' }}></div>
-               <button className={`btn ${route === 'sessions' ? 'btn-neon' : 'btn-dark'}`} style={{ padding: '0.5rem 1rem' }} onClick={() => setRoute('sessions')}>
-                 <CalendarDays size={16} /> Jornadas
-               </button>
-               <button className={`btn ${route === 'finances' ? 'btn-neon' : 'btn-dark'}`} style={{ padding: '0.5rem 1rem' }} onClick={() => setRoute('finances')}>
-                 <DollarSign size={16} /> Finanzas
-               </button>
-
-               <button className={`btn ${route === 'draw' ? 'btn-neon' : 'btn-dark'}`} style={{ padding: '0.5rem 1rem' }} onClick={() => setRoute('draw')}>
-                 Sorteo
-               </button>
-               <button className={`btn ${route === 'tournament' ? 'btn-neon' : 'btn-dark'}`} style={{ padding: '0.5rem 1rem' }} onClick={() => setRoute('tournament')}>
-                 <Play size={16} /> Torneo
-               </button>
-               <button className={`btn ${route === 'match' ? 'btn-neon' : 'btn-dark'}`} style={{ padding: '0.5rem 1rem' }} onClick={() => setRoute('match')}>
-                 <Gamepad2 size={16} /> VAR en Vivo
-               </button>
-               <button className={`btn ${route === 'champion' ? 'btn-neon' : 'btn-dark'}`} style={{ padding: '0.5rem 1rem' }} onClick={() => setRoute('champion')}>
-                 <Crown size={16} /> Campeón
-               </button>
-               <button className={`btn ${route === 'ratings' ? 'btn-neon' : 'btn-dark'}`} style={{ padding: '0.5rem 1rem' }} onClick={() => setRoute('ratings')}>
-                 <Star size={16} /> Notas
-               </button>
-             </>
-          )}
-        </div>
-
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        {/* ROW 1: Public & Profile */}
+        <div style={{ display: 'flex', width: '100%', padding: '1rem', alignItems: 'center', justifyContent: 'space-between', borderBottom: isAdmin ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(204, 255, 0, 0.1)', padding: '0.25rem 0.75rem', borderRadius: '1rem', border: '1px solid rgba(204, 255, 0, 0.3)' }} title="Usuarios en línea">
-            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ccff00', boxShadow: '0 0 8px #ccff00' }}></div>
-            <span style={{ color: '#ccff00', fontSize: '0.85rem', fontWeight: 'bold' }}>{onlineUsers.length} en línea</span>
+          <div className="logo" style={{ cursor: 'pointer' }} onClick={() => setRoute('confirm')}>
+            <Trophy color="var(--accent-neon)" /> EHDJ
           </div>
-
-          <div style={{ color: 'var(--dark-text-muted)', fontSize: '0.9rem', borderRight: '1px solid rgba(255,255,255,0.2)', paddingRight: '1rem' }}>
-            {profile?.full_name} ({profile?.role})
-          </div>
-
-          {isGlobalAdmin && (
-            <button className="btn" style={{ padding: '0.5rem', background: 'transparent', color: 'var(--accent-danger)' }} onClick={handleResetAll} title="Reiniciar Todos los Datos">
-              <RotateCcw size={20} />
+          
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <button className={`btn ${route === 'confirm' ? 'btn-neon' : 'btn-dark'}`} style={{ padding: '0.5rem 1rem' }} onClick={() => setRoute('confirm')}>
+              <CheckSquare size={16} /> Confirmar
             </button>
-          )}
+            <button className={`btn ${route === 'players' ? 'btn-neon' : 'btn-dark'}`} style={{ padding: '0.5rem 1rem' }} onClick={() => setRoute('players')}>
+              <UsersIcon size={16} /> Ranking
+            </button>
+            <button className={`btn ${route === 'history' ? 'btn-neon' : 'btn-dark'}`} style={{ padding: '0.5rem 1rem' }} onClick={() => setRoute('history')}>
+              <BarChart3 size={16} /> Historial
+            </button>
+            <button className={`btn ${route === 'mvp' ? 'btn-neon' : 'btn-dark'}`} style={{ padding: '0.5rem 1rem' }} onClick={() => setRoute('mvp')}>
+              <Award size={16} /> Votar MVP
+            </button>
+          </div>
 
-          <button className="btn btn-danger" style={{ padding: '0.5rem 1rem', background: 'transparent' }} onClick={handleLogout}>
-            <LogOut size={16} /> Salir
-          </button>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(204, 255, 0, 0.1)', padding: '0.25rem 0.75rem', borderRadius: '1rem', border: '1px solid rgba(204, 255, 0, 0.3)' }} title="Usuarios en línea">
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ccff00', boxShadow: '0 0 8px #ccff00' }}></div>
+              <span style={{ color: '#ccff00', fontSize: '0.85rem', fontWeight: 'bold' }}>{onlineUsers.length}</span>
+            </div>
+            
+            <div style={{ color: 'var(--dark-text-muted)', fontSize: '0.9rem', borderRight: '1px solid rgba(255,255,255,0.2)', paddingRight: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--accent-neon)', color: 'black', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.8rem' }}>
+                {profile?.full_name?.charAt(0).toUpperCase() || 'U'}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <span style={{ color: 'white', fontWeight: 'bold', lineHeight: '1' }}>{profile?.full_name?.split(' ')[0]}</span>
+                <span style={{ fontSize: '0.7rem', color: isGlobalAdmin ? 'var(--accent-danger)' : 'var(--accent-neon)', lineHeight: '1', marginTop: '2px' }}>
+                  {profile?.role.replace('_', ' ')}
+                </span>
+              </div>
+            </div>
+
+            {isGlobalAdmin && (
+              <button className="btn" style={{ padding: '0.5rem', background: 'transparent', color: 'var(--accent-danger)' }} onClick={handleResetAll} title="Reiniciar Todos los Datos">
+                <RotateCcw size={20} />
+              </button>
+            )}
+            <button className="btn btn-danger" style={{ padding: '0.5rem', background: 'transparent' }} onClick={handleLogout} title="Salir">
+              <LogOut size={16} />
+            </button>
+          </div>
         </div>
+
+        {/* ROW 2: Admin Tools */}
+        {isAdmin && (
+          <div style={{ display: 'flex', width: '100%', padding: '0.75rem 1rem', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--accent-neon)', textTransform: 'uppercase', letterSpacing: '1px', marginRight: '1rem', fontWeight: 'bold' }}>Panel Admin:</div>
+            
+            <button className={`btn ${route === 'sessions' ? 'btn-neon' : 'btn-dark'}`} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} onClick={() => setRoute('sessions')}>
+              <CalendarDays size={14} /> Jornadas
+            </button>
+            <button className={`btn ${route === 'finances' ? 'btn-neon' : 'btn-dark'}`} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} onClick={() => setRoute('finances')}>
+              <DollarSign size={14} /> Finanzas
+            </button>
+            
+            <div style={{ width: '1px', height: '20px', background: 'rgba(255,255,255,0.2)', margin: '0 0.5rem' }}></div>
+            
+            <button className={`btn ${route === 'draw' ? 'btn-neon' : 'btn-dark'}`} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} onClick={() => setRoute('draw')}>
+              Sorteo
+            </button>
+            <button className={`btn ${route === 'tournament' ? 'btn-neon' : 'btn-dark'}`} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} onClick={() => setRoute('tournament')}>
+              <Play size={14} /> Torneo
+            </button>
+            <button className={`btn ${route === 'match' ? 'btn-neon' : 'btn-dark'}`} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} onClick={() => setRoute('match')}>
+              <Gamepad2 size={14} /> VAR en Vivo
+            </button>
+            <button className={`btn ${route === 'champion' ? 'btn-neon' : 'btn-dark'}`} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} onClick={() => setRoute('champion')}>
+              <Crown size={14} /> Campeón
+            </button>
+            <button className={`btn ${route === 'ratings' ? 'btn-neon' : 'btn-dark'}`} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} onClick={() => setRoute('ratings')}>
+              <Star size={14} /> Notas
+            </button>
+          </div>
+        )}
       </nav>
 
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2rem 1rem' }}>
@@ -265,8 +293,8 @@ function App() {
         {route === 'draw' && isAdmin && <Draw players={confirmedPlayers} teams={teams} setTeams={setTeams} />}
         {route === 'tournament' && isAdmin && <Tournament teams={teams} matches={matches} setMatches={setMatches} matchEvents={matchEvents} />}
         {route === 'match' && isAdmin && <Match teams={teams} matchEvents={matchEvents} setMatchEvents={setMatchEvents} matches={matches} setMatches={setMatches} />}
-        {route === 'ratings' && isAdmin && <Ratings players={confirmedPlayers} updatePlayerRating={updatePlayerRating} matchEvents={matchEvents} />}
-        {route === 'mvp' && <MVP players={confirmedPlayers} isAdmin={isAdmin} />}
+        {route === 'ratings' && isAdmin && <Ratings players={confirmedPlayers} updatePlayerRating={updatePlayerRating} matchEvents={matchEvents} activeSessionId={activeSessionId} />}
+        {route === 'mvp' && <MVP isAdmin={isAdmin} historicalTournaments={historicalTournaments} setHistoricalTournaments={setHistoricalTournaments} />}
         {route === 'champion' && isAdmin && <Champion teams={teams} matches={matches} matchEvents={matchEvents} onFinalize={handleFinalizeTournament} />}
         {route === 'players' && <Players players={allPlayers} />}
         {route === 'history' && <History players={allPlayers} />}

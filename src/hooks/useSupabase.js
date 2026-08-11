@@ -14,15 +14,24 @@ export function useSupabaseTable(tableName, defaultValue = []) {
     let subscription;
 
     const fetchData = async () => {
-      const { data: rows, error } = await supabase
-        .from(tableName)
-        .select('*')
-        .order('created_at', { ascending: true });
+      try {
+        const orderByCol = tableName === 'historical_tournaments' ? 'saved_at' : 'created_at';
+        const isAscending = tableName !== 'historical_tournaments';
+        const { data: rows, error } = await supabase
+          .from(tableName)
+          .select('*')
+          .order(orderByCol, { ascending: isAscending });
 
-      if (!error && rows) {
-        setData(mapFromDB(tableName, rows));
+        if (!error && rows) {
+          setData(mapFromDB(tableName, rows));
+        } else if (error) {
+          console.error(`Supabase error fetching ${tableName}:`, error);
+        }
+      } catch (err) {
+        console.error(`Exception fetching ${tableName}:`, err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchData();
@@ -115,10 +124,14 @@ export function useSupabaseAuth() {
 
   useEffect(() => {
     // Obtener sesión actual
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) console.error("Supabase auth error:", error);
       setUser(session?.user || null);
       if (session?.user) fetchProfile(session.user.id);
       else setLoading(false);
+    }).catch(err => {
+      console.error("Exception getting session:", err);
+      setLoading(false);
     });
 
     // Escuchar cambios de autenticación
@@ -136,16 +149,23 @@ export function useSupabaseAuth() {
   }, []);
 
   const fetchProfile = async (userId) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
-    
-    if (!error && data) {
-      setProfile(data);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      if (!error && data) {
+        setProfile(data);
+      } else if (error) {
+        console.error("Supabase error fetching profile:", error);
+      }
+    } catch (err) {
+      console.error("Exception fetching profile:", err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return { user, profile, loading };

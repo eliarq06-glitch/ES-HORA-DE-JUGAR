@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Gamepad2, Activity, Trash2, Play, Pause, Square, AlertCircle } from 'lucide-react';
 import TacticalPitch from '../components/TacticalPitch';
+import FullHorizontalPitch from '../components/FullHorizontalPitch';
 
 // Sonidos usando Web Audio API (Cero dependencias)
 const playBeep = (freq = 440, type = 'sine', duration = 0.5) => {
@@ -202,12 +203,21 @@ export default function Match({ teams, matchEvents, setMatchEvents, matches, set
       </div>
 
       {activeMatch && team1 && team2 ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           
-          {/* Team 1 Players */}
+          {/* Full Horizontal Pitch */}
           <div className="glass-panel-dark">
-            <h3 className="title-main" style={{ textAlign: 'center', marginBottom: '1.5rem', color: 'white' }}>{team1.name}</h3>
-            <TacticalPitch team={team1} events={currentEvents} selectedPlayerId={selectedPlayer?.id} onPlayerClick={setSelectedPlayer} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', color: 'white', padding: '0 2rem' }}>
+              <h3 className="title-main">{team1.name}</h3>
+              <h3 className="title-main">{team2.name}</h3>
+            </div>
+            <FullHorizontalPitch 
+              team1={team1} 
+              team2={team2} 
+              events={currentEvents} 
+              selectedPlayerId={selectedPlayer?.id} 
+              onPlayerClick={setSelectedPlayer} 
+            />
           </div>
 
           {/* Action Center */}
@@ -215,7 +225,7 @@ export default function Match({ teams, matchEvents, setMatchEvents, matches, set
             <h3 className="title-main" style={{ textAlign: 'center', marginBottom: '1rem', color: 'var(--accent-neon)' }}>Registrar Acción</h3>
             
             {selectedPlayer ? (
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '600px', margin: '0 auto', width: '100%' }}>
                 <div style={{ textAlign: 'center', fontSize: '1.2rem', fontWeight: 'bold' }}>
                   {selectedPlayer.firstName} {selectedPlayer.lastName}
                 </div>
@@ -231,7 +241,7 @@ export default function Match({ teams, matchEvents, setMatchEvents, matches, set
                   </button>
                 </div>
 
-                <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem', marginTop: 'auto' }}>
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem', marginTop: '1rem' }}>
                   <h4 style={{ fontSize: '0.9rem', color: 'var(--accent-neon)', marginBottom: '0.5rem', textAlign: 'center' }}>⚽ GOL A FAVOR</h4>
                   <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
                     <select id="goalType" className="input-dark" style={{ flex: 1, padding: '0.4rem', fontSize: '0.8rem' }}>
@@ -253,15 +263,9 @@ export default function Match({ teams, matchEvents, setMatchEvents, matches, set
               </div>
             ) : (
               <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dark-text-muted)', textAlign: 'center', padding: '2rem' }}>
-                Selecciona un jugador de cualquier equipo para registrar una acción.
+                Selecciona un jugador de cualquier equipo en la cancha para registrar una acción.
               </div>
             )}
-          </div>
-
-          {/* Team 2 Players */}
-          <div className="glass-panel-dark">
-            <h3 className="title-main" style={{ textAlign: 'center', marginBottom: '1.5rem', color: 'white' }}>{team2.name}</h3>
-            <TacticalPitch team={team2} events={currentEvents} selectedPlayerId={selectedPlayer?.id} onPlayerClick={setSelectedPlayer} />
           </div>
 
           {/* Timeline Full Width */}
