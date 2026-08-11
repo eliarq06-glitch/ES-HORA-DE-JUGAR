@@ -202,7 +202,7 @@ function App() {
       <nav className="top-nav" style={{ display: 'flex', flexDirection: 'column', gap: 0, padding: 0 }}>
         
         {/* ROW 1: Public & Profile */}
-        <div style={{ display: 'flex', width: '100%', padding: '1rem', alignItems: 'center', justifyContent: 'space-between', borderBottom: isAdmin ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+        <div style={{ display: 'flex', width: '100%', padding: '1rem', alignItems: 'center', justifyContent: 'space-between', borderBottom: isAdmin ? '1px solid rgba(255,255,255,0.05)' : 'none', flexWrap: 'wrap', gap: '1rem' }}>
           
           <div className="logo" style={{ cursor: 'pointer' }} onClick={() => setRoute('confirm')}>
             <Trophy color="var(--accent-neon)" /> EHDJ

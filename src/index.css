@@ -250,3 +250,47 @@ h1, h2, h3, h4, h5, h6 {
   gap: 0.5rem;
   text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
+
+/* Responsiveness */
+@media (max-width: 768px) {
+  .title-main {
+    font-size: 1.8rem;
+  }
+  .subtitle {
+    font-size: 0.85rem;
+  }
+  .btn {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+  }
+  .glass-panel-dark, .glass-panel-light {
+    padding: 1.25rem;
+    border-radius: 16px;
+  }
+  .top-nav {
+    padding: 1rem;
+  }
+  .top-nav .logo {
+    font-size: 1.25rem;
+  }
+  /* Login Panel adjustments */
+  .login-panel {
+    padding: 1.5rem !important;
+    margin-top: 5vh !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .title-main {
+    font-size: 1.5rem;
+  }
+  .btn {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.75rem;
+  }
+  .avatar-placeholder {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+}
