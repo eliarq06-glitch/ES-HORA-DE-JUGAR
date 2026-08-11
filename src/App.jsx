@@ -195,7 +195,7 @@ function App() {
   }
 
   if (!user) {
-    return <div className="night-bg" style={{ minHeight: '100vh' }}><Login /></div>;
+    return <div className="night-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Login /></div>;
   }
 
   return (

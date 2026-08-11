@@ -50,7 +50,7 @@ export default function Login({ onBack }) {
   };
 
   return (
-    <div className="glass-panel-dark login-panel" style={{ width: '100%', maxWidth: '400px', margin: '10vh auto', textAlign: 'center' }}>
+    <div className="glass-panel-dark login-panel" style={{ width: '100%', maxWidth: '400px', textAlign: 'center' }}>
       <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
         <div style={{ background: 'rgba(255,255,255,0.1)', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem auto' }}>
           {isRegistering ? <UserPlus size={32} color="var(--accent-neon)" /> : <Lock size={32} color="var(--accent-neon)" />}
