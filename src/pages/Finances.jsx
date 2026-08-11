@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { DollarSign, AlertCircle, CheckCircle2, TrendingUp, TrendingDown, Lock, CreditCard, Users, Landmark } from 'lucide-react';
 
-export default function Finances({ sessions, setSessions, activeSessionId, allPlayers }) {
+export default function Finances({ sessions, setSessions, activeSessionId, allPlayers, initialFund, setInitialFund }) {
   const [activeTab, setActiveTab] = useState('current'); // 'current' or 'global'
   
   const activeSession = sessions.find(s => s.id === activeSessionId);
@@ -34,19 +34,24 @@ export default function Finances({ sessions, setSessions, activeSessionId, allPl
   // --- GLOBAL DEBTS LOGIC ---
   const calculateGlobalDebts = () => {
     const debts = {}; // { playerId: amount }
+    let historicalCajaChica = 0;
+    
     const closedSessions = sessions.filter(s => s.isClosed).sort((a,b) => a.id - b.id); // Oldest first
     
     closedSessions.forEach(session => {
       const pCost = session.playerCost || 0;
+      let sessionCollected = 0;
       session.confirmedIds.forEach(pid => {
         const paid = (session.payments && session.payments[pid]) ? session.payments[pid] : 0;
+        sessionCollected += paid;
         const owes = pCost - paid;
         if (owes > 0) {
           debts[pid] = (debts[pid] || 0) + owes;
         }
       });
+      historicalCajaChica += (sessionCollected - (session.pitchCost || 0));
     });
-    return debts;
+    return { debts, historicalCajaChica };
   };
 
   const handlePayGlobalDebt = (playerId, amount) => {
@@ -90,8 +95,9 @@ export default function Finances({ sessions, setSessions, activeSessionId, allPl
   const cajaChica = totalCollected - pitchCost;
   const isClosed = activeSession?.isClosed;
 
-  const globalDebts = calculateGlobalDebts();
+  const { debts: globalDebts, historicalCajaChica } = calculateGlobalDebts();
   const debtors = Object.keys(globalDebts).map(id => ({ player: allPlayers.find(p => p.id === parseInt(id)), debt: globalDebts[id] })).filter(d => d.debt > 0);
+  const totalCajaFuerte = historicalCajaChica + (initialFund || 0);
 
   return (
     <div style={{ width: '100%', maxWidth: '800px', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -201,11 +207,52 @@ export default function Finances({ sessions, setSessions, activeSessionId, allPl
       )}
 
       {activeTab === 'global' && (
-        <div className="glass-panel-dark">
-           <h2 className="title-main" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem' }}>
-             <Landmark color="var(--accent-warning)" /> Cuentas por Cobrar
-           </h2>
-           <p style={{ color: 'var(--dark-text-muted)', marginBottom: '2rem' }}>
+        <>
+          <div className="glass-panel-dark" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <h2 className="title-main" style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: 0 }}>
+              <TrendingUp color="var(--accent-neon)" /> Caja Fuerte Global
+            </h2>
+            <p style={{ color: 'var(--dark-text-muted)' }}>
+              Total de dinero recaudado históricamente, incluyendo saldo anterior de otras apps o temporadas.
+            </p>
+            
+            <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', flex: 1 }}>
+                <h3 style={{ margin: 0, color: 'var(--dark-text-muted)', fontSize: '0.9rem' }}>Saldo Inicial Manual</h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ fontSize: '1.5rem', color: 'white' }}>$</span>
+                  <input 
+                    type="number" 
+                    className="input-dark" 
+                    style={{ fontSize: '1.5rem', fontWeight: 'bold', padding: '0.5rem', width: '100%' }} 
+                    value={initialFund || ''} 
+                    onChange={(e) => setInitialFund(parseFloat(e.target.value) || 0)} 
+                    placeholder="0.00" 
+                  />
+                </div>
+              </div>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', flex: 1 }}>
+                <h3 style={{ margin: 0, color: 'var(--dark-text-muted)', fontSize: '0.9rem' }}>Ahorro de Jornadas Cerradas</h3>
+                <div style={{ fontSize: '2rem', fontWeight: '900', color: historicalCajaChica >= 0 ? 'var(--accent-neon)' : 'white' }}>
+                  ${historicalCajaChica.toFixed(2)}
+                </div>
+              </div>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '1rem', background: 'rgba(204,255,0,0.1)', border: '1px solid var(--accent-neon)', borderRadius: '12px', flex: 1 }}>
+                <h3 style={{ margin: 0, color: 'var(--accent-neon)', fontSize: '0.9rem', fontWeight: 'bold' }}>Total en Caja Fuerte</h3>
+                <div style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--accent-neon)' }}>
+                  ${totalCajaFuerte.toFixed(2)}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="glass-panel-dark">
+            <h2 className="title-main" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem' }}>
+              <Landmark color="var(--accent-warning)" /> Cuentas por Cobrar
+            </h2>
+            <p style={{ color: 'var(--dark-text-muted)', marginBottom: '2rem' }}>
              Aquí se muestran las deudas acumuladas de todas las jornadas que ya tienen la <strong>caja cerrada</strong>. Al abonar un pago, el sistema descontará automáticamente el dinero de las deudas más antiguas del jugador.
            </p>
 

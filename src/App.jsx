@@ -58,6 +58,7 @@ function App() {
   const [playersDB, setPlayersDB, loadingPlayers] = useSupabaseTable('players', []);
   const [sessions, setSessions, loadingSessions] = useSupabaseTable('sessions', []);
   const [activeSessionId, setActiveSessionId] = useSupabaseConfig('activeSessionId', 1);
+  const [initialFund, setInitialFund] = useSupabaseConfig('initialFund', 0);
   const [teams, setTeams] = useSupabaseTable('teams', []);
   const [matchEvents, setMatchEvents] = useSupabaseTable('match_events', []);
   const [matches, setMatches] = useSupabaseTable('matches', []);
@@ -288,7 +289,7 @@ function App() {
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2rem 1rem' }}>
         {route === 'confirm' && <Confirm isAdmin={isAdmin} activeSession={activeSession} confirmedPlayers={confirmedPlayers} allPlayers={allPlayers} updateConfirmedPlayers={updateConfirmedPlayers} setPlayersDB={setPlayersDB} />}
         {route === 'sessions' && isAdmin && <Sessions sessions={sessions} setSessions={setSessions} activeSessionId={activeSessionId} setActiveSessionId={setActiveSessionId} historicalTournaments={historicalTournaments} />}
-        {route === 'finances' && isAdmin && <Finances sessions={sessions} setSessions={setSessions} activeSessionId={activeSessionId} allPlayers={allPlayers} />}
+        {route === 'finances' && <Finances sessions={sessions} setSessions={setSessions} activeSessionId={activeSessionId} allPlayers={playersDB} initialFund={initialFund} setInitialFund={setInitialFund} />}
 
         {route === 'draw' && isAdmin && <Draw players={confirmedPlayers} teams={teams} setTeams={setTeams} />}
         {route === 'tournament' && isAdmin && <Tournament teams={teams} matches={matches} setMatches={setMatches} matchEvents={matchEvents} />}
