@@ -286,7 +286,8 @@ export default function Finances({ sessions, setSessions, activeSessionId, allPl
                 ))
               )}
            </div>
-        </div>
+         </div>
+        </>
       )}
 
     </div>
