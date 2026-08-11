@@ -202,7 +202,7 @@ function App() {
       <nav className="top-nav" style={{ display: 'flex', flexDirection: 'column', gap: 0, padding: 0 }}>
         
         {/* ROW 1: Public & Profile */}
-        <div style={{ display: 'flex', width: '100%', padding: '1rem', alignItems: 'center', justifyContent: 'space-between', borderBottom: isAdmin ? '1px solid rgba(255,255,255,0.05)' : 'none', flexWrap: 'wrap', gap: '1rem' }}>
+        <div className="nav-row-1" style={{ display: 'flex', width: '100%', padding: '1rem', alignItems: 'center', justifyContent: 'space-between', borderBottom: isAdmin ? '1px solid rgba(255,255,255,0.05)' : 'none', flexWrap: 'wrap', gap: '1rem' }}>
           
           <div className="logo" style={{ cursor: 'pointer' }} onClick={() => setRoute('confirm')}>
             <Trophy color="var(--accent-neon)" /> EHDJ
@@ -254,7 +254,7 @@ function App() {
 
         {/* ROW 2: Admin Tools */}
         {isAdmin && (
-          <div style={{ display: 'flex', width: '100%', padding: '0.75rem 1rem', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)' }}>
+          <div className="admin-tools-row" style={{ display: 'flex', width: '100%', padding: '0.75rem 1rem', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)' }}>
             <div style={{ fontSize: '0.75rem', color: 'var(--accent-neon)', textTransform: 'uppercase', letterSpacing: '1px', marginRight: '1rem', fontWeight: 'bold' }}>Panel Admin:</div>
             
             <button className={`btn ${route === 'sessions' ? 'btn-neon' : 'btn-dark'}`} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} onClick={() => setRoute('sessions')}>

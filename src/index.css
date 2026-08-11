@@ -268,7 +268,20 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: 16px;
   }
   .top-nav {
-    padding: 1rem;
+    padding: 1rem 0.5rem;
+  }
+  .nav-row-1 {
+    flex-direction: column;
+    justify-content: center !important;
+    text-align: center;
+  }
+  .admin-tools-row {
+    padding: 0.5rem;
+  }
+  .admin-tools-row .btn {
+    flex: 1 1 auto;
+    text-align: center;
+    padding: 0.5rem !important;
   }
   .top-nav .logo {
     font-size: 1.25rem;
