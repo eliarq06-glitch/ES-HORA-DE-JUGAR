@@ -12,6 +12,7 @@ import Ratings from './pages/Ratings';
 import Tournament from './pages/Tournament';
 import Champion from './pages/Champion';
 import Finances from './pages/Finances';
+import AdminPlayers from './pages/AdminPlayers';
 import { DollarSign, Loader, Activity } from 'lucide-react';
 import { useSupabaseTable, useSupabaseConfig, useSupabaseAuth, useSupabasePresence } from './hooks/useSupabase';
 import { supabase } from './lib/supabase';
@@ -216,6 +217,11 @@ function App() {
             <button className={`btn ${route === 'players' ? 'btn-neon' : 'btn-dark'}`} style={{ padding: '0.5rem 1rem' }} onClick={() => setRoute('players')}>
               <UsersIcon size={16} /> Ranking
             </button>
+            {isAdmin && (
+              <button className={`btn ${route === 'admin-players' ? 'btn-neon' : 'btn-dark'}`} style={{ padding: '0.5rem 1rem' }} onClick={() => setRoute('admin-players')}>
+                <UserPlus size={16} /> Jugadores
+              </button>
+            )}
             <button className={`btn ${route === 'history' ? 'btn-neon' : 'btn-dark'}`} style={{ padding: '0.5rem 1rem' }} onClick={() => setRoute('history')}>
               <BarChart3 size={16} /> Historial
             </button>
@@ -287,7 +293,8 @@ function App() {
       </nav>
 
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2rem 1rem' }}>
-        {route === 'confirm' && <Confirm isAdmin={isAdmin} activeSession={activeSession} confirmedPlayers={confirmedPlayers} allPlayers={allPlayers} updateConfirmedPlayers={updateConfirmedPlayers} setPlayersDB={setPlayersDB} />}
+        {route === 'confirm' && <Confirm isAdmin={isAdmin} user={user} activeSession={activeSession} confirmedPlayers={confirmedPlayers} allPlayers={allPlayers} updateConfirmedPlayers={updateConfirmedPlayers} setPlayersDB={setPlayersDB} />}
+        {route === 'admin-players' && isAdmin && <AdminPlayers allPlayers={playersDB} setPlayersDB={setPlayersDB} />}
         {route === 'sessions' && isAdmin && <Sessions sessions={sessions} setSessions={setSessions} activeSessionId={activeSessionId} setActiveSessionId={setActiveSessionId} historicalTournaments={historicalTournaments} />}
         {route === 'finances' && <Finances sessions={sessions} setSessions={setSessions} activeSessionId={activeSessionId} allPlayers={playersDB} initialFund={initialFund} setInitialFund={setInitialFund} />}
 

@@ -7,9 +7,23 @@ export default function Players({ players }) {
 
   return (
     <div style={{ width: '100%', maxWidth: '1200px' }}>
-      <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
         <h2 className="title-main" style={{ color: 'white', textShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>PLANTILLA OFICIAL</h2>
         <p className="subtitle" style={{ color: 'var(--accent-neon)' }}>Temporada Actual</p>
+      </div>
+
+      <div className="glass-panel-dark" style={{ marginBottom: '3rem', padding: '1.5rem', border: '1px solid rgba(204, 255, 0, 0.2)' }}>
+        <h3 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-neon)' }}>
+          <Zap size={20} /> ¿Cómo funciona el Ranking?
+        </h3>
+        <ul style={{ margin: 0, paddingLeft: '1.5rem', color: 'var(--light-text)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <li>
+            <strong>OVR (Nivel General):</strong> Va del 1 al 99. Sube o baja dependiendo de tu rendimiento en la cancha. Al final de cada jornada cerrada, el administrador asigna estrellas (1 a 5) en base a la votación del equipo. Mientras mejores notas saques consistentemente, más alto será tu OVR.
+          </li>
+          <li>
+            <strong>Goles y Asistencias:</strong> Se suman automáticamente de todas las jornadas oficiales gracias a los registros del VAR en vivo. ¡Cada gol cuenta para la bota de oro!
+          </li>
+        </ul>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '2rem' }}>
