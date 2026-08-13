@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trophy, LogOut, CheckSquare, Gamepad2, Award, Users as UsersIcon, BarChart3, CalendarDays, Star, Play, Crown, RotateCcw } from 'lucide-react';
+import { Trophy, LogOut, CheckSquare, Gamepad2, Award, Users as UsersIcon, BarChart3, CalendarDays, Star, Play, Crown, RotateCcw, UserPlus } from 'lucide-react';
 import Confirm from './pages/Confirm';
 import Login from './pages/Login';
 import Draw from './pages/Draw';
