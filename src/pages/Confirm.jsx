@@ -58,6 +58,21 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '100%', maxWidth: '600px' }}>
       
+      {!activeSession && (
+        <div className="glass-panel-light" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+          <h2 className="title-main" style={{ fontSize: '2rem', marginBottom: '1rem', color: 'var(--light-text)' }}>NO HAY JORNADA ACTIVA</h2>
+          <p style={{ color: 'var(--light-text-muted)', fontSize: '1.2rem', marginBottom: '2rem' }}>
+            No se ha iniciado ninguna convocatoria aún.
+          </p>
+          {isAdmin && (
+            <p style={{ color: 'var(--light-text)', fontWeight: 'bold' }}>Ve a la pestaña "Jornadas" para crear o reanudar una.</p>
+          )}
+        </div>
+      )}
+
+      {activeSession && (
+        <>
+
       {!isAdmin && !loggedInPlayer && (
         <div className="glass-panel-dark" style={{ border: '2px solid var(--accent-warning)', background: 'rgba(255, 193, 7, 0.1)' }}>
           <h2 className="title-main" style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--accent-warning)', margin: 0, marginBottom: '1rem' }}>
@@ -207,6 +222,7 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
           )}
         </div>
       </div>
+      </>}
     </div>
   );
 }
