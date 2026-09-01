@@ -115,16 +115,6 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
               </h2>
               <p className="subtitle" style={{ marginBottom: '2rem', color: 'var(--light-text-muted)' }}>Jornada: {activeSession?.name} ({activeSession?.date})</p>
             </div>
-            <button 
-              className="btn btn-dark" 
-              style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}
-              onClick={() => {
-                navigator.clipboard.writeText(`¡Confirma tu asistencia para la jornada de hoy!\n👉 ${window.location.origin}`);
-                alert('¡Link copiado al portapapeles!');
-              }}
-            >
-              <LinkIcon size={16} /> Compartir Link
-            </button>
           </div>
 
           <h4 style={{ marginBottom: '1rem', color: 'var(--light-text)' }}>Seleccionar jugador:</h4>
@@ -162,8 +152,20 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
       {/* Lista de Confirmados visible para todos */}
       <div className="glass-panel-light" style={{ background: 'rgba(255,255,255,0.95)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <h2 className="title-main" style={{ fontSize: '1.5rem', margin: 0 }}>Confirmados</h2>
-          <span style={{ background: 'black', color: 'white', padding: '4px 12px', borderRadius: '100px', fontWeight: 'bold' }}>{confirmedPlayers.length}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <h2 className="title-main" style={{ fontSize: '1.5rem', margin: 0 }}>Confirmados</h2>
+            <span style={{ background: 'black', color: 'white', padding: '4px 12px', borderRadius: '100px', fontWeight: 'bold' }}>{confirmedPlayers.length}</span>
+          </div>
+          <button 
+            className="btn btn-dark" 
+            style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}
+            onClick={() => {
+              navigator.clipboard.writeText(`¡Es Hora de Jugar! Confirma tu asistencia en La Catedral del Fútbol:\n👉 ${window.location.origin}`);
+              alert('¡Link de invitación copiado al portapapeles!');
+            }}
+          >
+            <LinkIcon size={16} /> Compartir
+          </button>
         </div>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
