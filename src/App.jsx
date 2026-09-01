@@ -186,10 +186,10 @@ function App() {
   // Loading screen mientras carga Supabase
   if (isLoading || authLoading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0a0a0a', gap: '1.5rem' }}>
-        <Trophy size={64} color="#ccff00" style={{ filter: 'drop-shadow(0 0 20px #ccff00)', animation: 'pulse 1.5s ease-in-out infinite' }} />
-        <div style={{ color: 'white', fontSize: '1.5rem', fontWeight: 'bold' }}>Es Hora de Jugar</div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#888' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--dark-bg)', gap: '1.5rem' }}>
+        <img src="/logo.png" alt="La Catedral del Fútbol" style={{ width: '150px', animation: 'pulse 1.5s ease-in-out infinite', filter: 'drop-shadow(0 0 20px rgba(232,185,49,0.3))' }} />
+        <div style={{ color: 'var(--accent-warning)', fontFamily: 'var(--font-heading)', textTransform: 'uppercase', fontSize: '1.8rem', fontWeight: '900', letterSpacing: '2px' }}>LA CATEDRAL DEL FÚTBOL</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--light-text-muted)', fontWeight: 'bold' }}>
           <Loader size={20} style={{ animation: 'spin 1s linear infinite' }} />
           Conectando con el servidor...
         </div>
