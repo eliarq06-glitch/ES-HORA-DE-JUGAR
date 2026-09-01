@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Shuffle, Star, Settings2, Trash2, GripHorizontal, Crown } from 'lucide-react';
+import { getCaptainImage } from '../utils/captains';
 
 export default function Draw({ players, teams, setTeams }) {
   const [numTeams, setNumTeams] = useState(4);
@@ -69,10 +70,9 @@ export default function Draw({ players, teams, setTeams }) {
   };
 
   const toggleCaptain = (playerId, teamIndex) => {
+    let newCaptains;
     setCaptains(prev => {
       const newCaps = { ...prev };
-      
-      // Remover de todos los demas equipos para evitar duplicados
       Object.keys(newCaps).forEach(key => {
         if (parseInt(key) !== teamIndex) {
             newCaps[key] = newCaps[key].filter(id => id !== playerId);
@@ -84,10 +84,28 @@ export default function Draw({ players, teams, setTeams }) {
       if (newCaps[teamIndex].includes(playerId)) {
         newCaps[teamIndex] = newCaps[teamIndex].filter(id => id !== playerId);
       } else {
-        newCaps[teamIndex].push(playerId);
+        newCaps[teamIndex] = [playerId]; // Solo permitimos 1 capitán oficial visualmente
       }
+      newCaptains = newCaps;
       return newCaps;
     });
+
+    // Update team name based on the new captain
+    setTimeout(() => {
+       const newTeams = [...teams];
+       const caps = newCaptains[teamIndex];
+       if (caps && caps.length > 0) {
+           const capPlayer = players.find(p => p.id === caps[0]);
+           if (capPlayer) {
+               newTeams[teamIndex].name = `Team ${capPlayer.firstName}`;
+               newTeams[teamIndex].captainId = capPlayer.id;
+           }
+       } else {
+           newTeams[teamIndex].name = `Equipo ${String.fromCharCode(65 + teamIndex)}`;
+           newTeams[teamIndex].captainId = null;
+       }
+       setTeams(newTeams);
+    }, 0);
   };
 
   const assignPlayerManual = (player, teamIndex) => {
@@ -211,11 +229,34 @@ export default function Draw({ players, teams, setTeams }) {
         gap: '1rem', 
         marginBottom: '2rem' 
       }}>
-        {teams.map((team, index) => (
+        {teams.map((team, index) => {
+          let bgImage = 'var(--dark-glass)';
+          let capPlayer = null;
+          const caps = captains[index] || [];
+          if (caps.length > 0) {
+              capPlayer = players.find(p => p.id === caps[0]);
+              if (capPlayer) {
+                  const epicImage = getCaptainImage(capPlayer.firstName);
+                  if (epicImage) {
+                      bgImage = `linear-gradient(to bottom, rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 1)), url('${epicImage}')`;
+                  }
+              }
+          }
+
+          return (
           <div 
             key={team.id} 
             className="glass-panel-dark" 
-            style={{ padding: '1rem', border: '2px solid transparent', transition: 'border 0.2s' }}
+            style={{ 
+              padding: '1rem', 
+              border: capPlayer ? '2px solid var(--accent-neon)' : '2px solid transparent', 
+              transition: 'border 0.2s',
+              background: bgImage,
+              backgroundSize: 'cover',
+              backgroundPosition: 'top center',
+              position: 'relative',
+              overflow: 'hidden'
+            }}
             onDrop={(e) => handleDrop(e, index)}
             onDragOver={handleDragOver}
           >
@@ -225,12 +266,12 @@ export default function Draw({ players, teams, setTeams }) {
                 newTeams[index].name = e.target.value;
                 setTeams(newTeams);
               }}
-              style={{ fontSize: '1.2rem', fontWeight: '900', fontFamily: 'var(--font-heading)', textTransform: 'uppercase', textAlign: 'center', background: 'transparent', border: 'none', borderBottom: '2px solid rgba(255,255,255,0.1)', width: '100%', padding: '0.5rem', marginBottom: '1rem' }}
+              style={{ fontSize: '1.4rem', fontWeight: '900', fontFamily: 'var(--font-heading)', textTransform: 'uppercase', textAlign: 'center', background: 'rgba(0,0,0,0.5)', border: 'none', borderBottom: '2px solid rgba(255,255,255,0.1)', width: '100%', padding: '0.5rem', marginBottom: '1rem', color: capPlayer ? 'var(--accent-neon)' : 'white' }}
             />
 
-            <div style={{ minHeight: '200px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                <h4 className="subtitle" style={{ fontSize: '0.75rem' }}>Plantilla Actual</h4>
+            <div style={{ minHeight: '200px', position: 'relative', zIndex: 2 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', background: 'rgba(0,0,0,0.4)', padding: '4px 8px', borderRadius: '4px' }}>
+                <h4 className="subtitle" style={{ fontSize: '0.75rem', color: 'white' }}>Plantilla Actual</h4>
                 <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--accent-neon)' }}>{team.players.length} J.</span>
               </div>
               
@@ -284,7 +325,8 @@ export default function Draw({ players, teams, setTeams }) {
               </div>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {available.length > 0 && (

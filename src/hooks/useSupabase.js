@@ -6,38 +6,45 @@ import { supabase } from '../lib/supabase';
 // Mantiene compatibilidad con la API de useLocalStorage
 // ============================================================
 export function useSupabaseTable(tableName, defaultValue = []) {
-  const [data, setData] = useState(defaultValue);
+  const [data, setData] = useState(() => {
+    const cached = localStorage.getItem(`cache_${tableName}`);
+    return cached ? JSON.parse(cached) : defaultValue;
+  });
   const [loading, setLoading] = useState(true);
 
-  // Cargar datos iniciales
-  useEffect(() => {
-    let subscription;
+  const fetchData = async () => {
+    try {
+      const orderByCol = tableName === 'historical_tournaments' ? 'saved_at' : 'created_at';
+      const isAscending = tableName !== 'historical_tournaments';
+      const { data: rows, error } = await supabase
+        .from(tableName)
+        .select('*')
+        .order(orderByCol, { ascending: isAscending });
 
-    const fetchData = async () => {
-      try {
-        const orderByCol = tableName === 'historical_tournaments' ? 'saved_at' : 'created_at';
-        const isAscending = tableName !== 'historical_tournaments';
-        const { data: rows, error } = await supabase
-          .from(tableName)
-          .select('*')
-          .order(orderByCol, { ascending: isAscending });
+      if (error) throw error;
 
-        if (!error && rows) {
-          setData(mapFromDB(tableName, rows));
-        } else if (error) {
-          console.error(`Supabase error fetching ${tableName}:`, error);
-        }
-      } catch (err) {
-        console.error(`Exception fetching ${tableName}:`, err);
-      } finally {
-        setLoading(false);
+      if (rows) {
+        const mappedData = mapFromDB(tableName, rows);
+        setData(mappedData);
+        localStorage.setItem(`cache_${tableName}`, JSON.stringify(mappedData));
       }
-    };
+    } catch (err) {
+      console.error(`Error fetching ${tableName}:`, err.message);
+      const cached = localStorage.getItem(`cache_${tableName}`);
+      if (cached) {
+        console.log(`Loaded ${tableName} from offline cache`);
+        setData(JSON.parse(cached));
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
 
     // Suscripción en tiempo real
-    subscription = supabase
+    const subscription = supabase
       .channel(`realtime-${tableName}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: tableName }, () => {
         fetchData(); // Re-fetch al detectar cualquier cambio
@@ -55,6 +62,7 @@ export function useSupabaseTable(tableName, defaultValue = []) {
     
     // Update local state immediately (optimistic)
     setData(newValue);
+    localStorage.setItem(`cache_${tableName}`, JSON.stringify(newValue));
     
     // Sync to Supabase
     await syncToDB(tableName, newValue);
@@ -68,49 +76,44 @@ export function useSupabaseTable(tableName, defaultValue = []) {
 // ej: activeSessionId, mvpVotes, isMvpClosed
 // ============================================================
 export function useSupabaseConfig(key, defaultValue) {
-  const [value, setValue] = useState(defaultValue);
+  const [value, setValue] = useState(() => {
+    const cached = localStorage.getItem(`cache_config_${key}`);
+    return cached ? JSON.parse(cached) : defaultValue;
+  });
+
+  const fetchConfig = async () => {
+    try {
+      const { data, error } = await supabase.from('app_config').select('value').eq('key', key).single();
+      if (data) {
+        let parsed = data.value;
+        try { parsed = JSON.parse(data.value); } catch(e) {}
+        setValue(parsed);
+        localStorage.setItem(`cache_config_${key}`, JSON.stringify(parsed));
+      } else if (error && error.code !== 'PGRST116') {
+        console.error(`Error fetching config ${key}:`, error);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
-    let subscription;
-
-    const fetchConfig = async () => {
-      const { data } = await supabase
-        .from('app_config')
-        .select('value')
-        .eq('key', key)
-        .single();
-      
-      if (data?.value !== undefined && data?.value !== null) {
-        setValue(data.value);
-      }
-    };
-
     fetchConfig();
-
-    subscription = supabase
-      .channel(`config-${key}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'app_config' }, (payload) => {
-        if (payload.new?.key === key) {
-          setValue(payload.new.value);
-        }
-      })
-      .subscribe();
-
-    return () => {
-      if (subscription) supabase.removeChannel(subscription);
-    };
+    const sub = supabase.channel(`realtime-config-${key}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'app_config', filter: `key=eq.${key}` }, () => {
+        fetchConfig();
+      }).subscribe();
+    return () => { supabase.removeChannel(sub); };
   }, [key]);
 
-  const setValueAndSync = useCallback(async (newValueOrFn) => {
-    const newValue = typeof newValueOrFn === 'function' ? newValueOrFn(value) : newValueOrFn;
+  const updateConfig = async (newValue) => {
     setValue(newValue);
-    
-    await supabase
-      .from('app_config')
-      .upsert({ key, value: newValue, updated_at: new Date().toISOString() }, { onConflict: 'key' });
-  }, [key, value]);
+    localStorage.setItem(`cache_config_${key}`, JSON.stringify(newValue));
+    const stringValue = typeof newValue === 'object' ? JSON.stringify(newValue) : String(newValue);
+    await supabase.from('app_config').upsert({ key, value: stringValue, updated_at: new Date() });
+  };
 
-  return [value, setValueAndSync];
+  return [value, updateConfig];
 }
 
 // ============================================================

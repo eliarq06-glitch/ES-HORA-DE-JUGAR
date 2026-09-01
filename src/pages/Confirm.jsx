@@ -108,7 +108,7 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
 
       {isAdmin && (
         <div className="glass-panel-light">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h2 className="title-main" style={{ fontSize: '1.8rem', display: 'flex', alignItems: 'center', gap: '10px', margin: 0 }}>
                 <Shield size={28} /> Admin: Confirmar
@@ -128,10 +128,10 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
           </div>
 
           <h4 style={{ marginBottom: '1rem', color: 'var(--light-text)' }}>Seleccionar jugador:</h4>
-          <form onSubmit={handleConfirmExisting} style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
+          <form onSubmit={handleConfirmExisting} style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
             <select 
               className="input-light" 
-              style={{ flex: 1 }}
+              style={{ flex: 1, minWidth: '200px' }}
               value={selectedPlayerId}
               onChange={(e) => setSelectedPlayerId(e.target.value)}
             >
@@ -140,7 +140,7 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
                 <option key={p.id} value={p.id}>{p.firstName} {p.lastName} {p.nickname ? `"${p.nickname}"` : ''}</option>
               ))}
             </select>
-            <button type="submit" className="btn btn-dark" disabled={!selectedPlayerId}>
+            <button type="submit" className="btn btn-dark" disabled={!selectedPlayerId} style={{ minWidth: '120px' }}>
               Confirmar
             </button>
           </form>

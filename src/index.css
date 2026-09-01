@@ -1,27 +1,27 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;700;900&family=Roboto:wght@400;500;700;900&display=swap');
 
 :root {
-  --font-body: 'Inter', system-ui, sans-serif;
-  --font-heading: 'Outfit', system-ui, sans-serif;
+  --font-body: 'Oswald', system-ui, sans-serif;
+  --font-heading: 'Oswald', system-ui, sans-serif;
   
-  /* Light Theme (Pitch) */
-  --light-glass: rgba(255, 255, 255, 0.85);
-  --light-glass-border: rgba(255, 255, 255, 0.5);
-  --light-text: #1a202c;
-  --light-text-muted: #4a5568;
+  /* Theme LCDF - ESPN Style */
+  --light-glass: #ffffff; /* Sólido en vez de vidrio para estilo limpio ESPN */
+  --light-glass-border: #e2e8f0;
+  --light-text: #0f172a;
+  --light-text-muted: #64748b;
   
-  /* Dark Theme (Admin/Stats) */
-  --dark-bg: #0b1120;
-  --dark-glass: rgba(30, 41, 59, 0.7);
-  --dark-glass-border: rgba(255, 255, 255, 0.1);
+  --dark-bg: #050a07; /* Negro profundo verdoso */
+  --dark-glass: #0e1c13; /* Verde muy oscuro casi negro */
+  --dark-glass-border: #1a3323;
   --dark-text: #f8fafc;
   --dark-text-muted: #94a3b8;
   
-  /* Accents */
-  --accent-neon: #ccff00; /* High visibility lime green */
-  --accent-neon-dark: #b3e600;
-  --accent-danger: #ef4444;
-  --accent-warning: #f59e0b;
+  /* Accents LCDF (Oro y Verde) */
+  --accent-neon: #E8B931; /* Reemplazamos el neón por Dorado LCF */
+  --accent-neon-dark: #C69A1D;
+  --accent-primary: #124D28; /* Verde LCF */
+  --accent-danger: #e11d48; /* Rojo vivo estilo deportivo */
+  --accent-warning: #E8B931;
 }
 
 * {
@@ -49,8 +49,6 @@ h1, h2, h3, h4, h5, h6 {
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-  display: flex;
-  flex-direction: column;
 }
 
 .night-bg {
@@ -59,28 +57,22 @@ h1, h2, h3, h4, h5, h6 {
   background-image: 
     radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 40%),
     radial-gradient(circle at 90% 80%, rgba(239, 68, 68, 0.1) 0%, transparent 40%);
-  display: flex;
-  flex-direction: column;
 }
 
-/* Glass Panels */
+/* Clean Panels (ESPN Style) */
 .glass-panel-light {
   background: var(--light-glass);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--light-glass-border);
-  border-radius: 24px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   padding: 2rem;
   color: var(--light-text);
 }
 
 .glass-panel-dark {
   background: var(--dark-glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--dark-glass-border);
-  border-radius: 24px;
+  border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   padding: 2rem;
   color: var(--dark-text);
@@ -156,41 +148,49 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Buttons */
 .btn {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  padding: 1rem 2rem;
-  border-radius: 100px;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px; /* Menos redondeado para estilo deportivo duro */
   border: none;
+  font-weight: 700;
+  font-size: 1rem;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  display: inline-flex;
+  transition: all 0.2s;
+  display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  font-size: 1rem;
+  text-transform: uppercase; /* ESPN usa mayúsculas para botones */
+  font-family: var(--font-heading);
 }
-
-.btn:active { transform: scale(0.95); }
 
 .btn-neon {
   background: var(--accent-neon);
   color: #000;
-  box-shadow: 0 4px 20px rgba(204, 255, 0, 0.4);
+  box-shadow: 0 4px 15px rgba(232, 185, 49, 0.3); /* Sombra dorada suave */
 }
+
 .btn-neon:hover {
   background: var(--accent-neon-dark);
-  box-shadow: 0 6px 25px rgba(204, 255, 0, 0.6);
   transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(232, 185, 49, 0.4);
+}
+
+.btn-neon:disabled {
+  background: #cbd5e1;
+  color: #64748b;
+  box-shadow: none;
+  transform: none;
+  cursor: not-allowed;
 }
 
 .btn-dark {
-  background: #000;
+  background: var(--accent-primary); /* Botones secundarios ahora son verdes */
   color: white;
+  border: 1px solid rgba(255,255,255,0.1);
 }
+
 .btn-dark:hover {
-  background: #111;
+  background: #1a6636;
   transform: translateY(-2px);
 }
 
@@ -303,6 +303,177 @@ h1, h2, h3, h4, h5, h6 {
   .avatar-placeholder {
     width: 36px;
     height: 36px;
-    font-size: 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* FIFA Card Style */
+.fifa-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2.5 / 3.5;
+  background: linear-gradient(135deg, #1a1917 0%, #111111 100%);
+  border-radius: 12px;
+  border: 1px solid #c9b065;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s;
+}
+
+.fifa-card:hover {
+  transform: translateY(-5px) scale(1.02);
+}
+
+.fifa-card-bg {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(201, 176, 101, 0.05) 10px, rgba(201, 176, 101, 0.05) 20px);
+  z-index: 1;
+}
+
+.fifa-card-content {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.fifa-card-top {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+}
+
+.fifa-card-ovr {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #c9b065; /* Gold */
+  line-height: 1;
+}
+
+.fifa-card-pos {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #fff;
+}
+
+.fifa-card-image {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.fifa-card-image img {
+  max-width: 90%;
+  max-height: 150px;
+  object-fit: cover;
+  filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5));
+}
+
+.fifa-card-bottom {
+  background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+  padding: 1rem;
+  text-align: center;
+  border-top: 1px solid rgba(201, 176, 101, 0.3);
+}
+
+.fifa-card-name {
+  font-size: 1.2rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #c9b065;
+  margin-bottom: 0.5rem;
+}
+
+.fifa-card-stats {
+  display: flex;
+  justify-content: space-around;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.fifa-card-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Sidebar and Layout */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 250px;
+  background: var(--dark-bg);
+  border-right: 1px solid var(--dark-glass-border);
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: 100;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Mobile Navigation Elements (Hidden on Desktop) */
+.bottom-nav {
+  display: none;
+}
+
+.mobile-top-bar {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    display: none;
+  }
+
+  .bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: var(--dark-bg);
+    border-top: 1px solid var(--dark-glass-border);
+    z-index: 1000;
+    justify-content: space-around;
+    padding: 0.5rem;
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+  }
+
+  .main-content {
+    padding-bottom: 80px;
+  }
+  
+  .mobile-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--dark-bg);
+    border-bottom: 1px solid var(--dark-glass-border);
+    position: sticky;
+    top: 0;
+    z-index: 90;
   }
 }

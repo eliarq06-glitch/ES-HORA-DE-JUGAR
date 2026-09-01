@@ -16,7 +16,7 @@ export default function Players({ players }) {
         <h3 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-neon)' }}>
           <Zap size={20} /> ¿Cómo funciona el Ranking?
         </h3>
-        <ul style={{ margin: 0, paddingLeft: '1.5rem', color: 'var(--light-text)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <ul style={{ margin: 0, paddingLeft: '1.5rem', color: 'white', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <li>
             <strong>OVR (Nivel General):</strong> Va del 1 al 99. Sube o baja dependiendo de tu rendimiento en la cancha. Al final de cada jornada cerrada, el administrador asigna estrellas (1 a 5) en base a la votación del equipo. Mientras mejores notas saques consistentemente, más alto será tu OVR.
           </li>
@@ -26,65 +26,111 @@ export default function Players({ players }) {
         </ul>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '2rem' }}>
-        {playerStats.map(player => (
-          <div key={player.id} style={{ 
-            background: 'linear-gradient(145deg, #1e293b, #0f172a)',
-            borderRadius: '24px',
-            border: '1px solid rgba(255,255,255,0.1)',
-            padding: '2rem 1.5rem',
-            position: 'relative',
-            overflow: 'hidden',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center'
-          }}>
-            {/* Top decorative shapes */}
-            <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '150px', height: '150px', background: 'rgba(204, 255, 0, 0.1)', borderRadius: '50%', filter: 'blur(30px)' }}></div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '2rem', padding: '1rem' }}>
+        {playerStats.map((player, index) => (
+          <div key={player.id} className="fifa-card">
+            <div className="fifa-card-bg"></div>
+            <div className="fifa-card-content">
+              
+              <div className="fifa-card-top">
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <div className="fifa-card-ovr">{Math.round((player.stars / 5) * 99) || 50}</div>
+                  <div className="fifa-card-pos">OVR</div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
+                  <span style={{ color: index === 0 ? 'var(--accent-neon)' : index === 1 ? '#e2e8f0' : index === 2 ? '#cd7f32' : 'var(--dark-text-muted)', fontWeight: 'bold', fontSize: '1.2rem' }}>#{index + 1}</span>
+                </div>
+              </div>
+
+              <div className="fifa-card-image">
+                {player.photoUrl ? (
+                  <img src={player.photoUrl} alt={player.firstName} />
+                ) : (
+                  <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', color: '#c9b065', fontWeight: 'bold', marginBottom: '1rem' }}>
+                    {player.firstName[0]}
+                  </div>
+                )}
+              </div>
+
+              <div className="fifa-card-bottom">
+                <div className="fifa-card-name">{player.firstName} {player.lastName}</div>
+                <div className="fifa-card-stats">
+                  <div className="fifa-card-stat">
+                    <span>{player.goals || 0}</span>
+                    <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.5)' }}>GLS</span>
+                  </div>
+                  <div className="fifa-card-stat">
+                    <span>{player.assists || 0}</span>
+                    <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.5)' }}>AST</span>
+                  </div>
+                  <div className="fifa-card-stat">
+                    <span>{player.matches || 0}</span>
+                    <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.5)' }}>PJ</span>
+                  </div>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* SPONSORS SECTION - VIP BANNER */}
+      <div style={{ marginTop: '4rem', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 10px 40px rgba(0,0,0,0.6)' }}>
+        
+        {/* HEADER VIBRANTE */}
+        <div style={{ background: 'linear-gradient(to bottom, #e1c16e 0%, #b39100 100%)', padding: '4rem 2rem 2rem 2rem', textAlign: 'center', color: 'black' }}>
+          <h3 style={{ fontFamily: 'var(--font-heading)', textTransform: 'uppercase', marginBottom: '1rem', letterSpacing: '2px', fontSize: '2.5rem', fontWeight: '900' }}>
+            AGRADECIMIENTO ESPECIAL
+          </h3>
+          <p style={{ fontSize: '1.2rem', maxWidth: '800px', margin: '0 auto', lineHeight: '1.5', fontWeight: '500' }}>
+            La <span style={{ fontStyle: 'italic' }}>magia</span> de <strong>La Catedral del Fútbol</strong> no sería posible sin el invaluable y generoso apoyo de nuestros patrocinadores. A ustedes, que confían en nuestra visión y hacen posible que el balón siga rodando con <strong>pasión</strong> cada semana: <br/><br/><span style={{ fontSize: '1.4rem', fontWeight: '900', fontStyle: 'italic' }}>¡GRACIAS POR SER PARTE DE NUESTRA FAMILIA!</span>
+          </p>
+        </div>
+
+        {/* OLA (WAVE) TRANSICIÓN A BLANCO */}
+        <div style={{ background: 'white' }}>
+          <svg viewBox="0 0 1440 100" preserveAspectRatio="none" style={{ display: 'block', width: '100%', height: '60px', marginTop: '-1px' }}>
+            <path fill="#b39100" d="M0,0 C320,100 420,100 720,50 C1020,0 1120,0 1440,100 L1440,0 Z"></path>
+          </svg>
+        </div>
+
+        {/* CONTENEDOR DE LOGOS */}
+        <div style={{ background: 'white', padding: '2rem 2rem 6rem 2rem' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2.5rem', alignItems: 'center', justifyContent: 'center' }}>
             
-            {/* Rating Shield */}
-            <div style={{ position: 'absolute', top: '1rem', left: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-               <span style={{ fontSize: '1.5rem', fontWeight: '900', color: 'var(--accent-warning)', lineHeight: 1 }}>
-                 {Math.round((player.stars / 5) * 99)}
-               </span>
-               <span style={{ fontSize: '0.6rem', textTransform: 'uppercase', fontWeight: 'bold', color: 'var(--dark-text-muted)' }}>OVR</span>
+            {/* CUADRADOS (160x160) */}
+            <div style={{ width: '160px', height: '160px', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 6px 20px rgba(0,0,0,0.15)' }}>
+              <img src="/sponsors/fittown.jpg" alt="FitTown" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+            
+            <div style={{ width: '160px', height: '160px', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 6px 20px rgba(0,0,0,0.15)' }}>
+              <img src="/sponsors/parrilla.jpg" alt="La Parrilla Burger" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
 
-            {/* Avatar */}
-            <div style={{ 
-              width: '120px', height: '120px', borderRadius: '50%', 
-              background: 'linear-gradient(135deg, var(--accent-neon), var(--accent-warning))',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '4rem', fontWeight: '900', color: '#000',
-              marginBottom: '1rem',
-              border: '4px solid #0f172a',
-              boxShadow: '0 10px 20px rgba(0,0,0,0.3)'
-            }}>
-              {player.firstName.charAt(0)}
+            <div style={{ width: '160px', height: '160px', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 6px 20px rgba(0,0,0,0.15)' }}>
+              <img src="/sponsors/bochiphone.jpg" alt="Bochi Phone" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
             
-            {/* Name */}
-            <h3 style={{ fontSize: '1.5rem', fontWeight: '900', textTransform: 'uppercase', margin: 0 }}>
-              {player.firstName}
-            </h3>
-            {player.nickname && <h4 style={{ color: 'var(--accent-neon)', fontSize: '1rem', fontWeight: 'bold', fontStyle: 'italic', marginBottom: '0.5rem' }}>"{player.nickname}"</h4>}
-            <h4 style={{ color: 'var(--dark-text-muted)', fontSize: '1rem', textTransform: 'uppercase', marginBottom: '1.5rem' }}>{player.lastName}</h4>
+            <div style={{ width: '160px', height: '160px', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 6px 20px rgba(0,0,0,0.15)' }}>
+              <img src="/sponsors/agrolvera.jpg" alt="Agrolvera" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
 
-            {/* Stats Row */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', width: '100%', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1.5rem' }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '1.5rem', fontWeight: '900' }}>{player.goals}</div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--dark-text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>Goles</div>
-              </div>
-              <div style={{ textAlign: 'center', borderLeft: '1px solid rgba(255,255,255,0.1)' }}>
-                <div style={{ fontSize: '1.5rem', fontWeight: '900' }}>{player.assists}</div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--dark-text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>Asistencias</div>
-              </div>
+            {/* RECTÁNGULOS (340x160) */}
+            <div style={{ width: '100%', maxWidth: '340px', height: '160px', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 6px 20px rgba(0,0,0,0.15)', backgroundColor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <img src="/sponsors/odorisio.jpg" alt="Constructora Odorisio" style={{ width: '100%', height: '100%', objectFit: 'contain', transform: 'scale(0.9)' }} />
+            </div>
+            
+            <div style={{ width: '100%', maxWidth: '340px', height: '160px', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 6px 20px rgba(0,0,0,0.15)', backgroundColor: '#f3f6f1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <img src="/sponsors/eliarq.png" alt="ELIARQ" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+            
+            <div style={{ width: '100%', maxWidth: '340px', height: '160px', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 6px 20px rgba(0,0,0,0.15)', backgroundColor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <img src="/sponsors/graficok.jpg" alt="Graficok" style={{ width: '100%', height: '100%', objectFit: 'contain', transform: 'scale(1.1)' }} />
             </div>
 
           </div>
-        ))}
+        </div>
       </div>
     </div>
   );
