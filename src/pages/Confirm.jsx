@@ -222,7 +222,8 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
           )}
         </div>
       </div>
-      </>}
+      </>
+      )}
     </div>
   );
 }
