@@ -66,9 +66,9 @@ export default function Sessions({ sessions, setSessions, activeSessionId, setAc
                 </button>
               )}
               {activeSessionId === s.id && (
-                 <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent-neon)', fontWeight: 'bold' }}>
-                   <Check /> Activa
-                 </span>
+                <button className="btn" style={{ background: 'var(--accent-neon)', color: 'black', fontWeight: 'bold' }} onClick={() => setActiveSessionId(null)}>
+                  <Check size={18} style={{ marginRight: '5px' }} /> Activa (Cerrar)
+                </button>
               )}
               <button className="btn btn-danger" style={{ padding: '0.75rem' }} onClick={() => handleDelete(s.id)}>
                 <Trash2 size={18} />
