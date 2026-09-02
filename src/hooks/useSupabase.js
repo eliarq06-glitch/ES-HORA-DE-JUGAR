@@ -60,6 +60,9 @@ export function useSupabaseTable(tableName, defaultValue = []) {
   const setDataAndSync = useCallback(async (newValueOrFn) => {
     const newValue = typeof newValueOrFn === 'function' ? newValueOrFn(data) : newValueOrFn;
     
+    // Bail out to prevent infinite loops if state hasn't changed
+    if (newValue === data) return;
+    
     // Update local state immediately (optimistic)
     setData(newValue);
     localStorage.setItem(`cache_${tableName}`, JSON.stringify(newValue));

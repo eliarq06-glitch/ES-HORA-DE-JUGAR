@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { UserPlus, Save, Trash2, Edit2, Shield, Users, ShieldAlert } from 'lucide-react';
+import { UserPlus, Save, Trash2, Edit2, Shield, Users, ShieldAlert, Image as ImageIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useSupabaseConfig } from '../hooks/useSupabase';
 
 export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }) {
   const [newPlayer, setNewPlayer] = useState({ firstName: '', lastName: '', nickname: '', email: '', photoUrl: '', stars: 3 });
   const [editingId, setEditingId] = useState(null);
   const [editData, setEditData] = useState({ firstName: '', lastName: '', nickname: '', email: '', photoUrl: '', stars: 3 });
   const [profiles, setProfiles] = useState([]);
+  const [sponsorsConfig, setSponsorsConfig] = useSupabaseConfig('sponsors', []);
 
   useEffect(() => {
     if (isGlobalAdmin) {
@@ -300,6 +302,45 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      <div className="glass-panel-dark" style={{ marginTop: '2rem' }}>
+        <h3 className="title-main" style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--accent-neon)', marginBottom: '1rem' }}>
+          <ImageIcon /> Gestión de Auspiciantes ({sponsorsConfig.length})
+        </h3>
+        <p style={{ color: 'var(--dark-text-muted)', marginBottom: '1rem' }}>Sube el logo de los auspiciantes. Se acomodarán automáticamente en el banner de Jugadores.</p>
+        
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
+            <div style={{ flex: 1, minWidth: '150px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+              <label style={{ fontSize: '0.8rem', color: '#666' }}>Cargar Nuevo Logo:</label>
+              <input type="file" accept="image/*" onChange={async (e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  try {
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `sponsor_${Date.now()}.${fileExt}`;
+                    const { error: uploadError } = await supabase.storage.from('fotos').upload(fileName, file);
+                    if (uploadError) throw uploadError;
+                    const { data: { publicUrl } } = supabase.storage.from('fotos').getPublicUrl(fileName);
+                    setSponsorsConfig([...sponsorsConfig, { id: Date.now(), url: publicUrl }]);
+                    alert('Auspiciante agregado.');
+                  } catch (error) {
+                    alert('Error al subir: ' + error.message);
+                  }
+              }} style={{ width: '100%' }} />
+            </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            {sponsorsConfig.map(sponsor => (
+                <div key={sponsor.id} style={{ background: 'white', padding: '10px', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', width: '120px' }}>
+                    <img src={sponsor.url} alt="Sponsor" style={{ width: '100px', height: '100px', objectFit: 'contain' }} />
+                    <button className="btn btn-danger" onClick={() => setSponsorsConfig(sponsorsConfig.filter(s => s.id !== sponsor.id))} style={{ padding: '0.3rem', width: '100%' }}>
+                        Eliminar
+                    </button>
+                </div>
+            ))}
         </div>
       </div>
     </div>

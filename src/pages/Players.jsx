@@ -1,7 +1,10 @@
 import React from 'react';
 import { Star, Shield, Zap } from 'lucide-react';
+import { useSupabaseConfig } from '../hooks/useSupabase';
 
 export default function Players({ players }) {
+  const [sponsorsConfig] = useSupabaseConfig('sponsors', []);
+  
   // Stats are already calculated and included in the players array
   const playerStats = players;
 
@@ -151,38 +154,15 @@ export default function Players({ players }) {
 
         {/* CONTENEDOR DE LOGOS */}
         <div style={{ background: 'white', padding: '2rem 2rem 6rem 2rem' }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2.5rem', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(${Math.max(120, 300 - sponsorsConfig.length * 15)}px, 1fr))`, gap: '2.5rem', alignItems: 'center', justifyItems: 'center' }}>
             
-            {/* CUADRADOS (160x160) */}
-            <div style={{ width: '160px', height: '160px', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 6px 20px rgba(0,0,0,0.15)' }}>
-              <img src="/sponsors/fittown.jpg" alt="FitTown" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-            
-            <div style={{ width: '160px', height: '160px', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 6px 20px rgba(0,0,0,0.15)' }}>
-              <img src="/sponsors/parrilla.jpg" alt="La Parrilla Burger" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-
-            <div style={{ width: '160px', height: '160px', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 6px 20px rgba(0,0,0,0.15)' }}>
-              <img src="/sponsors/bochiphone.jpg" alt="Bochi Phone" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-            
-            <div style={{ width: '160px', height: '160px', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 6px 20px rgba(0,0,0,0.15)' }}>
-              <img src="/sponsors/agrolvera.jpg" alt="Agrolvera" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-
-            {/* RECTÁNGULOS (340x160) */}
-            <div style={{ width: '100%', maxWidth: '340px', height: '160px', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 6px 20px rgba(0,0,0,0.15)', backgroundColor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <img src="/sponsors/odorisio.jpg" alt="Constructora Odorisio" style={{ width: '100%', height: '100%', objectFit: 'contain', transform: 'scale(0.9)' }} />
-            </div>
-            
-            <div style={{ width: '100%', maxWidth: '340px', height: '160px', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 6px 20px rgba(0,0,0,0.15)', backgroundColor: '#f3f6f1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <img src="/sponsors/eliarq.png" alt="ELIARQ" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-            
-            <div style={{ width: '100%', maxWidth: '340px', height: '160px', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 6px 20px rgba(0,0,0,0.15)', backgroundColor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <img src="/sponsors/graficok.jpg" alt="Graficok" style={{ width: '100%', height: '100%', objectFit: 'contain', transform: 'scale(1.1)' }} />
-            </div>
-
+            {sponsorsConfig.length > 0 ? sponsorsConfig.map((sponsor, idx) => (
+              <div key={sponsor.id || idx} style={{ width: '100%', height: '160px', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 6px 20px rgba(0,0,0,0.1)', backgroundColor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', transition: 'transform 0.3s' }} className="sponsor-card">
+                <img src={sponsor.url} alt={sponsor.name || 'Auspiciante'} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              </div>
+            )) : (
+              <p style={{ color: 'gray', fontStyle: 'italic', gridColumn: '1 / -1' }}>No hay auspiciantes cargados aún.</p>
+            )}
           </div>
         </div>
       </div>
