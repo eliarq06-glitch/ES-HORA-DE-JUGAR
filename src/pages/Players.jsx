@@ -118,11 +118,17 @@ export default function Players({ players }) {
 
                 {/* Real App Stats (Goals, Assists, Camp) at very bottom as a pill or removed? 
                     User asked to replace stats with the FIFA layout. I will add the real app stats as a small pill at the bottom so they don't lose that data. */}
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '5px', fontSize: '0.65rem', color: textColor, opacity: 0.8, fontWeight: 'bold' }}>
-                  <span>{player.historicalGoals || 0} G</span>
-                  <span>{player.historicalAssists || 0} A</span>
-                  <span>{player.historicalChampionships || 0} 🏆</span>
-                </div>
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '5px', fontSize: '0.65rem', color: textColor, opacity: 0.8, fontWeight: 'bold' }}>
+                    <span>{player.historicalGoals || 0} G</span>
+                    <span>{player.historicalAssists || 0} A</span>
+                    {(player.historicalChampionships || 0) > 0 && (
+                      <span style={{ display: 'flex', gap: '2px', alignItems: 'center', color: '#ffb300' }}>
+                        {Array.from({ length: player.historicalChampionships }).map((_, i) => (
+                          <Star key={i} size={10} fill="#ffb300" />
+                        ))}
+                      </span>
+                    )}
+                  </div>
 
               </div>
               
