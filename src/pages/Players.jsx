@@ -51,50 +51,68 @@ export default function Players({ players }) {
             statsColor = '#3b2511';
           }
 
+          const ovr = Math.round((player.stars / 5) * 99) || 50;
+          const pos = player.position || 'MCO';
+          
+          // Generate 6 deterministic stats based on OVR and Position
+          const base = ovr - 5;
+          const getStat = (offset) => Math.min(99, Math.max(1, base + offset));
+          
+          let pac=base, sho=base, pas=base, dri=base, def=base, phy=base;
+          if(pos==='DEL' || pos==='DC' || pos==='EI' || pos==='ED') { pac=getStat(8); sho=getStat(10); dri=getStat(5); def=getStat(-20); }
+          else if(pos==='MCO' || pos==='MC' || pos==='MI' || pos==='MD') { pas=getStat(10); dri=getStat(8); sho=getStat(5); def=getStat(-5); }
+          else if(pos==='MCD' || pos==='DEF' || pos==='DFC' || pos==='LI' || pos==='LD') { def=getStat(12); phy=getStat(10); pac=getStat(-5); sho=getStat(-15); }
+          else if(pos==='POR' || pos==='PO') { pac=getStat(-10); sho=getStat(-20); pas=getStat(5); dri=getStat(15); def=getStat(5); phy=getStat(5); } // GK stats mapped differently but using same layout for simplicity
+
           return (
           <div key={player.id} className="fifa-card" style={{ backgroundImage: `url(${bgImage})` }}>
             <div className="fifa-card-content">
               
-              <div className="fifa-card-top">
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <div className="fifa-card-ovr" style={{ color: textColor }}>{Math.round((player.stars / 5) * 99) || 50}</div>
-                  <div className="fifa-card-pos" style={{ color: textColor }}>OVR</div>
-                </div>
+              {/* Top Left OVR & Position */}
+              <div className="fifa-card-top-left" style={{ color: textColor }}>
+                <div className="fifa-card-ovr-new">{ovr}</div>
+                <div className="fifa-card-pos-new">{pos}</div>
+                <div className="fifa-card-flag">🇪🇨</div>
               </div>
 
-              <div className="fifa-card-image">
+              {/* Player Image */}
+              <div className="fifa-card-image-new">
                 {player.photoUrl ? (
                   <img src={player.photoUrl} alt={player.firstName} />
                 ) : (
-                  <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', color: textColor, fontWeight: 'bold', marginBottom: '1rem' }}>
+                  <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', color: textColor, fontWeight: 'bold' }}>
                     {player.firstName[0]}
                   </div>
                 )}
               </div>
 
-              <div className="fifa-card-bottom">
-                <div className="fifa-card-name" style={{ color: textColor }}>{player.firstName} {player.lastName}</div>
-                {player.historicalChampionships > 0 && (
-                  <div style={{ display: 'flex', justifyContent: 'center', gap: '2px', marginBottom: '8px' }}>
-                    {Array.from({ length: Math.min(player.historicalChampionships, 5) }).map((_, i) => (
-                      <Star key={i} size={12} fill={textColor} color={textColor} />
-                    ))}
+              {/* Name & Stats */}
+              <div className="fifa-card-bottom-new">
+                <div className="fifa-card-name-new" style={{ color: textColor }}>{player.firstName} {player.lastName}</div>
+                
+                {/* Stats Grid */}
+                <div className="fifa-card-stats-grid" style={{ color: statsColor }}>
+                  <div className="stat-col">
+                    <div className="stat-row"><span>{pac}</span> <span>RIT</span></div>
+                    <div className="stat-row"><span>{sho}</span> <span>TIR</span></div>
+                    <div className="stat-row"><span>{pas}</span> <span>PAS</span></div>
                   </div>
-                )}
-                <div className="fifa-card-stats" style={{ color: statsColor }}>
-                  <div className="fifa-card-stat">
-                    <span>{player.historicalGoals || 0}</span>
-                    <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.5)' }}>GLS</span>
-                  </div>
-                  <div className="fifa-card-stat">
-                    <span>{player.historicalAssists || 0}</span>
-                    <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.5)' }}>AST</span>
-                  </div>
-                  <div className="fifa-card-stat">
-                    <span>{player.historicalChampionships || 0}</span>
-                    <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.5)' }}>CAMP</span>
+                  <div className="stat-divider" style={{ background: statsColor }}></div>
+                  <div className="stat-col">
+                    <div className="stat-row"><span>{dri}</span> <span>REG</span></div>
+                    <div className="stat-row"><span>{def}</span> <span>DEF</span></div>
+                    <div className="stat-row"><span>{phy}</span> <span>FÍS</span></div>
                   </div>
                 </div>
+
+                {/* Real App Stats (Goals, Assists, Camp) at very bottom as a pill or removed? 
+                    User asked to replace stats with the FIFA layout. I will add the real app stats as a small pill at the bottom so they don't lose that data. */}
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '5px', fontSize: '0.65rem', color: textColor, opacity: 0.8, fontWeight: 'bold' }}>
+                  <span>{player.historicalGoals || 0} G</span>
+                  <span>{player.historicalAssists || 0} A</span>
+                  <span>{player.historicalChampionships || 0} 🏆</span>
+                </div>
+
               </div>
               
             </div>

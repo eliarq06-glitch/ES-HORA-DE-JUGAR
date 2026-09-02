@@ -336,64 +336,91 @@ h1, h2, h3, h4, h5, h6 {
   flex-direction: column;
 }
 
-.fifa-card-top {
+.fifa-card-top-left {
+  position: absolute;
+  top: 12%;
+  left: 15%;
   display: flex;
-  justify-content: space-between;
-  padding: 1rem;
+  flex-direction: column;
+  align-items: center;
+  font-family: var(--font-heading);
 }
 
-.fifa-card-ovr {
-  font-size: 2rem;
+.fifa-card-ovr-new {
+  font-size: 2.2rem;
   font-weight: 900;
-  color: #c9b065; /* Gold */
   line-height: 1;
 }
 
-.fifa-card-pos {
-  font-size: 1rem;
+.fifa-card-pos-new {
+  font-size: 0.9rem;
   font-weight: bold;
-  color: #fff;
+  margin-top: 2px;
+  margin-bottom: 5px;
 }
 
-.fifa-card-image {
+.fifa-card-flag {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.fifa-card-image-new {
   flex: 1;
   display: flex;
   justify-content: center;
   align-items: flex-end;
+  padding-top: 2rem;
 }
 
-.fifa-card-image img {
-  max-width: 90%;
-  max-height: 150px;
+.fifa-card-image-new img {
+  max-width: 80%;
+  max-height: 160px;
   object-fit: contain;
-  filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5));
+  filter: drop-shadow(0 10px 10px rgba(0,0,0,0.4));
+  margin-left: 20%; /* Offset to make room for stats on the left */
 }
 
-.fifa-card-bottom {
-  padding: 1rem;
+.fifa-card-bottom-new {
+  padding: 0.5rem 1rem 1.5rem 1rem;
   text-align: center;
+  font-family: var(--font-heading);
 }
 
-.fifa-card-name {
+.fifa-card-name-new {
   font-size: 1.2rem;
   font-weight: 900;
   text-transform: uppercase;
-  color: #c9b065;
   margin-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  padding-bottom: 0.2rem;
 }
 
-.fifa-card-stats {
+.fifa-card-stats-grid {
   display: flex;
-  justify-content: space-around;
-  color: #fff;
-  font-size: 0.8rem;
-  font-weight: bold;
+  justify-content: space-between;
+  align-items: stretch;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0 0.5rem;
 }
 
-.fifa-card-stat {
+.stat-col {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: 2px;
+  flex: 1;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.stat-divider {
+  width: 1px;
+  margin: 0 10px;
+  opacity: 0.2;
 }
 
 /* Sidebar and Layout */

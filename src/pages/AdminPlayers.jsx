@@ -188,6 +188,16 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
           <input type="text" className="input-dark" placeholder="Apodo" value={newPlayer.nickname} onChange={e => setNewPlayer({...newPlayer, nickname: e.target.value})} style={{ flex: 1, minWidth: '100px' }} />
           <input type="email" className="input-dark" placeholder="Email" value={newPlayer.email} onChange={e => setNewPlayer({...newPlayer, email: e.target.value})} style={{ flex: 1, minWidth: '150px' }} />
           
+          <select className="input-dark" value={newPlayer.position || 'MCO'} onChange={e => setNewPlayer({...newPlayer, position: e.target.value})} style={{ flex: 0.5, minWidth: '90px' }}>
+            <option value="POR">POR</option>
+            <option value="DEF">DEF</option>
+            <option value="MCD">MCD</option>
+            <option value="MC">MC</option>
+            <option value="MCO">MCO</option>
+            <option value="ED">ED</option>
+            <option value="EI">EI</option>
+            <option value="DC">DC</option>
+          </select>
           <select className="input-dark" value={newPlayer.stars} onChange={e => setNewPlayer({...newPlayer, stars: parseInt(e.target.value)})} style={{ flex: 1, minWidth: '150px' }}>
             <option value={5}>Bombo 1 (5 Estrellas)</option>
             <option value={4}>Bombo 2 (4 Estrellas)</option>
@@ -220,6 +230,20 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
                   <div style={{ flex: 1, minWidth: '100px' }}><label style={{fontSize:'0.7rem', color:'gray'}}>Apellido</label><input type="text" className="input-dark" value={editData.lastName} onChange={e => setEditData({...editData, lastName: e.target.value})} style={{ width: '100%' }} /></div>
                   <div style={{ flex: 0.5, minWidth: '80px' }}><label style={{fontSize:'0.7rem', color:'gray'}}>Apodo</label><input type="text" className="input-dark" value={editData.nickname} onChange={e => setEditData({...editData, nickname: e.target.value})} style={{ width: '100%' }} /></div>
                   
+                  <div style={{ flex: 0.5, minWidth: '70px' }}>
+                    <label style={{fontSize:'0.7rem', color:'gray'}}>Pos</label>
+                    <select className="input-dark" value={editData.position || 'MCO'} onChange={e => setEditData({...editData, position: e.target.value})} style={{ width: '100%' }}>
+                      <option value="POR">POR</option>
+                      <option value="DEF">DEF</option>
+                      <option value="MCD">MCD</option>
+                      <option value="MC">MC</option>
+                      <option value="MCO">MCO</option>
+                      <option value="ED">ED</option>
+                      <option value="EI">EI</option>
+                      <option value="DC">DC</option>
+                    </select>
+                  </div>
+
                   <div style={{ flex: 1, minWidth: '150px' }}>
                     <label style={{fontSize:'0.7rem', color:'gray'}}>Clasificación Bombo</label>
                     <select className="input-dark" value={editData.stars} onChange={e => setEditData({...editData, stars: parseInt(e.target.value)})} style={{ width: '100%' }}>

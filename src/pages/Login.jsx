@@ -9,6 +9,7 @@ export default function Login({ onBack, allPlayers = [], setPlayersDB, activeSes
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [selectedPlayerId, setSelectedPlayerId] = useState('');
+  const [position, setPosition] = useState('MCO');
   
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -40,7 +41,7 @@ export default function Login({ onBack, allPlayers = [], setPlayersDB, activeSes
         if (signUpError) throw signUpError;
         
         if (setPlayersDB) {
-           setPlayersDB(prev => prev.map(p => p.id === player.id ? { ...p, email } : p));
+           setPlayersDB(prev => prev.map(p => p.id === player.id ? { ...p, email, position } : p));
         }
 
         // AUTO-CONFIRM IN ACTIVE SESSION
@@ -94,12 +95,32 @@ export default function Login({ onBack, allPlayers = [], setPlayersDB, activeSes
               value={selectedPlayerId} 
               onChange={(e) => setSelectedPlayerId(e.target.value)} 
               required={isRegistering}
-              style={{ width: '100%' }}
+              style={{ width: '100%', marginBottom: '1rem' }}
             >
               <option value="">-- ¿Quién eres en la liga? --</option>
               {allPlayers.filter(p => !p.email).sort((a,b) => a.firstName.localeCompare(b.firstName)).map(p => (
                 <option key={p.id} value={p.id}>{p.firstName} {p.lastName} {p.nickname ? `("${p.nickname}")` : ''}</option>
               ))}
+            </select>
+            
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--dark-text-muted)' }}><User size={16} /> Tu Posición en la Cancha</label>
+            <select
+              className="input-dark" 
+              value={position} 
+              onChange={(e) => setPosition(e.target.value)} 
+              required={isRegistering}
+              style={{ width: '100%' }}
+            >
+              <option value="POR">Portero (POR)</option>
+              <option value="DEF">Defensa Central (DEF)</option>
+              <option value="LD">Lateral Derecho (LD)</option>
+              <option value="LI">Lateral Izquierdo (LI)</option>
+              <option value="MCD">Medio Centro Defensivo (MCD)</option>
+              <option value="MC">Medio Centro (MC)</option>
+              <option value="MCO">Medio Centro Ofensivo (MCO)</option>
+              <option value="ED">Extremo Derecho (ED)</option>
+              <option value="EI">Extremo Izquierdo (EI)</option>
+              <option value="DC">Delantero Centro (DC)</option>
             </select>
           </div>
         )}
