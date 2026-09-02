@@ -219,7 +219,9 @@ function mapFromDB(tableName, rows) {
         historicalGoals: r.historical_goals || 0,
         historicalAssists: r.historical_assists || 0,
         historicalFouls: r.historical_fouls || 0,
-        historicalChampionships: r.historical_championships || 0
+        historicalChampionships: r.historical_championships || 0,
+        email: r.email || '',
+        photoUrl: r.photo_url || ''
       }));
 
     case 'sessions':
@@ -329,7 +331,9 @@ function mapToDB(tableName, items) {
         historical_goals: p.historicalGoals || 0,
         historical_assists: p.historicalAssists || 0,
         historical_fouls: p.historicalFouls || 0,
-        historical_championships: p.historicalChampionships || 0
+        historical_championships: p.historicalChampionships || 0,
+        email: p.email || '',
+        photo_url: p.photoUrl || ''
       }));
 
     case 'sessions':
