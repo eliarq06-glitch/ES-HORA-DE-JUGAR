@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Trophy, LogOut, CheckSquare, Gamepad2, Award, Users as UsersIcon, BarChart3, CalendarDays, Star, Play, Crown, RotateCcw, UserPlus } from 'lucide-react';
 import Confirm from './pages/Confirm';
 import Login from './pages/Login';
@@ -77,6 +77,30 @@ function App() {
 
   const [mvpVotes, setMvpVotes] = useSupabaseConfig('mvpVotes', {});
   const [mvpClosed, setMvpClosed] = useSupabaseConfig('mvpClosed', false);
+
+  // MIGRATION SCRIPT: Restore old local storage players if Supabase is empty
+  useEffect(() => {
+    if (!loadingPlayers && playersDB.length <= 2) {
+      const oldPlayers = localStorage.getItem('players');
+      if (oldPlayers) {
+        try {
+          const parsed = JSON.parse(oldPlayers);
+          if (parsed && parsed.length > 2) {
+            console.log("Restoring old players from localStorage to Supabase:", parsed);
+            // Merge existing db players with old players
+            const merged = [...parsed];
+            playersDB.forEach(dbP => {
+              if (!merged.find(p => p.id === dbP.id)) merged.push(dbP);
+            });
+            setPlayersDB(merged);
+            // Once migrated, we can optionally clear it, but let's leave it as backup
+          }
+        } catch (e) {
+          console.error("Failed to migrate players", e);
+        }
+      }
+    }
+  }, [loadingPlayers, playersDB.length]);
 
   const isLoading = loadingPlayers || loadingSessions;
 
