@@ -142,17 +142,15 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
   return (
     <div style={{ width: '100%', maxWidth: '900px', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       
-      {allPlayers.length === 0 && (
-        <div style={{ background: 'var(--accent-danger)', color: 'black', padding: '1.5rem', borderRadius: '12px', fontWeight: 'bold' }}>
-          <h3 style={{ margin: '0 0 1rem 0' }}>¿Tus jugadores desaparecieron?</h3>
-          <p style={{ margin: '0 0 1rem 0', fontWeight: 'normal' }}>
-            Al conectar la base de datos oficial, es posible que se haya sobreescrito tu lista de pruebas. Si tenías jugadores guardados en este navegador, puedes intentar rescatarlos:
-          </p>
-          <button className="btn btn-dark" style={{ background: 'black', color: 'var(--accent-warning)', border: '1px solid var(--accent-warning)' }} onClick={handleRescuePlayers}>
-            <Upload size={18} /> RESCATAR JUGADORES (Desde Memoria Local)
-          </button>
-        </div>
-      )}
+      <div style={{ background: 'var(--accent-danger)', color: 'black', padding: '1.5rem', borderRadius: '12px', fontWeight: 'bold' }}>
+        <h3 style={{ margin: '0 0 1rem 0' }}>¿Faltan jugadores en tu lista?</h3>
+        <p style={{ margin: '0 0 1rem 0', fontWeight: 'normal' }}>
+          Si tenías una lista de jugadores guardada en las pruebas anteriores, presiona este botón para rescatarlos e ingresarlos a la base de datos oficial. (Solo agregará los que falten).
+        </p>
+        <button className="btn btn-dark" style={{ background: 'black', color: 'var(--accent-warning)', border: '1px solid var(--accent-warning)' }} onClick={handleRescuePlayers}>
+          <Upload size={18} /> RESCATAR JUGADORES (Desde Memoria Local)
+        </button>
+      </div>
 
       {isGlobalAdmin && (
         <div className="glass-panel-dark" style={{ border: '2px solid var(--accent-neon)' }}>
