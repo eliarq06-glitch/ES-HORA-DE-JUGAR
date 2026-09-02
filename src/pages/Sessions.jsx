@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Plus, Trash2, Check, Trophy, ChevronDown, ChevronUp, Crown, Activity, Star } from 'lucide-react';
+import { Calendar, Plus, Trash2, Check, Trophy, ChevronDown, ChevronUp, Crown, Activity, Star, Lock, Unlock } from 'lucide-react';
 
 export default function Sessions({ sessions, setSessions, activeSessionId, setActiveSessionId, historicalTournaments = [] }) {
   const [newSessionName, setNewSessionName] = useState('');
@@ -56,7 +56,7 @@ export default function Sessions({ sessions, setSessions, activeSessionId, setAc
           <div key={s.id} className="glass-panel-dark" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: activeSessionId === s.id ? '2px solid var(--accent-neon)' : '1px solid var(--dark-glass-border)' }}>
             <div>
               <h3 style={{ fontSize: '1.25rem', margin: 0, color: 'white' }}>{s.name}</h3>
-              <p style={{ margin: '4px 0 0 0', color: 'var(--dark-text-muted)' }}>{s.date} • {s.confirmedIds.length} Confirmados</p>
+              <p style={{ margin: '4px 0 0 0', color: 'var(--dark-text-muted)' }}>{s.date} • {s.confirmedIds.length} Confirmados {s.status === 'locked' && <span style={{color: 'var(--accent-danger)'}}>(CERRADA)</span>}</p>
             </div>
             
             <div style={{ display: 'flex', gap: '1rem' }}>
@@ -67,9 +67,17 @@ export default function Sessions({ sessions, setSessions, activeSessionId, setAc
               )}
               {activeSessionId === s.id && (
                 <button className="btn" style={{ background: 'var(--accent-neon)', color: 'black', fontWeight: 'bold' }} onClick={() => setActiveSessionId(null)}>
-                  <Check size={18} style={{ marginRight: '5px' }} /> Activa (Cerrar)
+                  <Check size={18} style={{ marginRight: '5px' }} /> Activa (Ocultar)
                 </button>
               )}
+              <button 
+                className="btn btn-dark" 
+                style={{ border: s.status === 'locked' ? '1px solid var(--accent-danger)' : '1px solid var(--accent-warning)', color: s.status === 'locked' ? 'var(--accent-danger)' : 'var(--accent-warning)', padding: '0.75rem' }} 
+                onClick={() => setSessions(sessions.map(sess => sess.id === s.id ? { ...sess, status: sess.status === 'locked' ? 'open' : 'locked' } : sess))}
+                title={s.status === 'locked' ? "Abrir Inscripciones" : "Cerrar Convocatoria (Bloquear)"}
+              >
+                {s.status === 'locked' ? <Lock size={18} /> : <Unlock size={18} />}
+              </button>
               <button className="btn btn-danger" style={{ padding: '0.75rem' }} onClick={() => handleDelete(s.id)}>
                 <Trash2 size={18} />
               </button>

@@ -109,6 +109,13 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
               <span style={{ fontSize: '1.5rem' }}>¡Estás Confirmado!</span>
               <p style={{ color: 'var(--light-text-muted)', fontWeight: 'normal' }}>Nos vemos en la cancha.</p>
             </div>
+          ) : activeSession.status === 'locked' || activeSession.confirmedIds.length >= 27 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', color: 'var(--accent-danger)', fontWeight: 'bold', padding: '1rem', border: '2px dashed var(--accent-danger)', borderRadius: '16px', background: 'rgba(239, 68, 68, 0.05)' }}>
+              <div style={{ fontSize: '1.5rem' }}>¡CUPOS LLENOS! 🚫</div>
+              <p style={{ color: 'var(--light-text)', fontWeight: 'normal', fontSize: '1.1rem', margin: 0 }}>
+                Ya no entraste en esta convocatoria...<br/>deberías inscribirte más temprano ¡Bolsa! 😂
+              </p>
+            </div>
           ) : (
             <button 
               className="btn btn-neon" 
