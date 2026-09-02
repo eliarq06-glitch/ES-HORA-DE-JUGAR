@@ -26,7 +26,7 @@ export default function Login({ onBack }) {
           password,
           options: {
             data: {
-              full_name: fullName,
+              full_name: fullName.toUpperCase(),
             }
           }
         });

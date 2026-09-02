@@ -3,7 +3,7 @@ import { UserPlus, Save, Trash2, Edit2, Shield, Users, ShieldAlert } from 'lucid
 import { supabase } from '../lib/supabase';
 
 export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }) {
-  const [newPlayer, setNewPlayer] = useState({ firstName: '', lastName: '', nickname: '', photoUrl: '', stars: 3 });
+  const [newPlayer, setNewPlayer] = useState({ firstName: '', lastName: '', nickname: '', email: '', photoUrl: '', stars: 3 });
   const [editingId, setEditingId] = useState(null);
   const [editData, setEditData] = useState({ firstName: '', lastName: '', nickname: '', email: '', photoUrl: '', stars: 3 });
   const [profiles, setProfiles] = useState([]);
@@ -61,7 +61,7 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
     const newId = Date.now();
     const playerObj = { id: newId, ...newPlayer, ratings: [] };
     setPlayersDB(prev => [...prev, playerObj]);
-    setNewPlayer({ firstName: '', lastName: '', nickname: '', photoUrl: '', stars: 3 });
+    setNewPlayer({ firstName: '', lastName: '', nickname: '', email: '', photoUrl: '', stars: 3 });
   };
 
   const handleStartEdit = (p) => {
@@ -102,7 +102,7 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                  <th style={{ padding: '0.5rem', color: 'var(--accent-warning)' }}>Correo</th>
+                  <th style={{ padding: '0.5rem', color: 'var(--accent-warning)' }}>Usuario</th>
                   <th style={{ padding: '0.5rem', color: 'var(--accent-warning)' }}>Rol Actual</th>
                   <th style={{ padding: '0.5rem', color: 'var(--accent-warning)' }}>Cambiar Rol</th>
                 </tr>
@@ -110,7 +110,7 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
               <tbody>
                 {profiles.map(p => (
                   <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                    <td style={{ padding: '0.5rem', color: 'white' }}>{p.email || p.full_name || 'Desconocido'}</td>
+                    <td style={{ padding: '0.5rem', color: 'white' }}>{p.full_name?.toUpperCase() || p.email?.toLowerCase() || 'DESCONOCIDO'}</td>
                     <td style={{ padding: '0.5rem', fontWeight: 'bold', color: p.role === 'global_admin' ? 'var(--accent-danger)' : p.role === 'admin' ? 'var(--accent-neon)' : 'white' }}>
                       {p.role === 'global_admin' ? 'SUPER ADMIN' : p.role === 'admin' ? 'ADMIN' : 'Jugador'}
                     </td>
@@ -153,6 +153,7 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
           <input type="text" className="input-dark" placeholder="Nombre" value={newPlayer.firstName} onChange={e => setNewPlayer({...newPlayer, firstName: e.target.value})} style={{ flex: 1, minWidth: '120px' }} required />
           <input type="text" className="input-dark" placeholder="Apellido" value={newPlayer.lastName} onChange={e => setNewPlayer({...newPlayer, lastName: e.target.value})} style={{ flex: 1, minWidth: '120px' }} />
           <input type="text" className="input-dark" placeholder="Apodo" value={newPlayer.nickname} onChange={e => setNewPlayer({...newPlayer, nickname: e.target.value})} style={{ flex: 1, minWidth: '100px' }} />
+          <input type="email" className="input-dark" placeholder="Email" value={newPlayer.email} onChange={e => setNewPlayer({...newPlayer, email: e.target.value})} style={{ flex: 1, minWidth: '150px' }} />
           
           <select className="input-dark" value={newPlayer.stars} onChange={e => setNewPlayer({...newPlayer, stars: parseInt(e.target.value)})} style={{ flex: 1, minWidth: '150px' }}>
             <option value={5}>Bombo 1 (5 Estrellas)</option>
