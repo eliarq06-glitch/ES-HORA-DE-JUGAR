@@ -31,8 +31,8 @@ export default function Match({ teams, matchEvents, setMatchEvents, matches, set
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   
   // Timer State
-  const [timerDuration, setTimerDuration] = useState(15); // minutes
-  const [timeLeft, setTimeLeft] = useState(15 * 60);
+  const [timerDuration, setTimerDuration] = useState(12); // minutes
+  const [timeLeft, setTimeLeft] = useState(12 * 60);
   const [isRunning, setIsRunning] = useState(false);
   const timerRef = useRef(null);
 
@@ -145,10 +145,15 @@ export default function Match({ teams, matchEvents, setMatchEvents, matches, set
             <select className="input-dark" value={activeMatchId} onChange={(e) => {
               const newId = e.target.value;
               setActiveMatchId(newId);
+              const selectedM = matches.find(m => m.id === newId);
+              const duration = selectedM?.isFinal ? 15 : 12;
+              setTimerDuration(duration);
+              setIsRunning(false);
+              setTimeLeft(duration * 60);
+
               if (newId) {
                 setMatches(matches.map(m => m.id === newId ? { ...m, status: 'active' } : (m.status === 'active' ? { ...m, status: 'pending' } : m)));
               }
-              resetTimer();
             }} style={{ minWidth: '250px' }}>
               <option value="">-- Elige un partido --</option>
               {matches.filter(m => m.status !== 'finished').map(m => {
