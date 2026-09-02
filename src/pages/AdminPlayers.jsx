@@ -231,7 +231,7 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
                   <div className="avatar-placeholder">{p.firstName.charAt(0)}</div>
                   <div>
-                    <div style={{ fontWeight: 'bold' }}>{p.firstName} {p.lastName} {p.nickname && <span style={{ color: 'var(--accent-primary)', fontSize: '0.9rem' }}>"{p.nickname}"</span>}</div>
+                    <div style={{ fontWeight: 'bold' }}>{p.firstName} {p.lastName} {p.nickname && <span style={{ color: 'var(--accent-warning)', fontSize: '0.85rem' }}>"{p.nickname}"</span>}</div>
                     <div style={{ fontSize: '0.8rem', color: p.email ? 'var(--accent-neon)' : 'var(--dark-text-muted)' }}>
                       {p.email ? `✉️ ${p.email}` : 'Sin cuenta vinculada'}
                     </div>
