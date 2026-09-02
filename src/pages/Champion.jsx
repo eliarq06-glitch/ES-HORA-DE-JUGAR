@@ -212,26 +212,62 @@ export default function Champion({ teams, matches, matchEvents, onFinalize }) {
               {championPhoto ? (
                 <>
                   {/* Contenedor del Flyer */}
-                  <div ref={flyerRef} style={{ width: '100%', maxWidth: '600px', background: 'var(--dark-bg)', padding: '2rem', borderRadius: '16px', position: 'relative', border: `4px solid ${championTeam.color || 'var(--accent-neon)'}`, overflow: 'hidden' }}>
-                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: `linear-gradient(to bottom, transparent, ${championTeam.color}33)`, zIndex: 0 }}></div>
+                  <div ref={flyerRef} style={{ width: '100%', maxWidth: '700px', background: 'radial-gradient(ellipse at top, #1e3a8a, #020617)', padding: '3rem 2rem', position: 'relative', border: 'none', overflow: 'hidden' }}>
                     
-                    <div style={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
-                      <h2 style={{ fontFamily: 'var(--font-heading)', color: 'var(--accent-neon)', fontSize: '2.5rem', margin: '0 0 1rem 0', textTransform: 'uppercase' }}>¡CAMPEÓN LCDF!</h2>
+                    {/* Elementos de fondo decorativos */}
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '20px 20px', zIndex: 0 }}></div>
+                    <div style={{ position: 'absolute', top: '10%', left: '-10%', width: '400px', height: '400px', background: championTeam.color || 'var(--accent-neon)', filter: 'blur(150px)', opacity: 0.3, zIndex: 0, borderRadius: '50%' }}></div>
+                    <div style={{ position: 'absolute', bottom: '10%', right: '-10%', width: '400px', height: '400px', background: '#38bdf8', filter: 'blur(150px)', opacity: 0.2, zIndex: 0, borderRadius: '50%' }}></div>
+
+                    <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                       
-                      <div style={{ border: '2px solid rgba(255,255,255,0.2)', borderRadius: '12px', overflow: 'hidden', marginBottom: '1.5rem', background: '#000' }}>
-                        <img src={championPhoto} alt="Campeón" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                      {/* Logo y Header */}
+                      <img src="/logo.png" alt="LCDF" style={{ height: '80px', objectFit: 'contain', marginBottom: '1rem', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.5))' }} />
+                      
+                      <div style={{ fontSize: '0.8rem', color: '#93c5fd', textTransform: 'uppercase', letterSpacing: '3px', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                        LA CANCHA DE LOS FINOS
+                      </div>
+
+                      {/* Título CAMPEÓN gigante */}
+                      <h2 style={{ 
+                        fontFamily: 'var(--font-heading)', 
+                        color: 'white', 
+                        fontSize: 'clamp(4rem, 10vw, 6.5rem)', 
+                        lineHeight: 1,
+                        margin: '0 0 0.5rem 0', 
+                        textTransform: 'uppercase',
+                        textShadow: `0px 4px 0px #0f172a, 0px 8px 15px rgba(0,0,0,0.8), 0px 0px 40px ${championTeam.color || 'var(--accent-neon)'}`
+                      }}>
+                        CAMPEÓN
+                      </h2>
+                      
+                      <div style={{ fontSize: '1.2rem', color: 'white', textTransform: 'uppercase', letterSpacing: '4px', fontWeight: '900', marginBottom: '2rem', padding: '0.5rem 2rem', background: 'rgba(0,0,0,0.5)', borderRadius: '100px', border: `1px solid ${championTeam.color || 'var(--accent-neon)'}` }}>
+                        {championTeam.name}
                       </div>
                       
-                      <h3 style={{ fontFamily: 'var(--font-heading)', color: 'white', fontSize: '2rem', margin: '0 0 1rem 0' }}>{championTeam.name.toUpperCase()}</h3>
+                      {/* Foto del Equipo */}
+                      <div style={{ border: '8px solid white', borderRadius: '4px', overflow: 'hidden', marginBottom: '2rem', background: '#000', boxShadow: '0 20px 40px rgba(0,0,0,0.8)', transform: 'rotate(-1deg)', position: 'relative', width: '100%', maxWidth: '550px' }}>
+                        <img src={championPhoto} alt="Campeón" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'cover' }} />
+                      </div>
                       
-                      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                        {[...championTeam.players].map(p => (
-                          <span key={p.id} style={{ background: 'rgba(255,255,255,0.1)', padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 'bold' }}>{p.firstName} {p.lastName}</span>
+                      {/* Nombres de los Jugadores */}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '6px', maxWidth: '90%', marginBottom: '1.5rem' }}>
+                        {[...championTeam.players].map((p, idx) => (
+                          <React.Fragment key={p.id}>
+                            <span style={{ fontSize: '0.9rem', fontWeight: '600', color: '#e2e8f0', letterSpacing: '0.5px' }}>
+                              {p.firstName} {p.lastName}
+                            </span>
+                            {idx < championTeam.players.length - 1 && (
+                              <span style={{ color: 'var(--accent-neon)', fontWeight: 'bold' }}>•</span>
+                            )}
+                          </React.Fragment>
                         ))}
                       </div>
 
-                      <div style={{ fontSize: '0.8rem', color: 'var(--dark-text-muted)', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem', marginTop: '1rem' }}>
-                        Jornada: {new Date().toLocaleDateString()}
+                      {/* Footer */}
+                      <div style={{ fontSize: '0.75rem', color: '#94a3b8', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem', width: '80%', display: 'flex', justifyContent: 'center', gap: '2rem' }}>
+                        <span>FECHA: {new Date().toLocaleDateString()}</span>
+                        <span>RESULTADO FINAL: {s1} - {s2}</span>
                       </div>
                     </div>
                   </div>
