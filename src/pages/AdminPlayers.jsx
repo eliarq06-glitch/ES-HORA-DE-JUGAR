@@ -127,9 +127,18 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
                 </tr>
               </thead>
               <tbody>
-                {profiles.map(p => (
+                {profiles.map(p => {
+                  const matchingPlayer = allPlayers.find(ap => ap.email && ap.email.toLowerCase() === p.email?.toLowerCase());
+                  return (
                   <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                    <td style={{ padding: '0.5rem', color: 'white' }}>{p.full_name?.toUpperCase() || p.email?.toLowerCase() || 'DESCONOCIDO'}</td>
+                    <td style={{ padding: '0.5rem', color: 'white' }}>
+                      {p.full_name?.toUpperCase() || p.email?.toLowerCase() || 'DESCONOCIDO'}
+                      {matchingPlayer && matchingPlayer.nickname && (
+                        <span style={{ color: 'var(--accent-warning)', fontSize: '0.85rem', marginLeft: '8px' }}>
+                          "{matchingPlayer.nickname}"
+                        </span>
+                      )}
+                    </td>
                     <td style={{ padding: '0.5rem', fontWeight: 'bold', color: p.role === 'global_admin' ? 'var(--accent-danger)' : p.role === 'admin' ? 'var(--accent-neon)' : 'white' }}>
                       {p.role === 'global_admin' ? 'SUPER ADMIN' : p.role === 'admin' ? 'ADMIN' : 'Jugador'}
                     </td>
@@ -147,7 +156,7 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
                       )}
                     </td>
                   </tr>
-                ))}
+                )})}
                 {profiles.length === 0 && (
                   <tr><td colSpan="3" style={{ padding: '1rem', textAlign: 'center', color: 'white' }}>Cargando usuarios o sin datos...</td></tr>
                 )}
