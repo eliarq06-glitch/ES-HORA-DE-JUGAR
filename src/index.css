@@ -332,14 +332,15 @@ h1, h2, h3, h4, h5, h6 {
   position: relative;
   z-index: 2;
   height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
 }
 
 .fifa-card-top-left {
   position: absolute;
-  top: 12%;
-  left: 15%;
+  top: 10%;
+  left: 12%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -347,61 +348,76 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .fifa-card-ovr-new {
-  font-size: 2.2rem;
+  font-size: clamp(1.5rem, 5vw, 2.2rem);
   font-weight: 900;
   line-height: 1;
 }
 
 .fifa-card-pos-new {
-  font-size: 0.9rem;
+  font-size: clamp(0.7rem, 2.5vw, 0.9rem);
   font-weight: bold;
   margin-top: 2px;
   margin-bottom: 5px;
 }
 
 .fifa-card-flag {
-  font-size: 1.2rem;
-  line-height: 1;
+  width: 25px;
+  height: auto;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .fifa-card-image-new {
-  flex: 1;
+  position: absolute;
+  top: 15%;
+  width: 100%;
+  height: 45%;
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  padding-top: 2rem;
 }
 
 .fifa-card-image-new img {
-  max-width: 80%;
-  max-height: 160px;
+  max-width: 70%;
+  max-height: 100%;
   object-fit: contain;
   filter: drop-shadow(0 10px 10px rgba(0,0,0,0.4));
-  margin-left: 20%; /* Offset to make room for stats on the left */
+  margin-left: 10%;
 }
 
 .fifa-card-bottom-new {
-  padding: 0.5rem 1rem 1.5rem 1rem;
-  text-align: center;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 40%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 5%;
   font-family: var(--font-heading);
 }
 
 .fifa-card-name-new {
-  font-size: 1.2rem;
+  font-size: clamp(0.9rem, 3.5vw, 1.3rem);
   font-weight: 900;
   text-transform: uppercase;
-  margin-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(0,0,0,0.1);
-  padding-bottom: 0.2rem;
+  width: 90%;
+  text-align: center;
+  margin-bottom: 2%;
+  border-bottom: 1px solid rgba(0,0,0,0.2);
+  padding-bottom: 2%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .fifa-card-stats-grid {
   display: flex;
-  justify-content: space-between;
-  align-items: stretch;
-  font-size: 0.85rem;
+  justify-content: center;
+  width: 90%;
+  font-size: clamp(0.7rem, 2.5vw, 0.95rem);
   font-weight: 700;
-  padding: 0 0.5rem;
+  line-height: 1.2;
 }
 
 .stat-col {
@@ -413,14 +429,14 @@ h1, h2, h3, h4, h5, h6 {
 
 .stat-row {
   display: flex;
-  justify-content: center;
-  gap: 6px;
+  justify-content: space-between;
+  padding: 0 5%;
 }
 
 .stat-divider {
   width: 1px;
-  margin: 0 10px;
-  opacity: 0.2;
+  margin: 0 4%;
+  opacity: 0.3;
 }
 
 /* Sidebar and Layout */

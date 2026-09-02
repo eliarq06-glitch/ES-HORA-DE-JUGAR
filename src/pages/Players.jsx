@@ -34,27 +34,34 @@ export default function Players({ players }) {
           let statsColor = '#3b2511';
           
           if (stars >= 5) {
-            bgImage = '/card_legend.png';
+            bgImage = '/card_legend.png'; // Blanco
             textColor = '#886d34';
             statsColor = '#886d34';
           } else if (stars === 4) {
-            bgImage = '/card_silver.png';
-            textColor = '#334155'; // Slate/dark gray text for silver card
-            statsColor = '#1e293b';
+            bgImage = '/card_toty.png'; // Azul
+            textColor = '#c9b065';
+            statsColor = '#c9b065';
           } else if (stars === 3) {
-            bgImage = '/card_gold.png';
+            // Negro - We use Silver and darken it heavily via CSS below
+            bgImage = '/card_silver.png'; 
+            textColor = '#e2e8f0'; 
+            statsColor = '#94a3b8';
+          } else if (stars === 2) {
+            bgImage = '/card_gold.png'; // Dorado
             textColor = '#4a3810';
             statsColor = '#3b2511';
           } else {
-            bgImage = '/card_bronze.png';
+            bgImage = '/card_bronze.png'; // Bronce
             textColor = '#3b2511';
             statsColor = '#3b2511';
           }
 
+          // Darken the silver card to make it black
+          const extraStyle = stars === 3 ? { filter: 'brightness(0.3) contrast(1.2)' } : {};
+
           const ovr = Math.round((player.stars / 5) * 99) || 50;
           const pos = player.position || 'MCO';
           
-          // Generate 6 deterministic stats based on OVR and Position
           const base = ovr - 5;
           const getStat = (offset) => Math.min(99, Math.max(1, base + offset));
           
@@ -62,17 +69,18 @@ export default function Players({ players }) {
           if(pos==='DEL' || pos==='DC' || pos==='EI' || pos==='ED') { pac=getStat(8); sho=getStat(10); dri=getStat(5); def=getStat(-20); }
           else if(pos==='MCO' || pos==='MC' || pos==='MI' || pos==='MD') { pas=getStat(10); dri=getStat(8); sho=getStat(5); def=getStat(-5); }
           else if(pos==='MCD' || pos==='DEF' || pos==='DFC' || pos==='LI' || pos==='LD') { def=getStat(12); phy=getStat(10); pac=getStat(-5); sho=getStat(-15); }
-          else if(pos==='POR' || pos==='PO') { pac=getStat(-10); sho=getStat(-20); pas=getStat(5); dri=getStat(15); def=getStat(5); phy=getStat(5); } // GK stats mapped differently but using same layout for simplicity
+          else if(pos==='POR' || pos==='PO') { pac=getStat(-10); sho=getStat(-20); pas=getStat(5); dri=getStat(15); def=getStat(5); phy=getStat(5); }
 
           return (
-          <div key={player.id} className="fifa-card" style={{ backgroundImage: `url(${bgImage})` }}>
+          <div key={player.id} className="fifa-card">
+            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundImage: `url(${bgImage})`, backgroundSize: '100% 100%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', zIndex: 1, ...extraStyle }}></div>
             <div className="fifa-card-content">
               
               {/* Top Left OVR & Position */}
               <div className="fifa-card-top-left" style={{ color: textColor }}>
                 <div className="fifa-card-ovr-new">{ovr}</div>
                 <div className="fifa-card-pos-new">{pos}</div>
-                <div className="fifa-card-flag">🇪🇨</div>
+                <img src="https://flagcdn.com/w40/ec.png" alt="Ecuador" className="fifa-card-flag" />
               </div>
 
               {/* Player Image */}
