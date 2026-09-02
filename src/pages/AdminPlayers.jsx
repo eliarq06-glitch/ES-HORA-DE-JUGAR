@@ -129,7 +129,13 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
               </thead>
               <tbody>
                 {profiles.map(p => {
-                  const matchingPlayer = allPlayers.find(ap => ap.email && ap.email.toLowerCase() === p.email?.toLowerCase());
+                  const matchingPlayer = allPlayers.find(ap => {
+                    const matchByEmail = ap.email && p.email && ap.email.toLowerCase() === p.email.toLowerCase();
+                    const matchByName = p.full_name && ap.firstName && 
+                      p.full_name.toLowerCase().includes(ap.firstName.toLowerCase()) && 
+                      (!ap.lastName || p.full_name.toLowerCase().includes(ap.lastName.toLowerCase()));
+                    return matchByEmail || matchByName;
+                  });
                   return (
                   <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                     <td style={{ padding: '0.5rem', color: 'white' }}>
