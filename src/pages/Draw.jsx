@@ -8,15 +8,27 @@ export default function Draw({ players, teams, setTeams }) {
   const [draftMode, setDraftMode] = useState('auto'); // 'auto' or 'manual'
 
   useEffect(() => {
-    if (teams.length !== numTeams) {
-      const initialTeams = Array.from({ length: numTeams }, (_, i) => ({
-        id: i,
-        name: `Equipo ${String.fromCharCode(65 + i)}`,
-        players: []
-      }));
-      setTeams(initialTeams);
-    }
-  }, [numTeams, setTeams, teams.length]);
+    setTeams(prev => {
+      if (prev.length === numTeams) return prev;
+      const newTeams = [...prev];
+      
+      // If we have more teams than needed, truncate
+      if (newTeams.length > numTeams) {
+        newTeams.length = numTeams;
+      }
+      
+      // If we need more teams, append them with unique IDs
+      while (newTeams.length < numTeams) {
+        newTeams.push({
+          id: Math.floor(Math.random() * 1000000) + newTeams.length,
+          name: `Equipo ${String.fromCharCode(65 + newTeams.length)}`,
+          players: [],
+          captainId: null
+        });
+      }
+      return newTeams;
+    });
+  }, [numTeams, setTeams]);
 
   const shuffleArray = (array) => {
     let newArr = [...array];
@@ -92,34 +104,44 @@ export default function Draw({ players, teams, setTeams }) {
 
     // Update team name based on the new captain
     setTimeout(() => {
-       const newTeams = [...teams];
-       const caps = newCaptains[teamIndex];
-       if (caps && caps.length > 0) {
-           const capPlayer = players.find(p => p.id === caps[0]);
-           if (capPlayer) {
-               newTeams[teamIndex].name = `Team ${capPlayer.firstName}`;
-               newTeams[teamIndex].captainId = capPlayer.id;
+       setTeams(prevTeams => {
+           const newTeams = [...prevTeams];
+           const caps = newCaptains[teamIndex];
+           
+           // Deep clone the team we are modifying
+           newTeams[teamIndex] = { ...newTeams[teamIndex] };
+           
+           if (caps && caps.length > 0) {
+               const capPlayer = players.find(p => p.id === caps[0]);
+               if (capPlayer) {
+                   newTeams[teamIndex].name = `TEAM ${capPlayer.firstName.toUpperCase()}`;
+                   newTeams[teamIndex].captainId = capPlayer.id;
+               }
+           } else {
+               newTeams[teamIndex].name = `Equipo ${String.fromCharCode(65 + teamIndex)}`;
+               newTeams[teamIndex].captainId = null;
            }
-       } else {
-           newTeams[teamIndex].name = `Equipo ${String.fromCharCode(65 + teamIndex)}`;
-           newTeams[teamIndex].captainId = null;
-       }
-       setTeams(newTeams);
+           return newTeams;
+       });
     }, 0);
   };
 
   const assignPlayerManual = (player, teamIndex) => {
-    const newTeams = [...teams];
-    if(!newTeams[teamIndex].players.find(p => p.id === player.id)) {
-        newTeams[teamIndex].players.push(player);
-        setTeams(newTeams);
-    }
+    setTeams(prev => {
+        const newTeams = [...prev];
+        if(!newTeams[teamIndex].players.find(p => p.id === player.id)) {
+            newTeams[teamIndex] = { ...newTeams[teamIndex], players: [...newTeams[teamIndex].players, player] };
+        }
+        return newTeams;
+    });
   };
 
   const removePlayerManual = (playerId, teamIndex) => {
-    const newTeams = [...teams];
-    newTeams[teamIndex].players = newTeams[teamIndex].players.filter(p => p.id !== playerId);
-    setTeams(newTeams);
+    setTeams(prev => {
+        const newTeams = [...prev];
+        newTeams[teamIndex] = { ...newTeams[teamIndex], players: newTeams[teamIndex].players.filter(p => p.id !== playerId) };
+        return newTeams;
+    });
     if((captains[teamIndex] || []).includes(playerId)) {
         setCaptains(prev => ({...prev, [teamIndex]: prev[teamIndex].filter(id => id !== playerId)}));
     }
@@ -166,29 +188,31 @@ export default function Draw({ players, teams, setTeams }) {
     
     if (!playerId) return;
     const pId = parseInt(playerId);
-    const newTeams = [...teams];
 
-    if (sourceTeamIndex === 'available') {
-        const playerToMove = players.find(p => p.id === pId);
-        if(playerToMove && !newTeams[targetTeamIndex].players.find(p=>p.id===pId)) {
-             newTeams[targetTeamIndex].players.push(playerToMove);
-             setTeams(newTeams);
-        }
-    } else {
-        const sIdx = parseInt(sourceTeamIndex);
-        if (sIdx === targetTeamIndex) return;
+    setTeams(prev => {
+        const newTeams = [...prev];
+        
+        if (sourceTeamIndex === 'available') {
+            const playerToMove = players.find(p => p.id === pId);
+            if(playerToMove && !newTeams[targetTeamIndex].players.find(p=>p.id===pId)) {
+                newTeams[targetTeamIndex] = { ...newTeams[targetTeamIndex], players: [...newTeams[targetTeamIndex].players, playerToMove] };
+            }
+        } else {
+            const sIdx = parseInt(sourceTeamIndex);
+            if (sIdx === targetTeamIndex) return prev;
 
-        const playerToMove = newTeams[sIdx].players.find(p => p.id === pId);
-        if (playerToMove) {
-            newTeams[sIdx].players = newTeams[sIdx].players.filter(p => p.id !== pId);
-            newTeams[targetTeamIndex].players.push(playerToMove);
-            setTeams(newTeams);
-            
-            if ((captains[sIdx] || []).includes(pId)) {
-                setCaptains(prev => ({...prev, [sIdx]: prev[sIdx].filter(id => id !== pId)}));
+            const playerToMove = newTeams[sIdx].players.find(p => p.id === pId);
+            if (playerToMove) {
+                newTeams[sIdx] = { ...newTeams[sIdx], players: newTeams[sIdx].players.filter(p => p.id !== pId) };
+                newTeams[targetTeamIndex] = { ...newTeams[targetTeamIndex], players: [...newTeams[targetTeamIndex].players, playerToMove] };
+                
+                if ((captains[sIdx] || []).includes(pId)) {
+                    setCaptains(prevCaps => ({...prevCaps, [sIdx]: prevCaps[sIdx].filter(id => id !== pId)}));
+                }
             }
         }
-    }
+        return newTeams;
+    });
   };
 
   const handleDragOver = (e) => {
@@ -252,16 +276,13 @@ export default function Draw({ players, teams, setTeams }) {
         marginBottom: '2rem' 
       }}>
         {teams.map((team, index) => {
-          let bgImage = 'var(--dark-glass)';
+          let epicImage = null;
           let capPlayer = null;
           const caps = captains[index] || [];
           if (caps.length > 0) {
               capPlayer = players.find(p => p.id === caps[0]);
               if (capPlayer) {
-                  const epicImage = getCaptainImage(capPlayer.firstName);
-                  if (epicImage) {
-                      bgImage = `linear-gradient(to bottom, rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 1)), url('${epicImage}')`;
-                  }
+                  epicImage = getCaptainImage(capPlayer.firstName);
               }
           }
 
@@ -270,32 +291,47 @@ export default function Draw({ players, teams, setTeams }) {
             key={team.id} 
             className="glass-panel-dark" 
             style={{ 
-              padding: '1rem', 
+              padding: 0, 
               border: capPlayer ? '2px solid var(--accent-neon)' : '2px solid transparent', 
               transition: 'border 0.2s',
-              background: bgImage,
-              backgroundSize: 'cover',
-              backgroundPosition: 'top center',
+              background: 'var(--dark-glass)',
               position: 'relative',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column'
             }}
             onDrop={(e) => handleDrop(e, index)}
             onDragOver={handleDragOver}
           >
             <input className="input-dark" value={team.name}
               onChange={(e) => {
-                const newTeams = [...teams];
-                newTeams[index].name = e.target.value;
-                setTeams(newTeams);
+                const val = e.target.value;
+                setTeams(prev => {
+                   const newTeams = [...prev];
+                   newTeams[index] = { ...newTeams[index], name: val };
+                   return newTeams;
+                });
               }}
-              style={{ fontSize: '1.4rem', fontWeight: '900', fontFamily: 'var(--font-heading)', textTransform: 'uppercase', textAlign: 'center', background: 'rgba(0,0,0,0.5)', border: 'none', borderBottom: '2px solid rgba(255,255,255,0.1)', width: '100%', padding: '0.5rem', marginBottom: '1rem', color: capPlayer ? 'var(--accent-neon)' : 'white' }}
+              style={{ fontSize: '1.4rem', fontWeight: '900', fontFamily: 'var(--font-heading)', textTransform: 'uppercase', textAlign: 'center', background: 'rgba(0,0,0,0.5)', border: 'none', borderBottom: '2px solid rgba(255,255,255,0.1)', width: '100%', padding: '0.8rem', color: capPlayer ? 'var(--accent-neon)' : 'white', zIndex: 3 }}
             />
 
-            <div style={{ minHeight: '200px', position: 'relative', zIndex: 2 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', background: 'rgba(0,0,0,0.4)', padding: '4px 8px', borderRadius: '4px' }}>
-                <h4 className="subtitle" style={{ fontSize: '0.75rem', color: 'white' }}>Plantilla Actual</h4>
-                <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--accent-neon)' }}>{team.players.length} J.</span>
-              </div>
+            <div style={{ display: 'flex', flex: 1, position: 'relative', zIndex: 2, minHeight: '300px' }}>
+              
+              {/* Captain Image Area (Left Side) */}
+              {epicImage && (
+                <div style={{ width: '40%', backgroundImage: `url('${epicImage}')`, backgroundSize: 'cover', backgroundPosition: 'center top', borderRight: '1px solid rgba(255,255,255,0.1)', position: 'relative' }}>
+                   <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)', padding: '10px', textAlign: 'center' }}>
+                      <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 'bold', color: 'var(--accent-neon)' }}>CAPITÁN</span>
+                   </div>
+                </div>
+              )}
+
+              {/* Players List Area (Right Side) */}
+              <div style={{ flex: 1, padding: '1rem', background: epicImage ? 'rgba(15, 23, 42, 0.6)' : 'transparent', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', background: 'rgba(0,0,0,0.4)', padding: '4px 8px', borderRadius: '4px' }}>
+                  <h4 className="subtitle" style={{ fontSize: '0.75rem', color: 'white' }}>Plantilla</h4>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--accent-neon)' }}>{team.players.length} J.</span>
+                </div>
               
               {team.players.map(p => {
                 const isCaptain = (captains[index] || []).includes(p.id);
@@ -345,8 +381,9 @@ export default function Draw({ players, teams, setTeams }) {
               <div style={{ border: '2px dashed rgba(255,255,255,0.1)', borderRadius: '8px', padding: '1rem', textAlign: 'center', color: 'var(--dark-text-muted)', fontSize: '0.75rem', marginTop: '0.5rem' }}>
                  Arrastra jugadores aquí
               </div>
-            </div>
-          </div>
+             </div>
+             </div>
+           </div>
           );
         })}
       </div>
