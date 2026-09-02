@@ -306,6 +306,20 @@ function App() {
           {route === 'players' && <Players players={allPlayers} />}
           {route === 'history' && <History players={allPlayers} />}
           {route === 'mvp' && <MVP isAdmin={isAdmin} historicalTournaments={historicalTournaments} setHistoricalTournaments={setHistoricalTournaments} />}
+          {route === 'admin-menu' && isAdmin && (
+            <div className="glass-panel-dark" style={{ width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.5rem' }}>
+              <h2 className="title-main" style={{ color: 'var(--accent-danger)', textAlign: 'center', marginBottom: '1rem' }}><Shield size={28} style={{ verticalAlign: 'middle', marginRight: '8px' }} /> Panel de Control</h2>
+              <button className="btn btn-dark" style={{ padding: '1rem', fontSize: '1.1rem', justifyContent: 'flex-start' }} onClick={() => setRoute('sessions')}><CalendarDays size={24} /> Jornadas y Convocatorias</button>
+              <button className="btn btn-dark" style={{ padding: '1rem', fontSize: '1.1rem', justifyContent: 'flex-start' }} onClick={() => setRoute('admin-players')}><UserPlus size={24} /> Gestionar Jugadores</button>
+              <button className="btn btn-dark" style={{ padding: '1rem', fontSize: '1.1rem', justifyContent: 'flex-start' }} onClick={() => setRoute('finances')}><DollarSign size={24} /> Finanzas y Pagos</button>
+              <button className="btn btn-dark" style={{ padding: '1rem', fontSize: '1.1rem', justifyContent: 'flex-start' }} onClick={() => setRoute('draw')}><Play size={24} /> Sorteo de Equipos</button>
+              <button className="btn btn-dark" style={{ padding: '1rem', fontSize: '1.1rem', justifyContent: 'flex-start' }} onClick={() => setRoute('tournament')}><Play size={24} /> Gestión de Torneo</button>
+              <button className="btn btn-dark" style={{ padding: '1rem', fontSize: '1.1rem', justifyContent: 'flex-start' }} onClick={() => setRoute('match')}><Gamepad2 size={24} /> VAR en Vivo (Anotar Goles)</button>
+              <button className="btn btn-dark" style={{ padding: '1rem', fontSize: '1.1rem', justifyContent: 'flex-start' }} onClick={() => setRoute('champion')}><Crown size={24} /> Elegir Campeón</button>
+              <button className="btn btn-dark" style={{ padding: '1rem', fontSize: '1.1rem', justifyContent: 'flex-start' }} onClick={() => setRoute('ratings')}><Star size={24} /> Poner Notas (Ranking)</button>
+              <button className="btn btn-danger" style={{ padding: '1rem', fontSize: '1.1rem', justifyContent: 'center', marginTop: '2rem' }} onClick={handleLogout}><LogOut size={24} /> Cerrar Sesión</button>
+            </div>
+          )}
         </div>
       </main>
 
@@ -324,7 +338,7 @@ function App() {
           <span style={{ fontSize: '0.7rem', marginTop: '4px' }}>Historial</span>
         </div>
         {isAdmin && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'var(--accent-danger)', cursor: 'pointer' }} onClick={() => setRoute('sessions')}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: route === 'admin-menu' ? 'var(--accent-danger)' : 'var(--dark-text-muted)', cursor: 'pointer' }} onClick={() => setRoute('admin-menu')}>
             <Shield size={24} />
             <span style={{ fontSize: '0.7rem', marginTop: '4px' }}>Admin</span>
           </div>
