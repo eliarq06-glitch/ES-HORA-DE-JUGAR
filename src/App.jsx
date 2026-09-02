@@ -47,8 +47,16 @@ const MOCK_PLAYERS = [
 ];
 
 function App() {
-  const [route, setRoute] = useState('confirm');
-  const [hasPassedLanding, setHasPassedLanding] = useState(false);
+  const [route, setRoute] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const r = params.get('route');
+    if (r === 'vote') return 'mvp';
+    return r || 'confirm';
+  });
+  const [hasPassedLanding, setHasPassedLanding] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.has('route');
+  });
   
   // Auth & Presence
   const { user, profile, loading: authLoading } = useSupabaseAuth();
@@ -67,7 +75,25 @@ function App() {
   const [matches, setMatches] = useSupabaseTable('matches', []);
   const [historicalTournaments, setHistoricalTournaments] = useSupabaseTable('historical_tournaments', []);
 
+  const [mvpVotes, setMvpVotes] = useSupabaseConfig('mvpVotes', {});
+  const [mvpClosed, setMvpClosed] = useSupabaseConfig('mvpClosed', false);
+
   const isLoading = loadingPlayers || loadingSessions;
+
+  const handleActivateSession = (newId) => {
+    if (newId !== activeSessionId) {
+      const confirmMsg = newId === null 
+        ? '¿Ocultar la jornada activa?' 
+        : 'Cambiar de jornada borrará los equipos y partidos del sorteo actual para empezar en blanco. ¿Deseas continuar?';
+      
+      if (window.confirm(confirmMsg)) {
+        setActiveSessionId(newId);
+        setTeams([]);
+        setMatches([]);
+        setMatchEvents([]);
+      }
+    }
+  };
 
   const updateSession = (updatedSession) => {
     setSessions(sessions.map(s => s.id === updatedSession.id ? updatedSession : s));
@@ -104,7 +130,7 @@ function App() {
     }
   };
 
-  const activeSession = sessions.find(s => s.id === activeSessionId) || sessions[0];
+  const activeSession = sessions.find(s => s.id === activeSessionId) || null;
   const allPlayers = getPlayersWithStats();
   // Preserve confirmation order for Titulares (1-24) vs Alternos (25+)
   const confirmedPlayers = activeSession 
@@ -296,7 +322,7 @@ function App() {
         <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {route === 'confirm' && <Confirm isAdmin={isAdmin} user={user} activeSession={activeSession} confirmedPlayers={confirmedPlayers} allPlayers={allPlayers} updateConfirmedPlayers={updateConfirmedPlayers} setPlayersDB={setPlayersDB} />}
           {route === 'admin-players' && isAdmin && <AdminPlayers allPlayers={playersDB} setPlayersDB={setPlayersDB} isGlobalAdmin={isGlobalAdmin} />}
-          {route === 'sessions' && isAdmin && <Sessions sessions={sessions} setSessions={setSessions} activeSessionId={activeSessionId} setActiveSessionId={setActiveSessionId} historicalTournaments={historicalTournaments} teams={teams} />}
+          {route === 'sessions' && isAdmin && <Sessions sessions={sessions} setSessions={setSessions} activeSessionId={activeSessionId} setActiveSessionId={handleActivateSession} historicalTournaments={historicalTournaments} teams={teams} />}
           {route === 'finances' && <Finances sessions={sessions} setSessions={setSessions} activeSessionId={activeSessionId} allPlayers={playersDB} initialFund={initialFund} setInitialFund={setInitialFund} />}
           {route === 'draw' && isAdmin && <Draw players={confirmedPlayers} activeSession={activeSession} teams={teams} setTeams={setTeams} />}
           {route === 'tournament' && isAdmin && <Tournament activeSession={activeSession} teams={teams} setTeams={setTeams} matchEvents={matchEvents} setMatchEvents={setMatchEvents} matches={matches} setMatches={setMatches} updateSession={updateSession} />}
@@ -304,8 +330,8 @@ function App() {
           {route === 'champion' && isAdmin && <Champion teams={teams} matches={matches} matchEvents={matchEvents} onFinalize={handleFinalizeTournament} />}
           {route === 'ratings' && isAdmin && <Ratings players={confirmedPlayers} updatePlayerRating={updatePlayerRating} matchEvents={matchEvents} activeSessionId={activeSessionId} />}
           {route === 'players' && <Players players={allPlayers} />}
-          {route === 'history' && <History players={allPlayers} />}
-          {route === 'mvp' && <MVP isAdmin={isAdmin} historicalTournaments={historicalTournaments} setHistoricalTournaments={setHistoricalTournaments} />}
+          {route === 'history' && <History players={allPlayers} historicalTournaments={historicalTournaments} />}
+          {route === 'mvp' && <MVP isAdmin={isAdmin} historicalTournaments={historicalTournaments} setHistoricalTournaments={setHistoricalTournaments} mvpVotes={mvpVotes} setMvpVotes={setMvpVotes} mvpClosed={mvpClosed} setMvpClosed={setMvpClosed} />}
           {route === 'admin-menu' && isAdmin && (
             <div className="glass-panel-dark" style={{ width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.5rem' }}>
               <h2 className="title-main" style={{ color: 'var(--accent-danger)', textAlign: 'center', marginBottom: '1rem' }}><Shield size={28} style={{ verticalAlign: 'middle', marginRight: '8px' }} /> Panel de Control</h2>

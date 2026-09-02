@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy, Play, CheckCircle2, ChevronRight, Activity, CalendarDays, BarChart3 } from 'lucide-react';
+import { Trophy, Play, CheckCircle2, ChevronRight, Activity, CalendarDays, BarChart3, PlusCircle } from 'lucide-react';
 
-export default function Tournament({ teams, matches, setMatches, matchEvents }) {
-  
+export default function Tournament({ activeSession, teams, matches, setMatches, matchEvents, updateSession }) {
+  const [manualTeam1, setManualTeam1] = useState('');
+  const [manualTeam2, setManualTeam2] = useState('');
+
   const generateFixture = () => {
     if (teams.length < 2) {
       alert("Necesitas al menos 2 equipos para jugar un torneo.");
@@ -37,6 +39,23 @@ export default function Tournament({ teams, matches, setMatches, matchEvents }) 
     }
 
     setMatches(newMatches);
+  };
+
+  const handleAddManualMatch = () => {
+    if (!manualTeam1 || !manualTeam2 || manualTeam1 === manualTeam2) {
+      alert("Selecciona dos equipos diferentes.");
+      return;
+    }
+    const newMatch = {
+      id: Math.floor(Math.random() * 10000000),
+      team1Id: parseInt(manualTeam1),
+      team2Id: parseInt(manualTeam2),
+      status: 'pending',
+      isFinal: false
+    };
+    setMatches([...matches, newMatch]);
+    setManualTeam1('');
+    setManualTeam2('');
   };
 
   const clearFixture = () => {
@@ -104,15 +123,36 @@ export default function Tournament({ teams, matches, setMatches, matchEvents }) 
     <div style={{ width: '100%', maxWidth: '1200px' }}>
       
       {matches.length === 0 ? (
-        <div className="glass-panel-dark" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+        <div className="glass-panel-light" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
           <Trophy size={64} color="var(--accent-neon)" style={{ marginBottom: '2rem' }} />
           <h2 className="title-main" style={{ fontSize: '2rem', marginBottom: '1rem' }}>Generar Torneo</h2>
-          <p className="subtitle" style={{ color: 'var(--dark-text-muted)', marginBottom: '2rem', maxWidth: '600px', margin: '0 auto 2rem auto' }}>
-            Los equipos ya están listos. Presiona el botón para generar el fixture de partidos. Jugarán todos contra todos, y los dos mejores pasarán a la Gran Final.
+          <p className="subtitle" style={{ color: 'var(--dark-text-muted)', marginBottom: '2rem', maxWidth: '600px', margin: '0 auto' }}>
+            Los equipos ya están listos. Genera automáticamente un torneo todos contra todos, o arma tus propios partidos manualmente.
           </p>
-          <button className="btn btn-neon" style={{ fontSize: '1.2rem', padding: '1rem 2rem' }} onClick={generateFixture}>
-            <CalendarDays size={24} /> GENERAR FIXTURE
-          </button>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: '400px', margin: '0 auto' }}>
+            <button className="btn btn-neon" style={{ fontSize: '1.2rem', padding: '1rem 2rem' }} onClick={generateFixture}>
+              <CalendarDays size={24} /> GENERAR TODOS CONTRA TODOS
+            </button>
+
+            <div style={{ padding: '1.5rem', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <h4 style={{ margin: '0 0 1rem 0', color: 'white' }}>Crear Partido Manual</h4>
+              <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                <select className="input-dark" value={manualTeam1} onChange={e => setManualTeam1(e.target.value)} style={{ flex: 1 }}>
+                  <option value="">Equipo 1...</option>
+                  {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                </select>
+                <span style={{ color: 'var(--dark-text-muted)', alignSelf: 'center', fontWeight: 'bold' }}>VS</span>
+                <select className="input-dark" value={manualTeam2} onChange={e => setManualTeam2(e.target.value)} style={{ flex: 1 }}>
+                  <option value="">Equipo 2...</option>
+                  {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                </select>
+              </div>
+              <button className="btn btn-dark" style={{ width: '100%', border: '1px solid var(--accent-neon)', color: 'var(--accent-neon)' }} onClick={handleAddManualMatch}>
+                <PlusCircle size={18} /> Agregar Partido
+              </button>
+            </div>
+          </div>
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
@@ -219,6 +259,24 @@ export default function Tournament({ teams, matches, setMatches, matchEvents }) 
                   </div>
                 )
               })}
+            </div>
+
+            <div style={{ marginTop: '2rem', padding: '1.5rem', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px dashed rgba(255,255,255,0.1)' }}>
+              <h4 style={{ margin: '0 0 1rem 0', color: 'white', textAlign: 'center' }}>Agregar Partido Extra</h4>
+              <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                <select className="input-dark" value={manualTeam1} onChange={e => setManualTeam1(e.target.value)} style={{ flex: 1 }}>
+                  <option value="">Equipo 1...</option>
+                  {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                </select>
+                <span style={{ color: 'var(--dark-text-muted)', alignSelf: 'center', fontWeight: 'bold' }}>VS</span>
+                <select className="input-dark" value={manualTeam2} onChange={e => setManualTeam2(e.target.value)} style={{ flex: 1 }}>
+                  <option value="">Equipo 2...</option>
+                  {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                </select>
+              </div>
+              <button className="btn btn-dark" style={{ width: '100%', border: '1px solid var(--accent-neon)', color: 'var(--accent-neon)' }} onClick={handleAddManualMatch}>
+                <PlusCircle size={18} /> Agregar Partido
+              </button>
             </div>
 
             {/* Hint */}

@@ -2,10 +2,8 @@ import React, { useState } from 'react';
 import { Award, ChevronUp, Users, Lock, Share2 } from 'lucide-react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
-export default function MVP({ isAdmin, historicalTournaments, setHistoricalTournaments }) {
-  const [votesData, setVotesData] = useLocalStorage('ehdj_mvp_votes', {});
+export default function MVP({ isAdmin, historicalTournaments, setHistoricalTournaments, mvpVotes, setMvpVotes, mvpClosed, setMvpClosed }) {
   const [myVoterName, setMyVoterName] = useLocalStorage('ehdj_mvp_my_name', '');
-  const [isVotingClosed, setIsVotingClosed] = useLocalStorage('ehdj_mvp_closed', false);
 
   const lastTournament = historicalTournaments && historicalTournaments.length > 0 ? historicalTournaments[0] : null;
 
@@ -44,8 +42,8 @@ export default function MVP({ isAdmin, historicalTournaments, setHistoricalTourn
   const getPlayerVotes = (playerId) => {
     let count = 0;
     let voters = [];
-    Object.keys(votesData).forEach(voterName => {
-      if (votesData[voterName] === playerId) {
+    Object.keys(mvpVotes).forEach(voterName => {
+      if (mvpVotes[voterName] === playerId) {
         count++;
         voters.push(voterName);
       }
@@ -54,7 +52,7 @@ export default function MVP({ isAdmin, historicalTournaments, setHistoricalTourn
   };
 
   const handleVote = (playerId) => {
-    if (isVotingClosed) {
+    if (mvpClosed) {
       alert("La votación ya está cerrada.");
       return;
     }
@@ -69,20 +67,20 @@ export default function MVP({ isAdmin, historicalTournaments, setHistoricalTourn
       if (!confirmChange) return;
     }
 
-    setVotesData(prev => ({
+    setmvpVotes(prev => ({
       ...prev,
       [name.trim()]: playerId
     }));
   };
 
   const handleChangeIdentity = () => {
-    if (isVotingClosed) return;
+    if (mvpClosed) return;
     setMyVoterName('');
   };
 
   const handleCloseVoting = () => {
     if (window.confirm("¿Seguro que quieres cerrar la votación? Ya nadie podrá votar y se guardará el ganador definitivo en el historial.")) {
-      setIsVotingClosed(true);
+      setmvpClosed(true);
       
       // Guardar el ganador en el historial
       const finalPodium = [...podium].sort((a,b) => getPlayerVotes(b.id).count - getPlayerVotes(a.id).count);
@@ -93,7 +91,7 @@ export default function MVP({ isAdmin, historicalTournaments, setHistoricalTourn
         updatedTournaments[0] = {
           ...updatedTournaments[0],
           mvpWinner: mvpWinner,
-          mvpVotes: votesData
+          mvpVotes: mvpVotes
         };
         setHistoricalTournaments(updatedTournaments);
       }
@@ -102,7 +100,7 @@ export default function MVP({ isAdmin, historicalTournaments, setHistoricalTourn
 
   const handleOpenVoting = () => {
     if (window.confirm("¿Reabrir la votación? Se podrá volver a votar.")) {
-      setIsVotingClosed(false);
+      setmvpClosed(false);
       // Remove winner from history temporarily
       if (setHistoricalTournaments) {
         const updatedTournaments = [...historicalTournaments];
@@ -117,8 +115,8 @@ export default function MVP({ isAdmin, historicalTournaments, setHistoricalTourn
 
   const handleResetVotes = () => {
     if (window.confirm("¿Eliminar todos los votos actuales y empezar de cero la votación para esta jornada?")) {
-      setVotesData({});
-      setIsVotingClosed(false);
+      setmvpVotes({});
+      setmvpClosed(false);
     }
   };
 
@@ -127,10 +125,10 @@ export default function MVP({ isAdmin, historicalTournaments, setHistoricalTourn
   const mvpWinner = sortedPodium.length > 0 ? sortedPodium[0] : null;
 
   const getShareText = () => {
-    let text = isVotingClosed ? `🏆 *RESULTADOS FINALES DEL MVP* 🏆\n\n` : `🏆 *VOTACIÓN DEL MVP (EN VIVO)* 🏆\n\n`;
+    let text = mvpClosed ? `🏆 *RESULTADOS FINALES DEL MVP* 🏆\n\n` : `🏆 *VOTACIÓN DEL MVP (EN VIVO)* 🏆\n\n`;
     text += `Jornada: ${lastTournament.sessionName} (${lastTournament.date})\n\n`;
     
-    if (isVotingClosed && mvpWinner) {
+    if (mvpClosed && mvpWinner) {
       text += `👑 *EL MVP DE LA JORNADA ES: ${mvpWinner.firstName} "${mvpWinner.nickname}"*\n\n`;
     }
 
@@ -143,7 +141,7 @@ export default function MVP({ isAdmin, historicalTournaments, setHistoricalTourn
        }
     });
     
-    if (!isVotingClosed) {
+    if (!mvpClosed) {
       text += `\nVota aquí: ${window.location.href}`;
     }
     
@@ -163,22 +161,22 @@ export default function MVP({ isAdmin, historicalTournaments, setHistoricalTourn
           }}
         >
           <Share2 size={14} style={{ marginRight: '6px' }} /> 
-          {isVotingClosed ? 'Compartir Resultados' : 'Compartir Votación'}
+          {mvpClosed ? 'Compartir Resultados' : 'Compartir Votación'}
         </button>
         
-        <Award size={48} color={isVotingClosed ? "var(--accent-primary)" : "var(--accent-warning)"} style={{ margin: '0 auto 1rem auto' }} />
-        <h2 className="title-main" style={{ color: '#000' }}>{isVotingClosed ? 'Resultados del MVP' : 'Votación del MVP'}</h2>
+        <Award size={48} color={mvpClosed ? "var(--accent-primary)" : "var(--accent-warning)"} style={{ margin: '0 auto 1rem auto' }} />
+        <h2 className="title-main" style={{ color: '#000' }}>{mvpClosed ? 'Resultados del MVP' : 'Votación del MVP'}</h2>
         <p className="subtitle" style={{ color: 'var(--light-text-muted)', marginBottom: '0.5rem' }}>{lastTournament.sessionName} ({lastTournament.date})</p>
         <p style={{ fontSize: '0.85rem', color: '#666' }}>Podio de la Jornada (Top 5 Rendimientos)</p>
         
-        {!isVotingClosed && myVoterName && (
+        {!mvpClosed && myVoterName && (
           <div style={{ marginTop: '1rem', display: 'inline-block', background: 'rgba(0,0,0,0.05)', padding: '0.5rem 1rem', borderRadius: '100px', fontSize: '0.85rem' }}>
             Votando como: <strong>{myVoterName}</strong> 
             <button className="btn" style={{ marginLeft: '10px', padding: '2px 8px', fontSize: '0.7rem', background: 'white', color: 'black' }} onClick={handleChangeIdentity}>Cambiar</button>
           </div>
         )}
 
-        {isVotingClosed && (
+        {mvpClosed && (
           <div style={{ marginTop: '1rem', display: 'inline-block', background: 'var(--accent-primary)', color: 'white', padding: '0.5rem 1rem', borderRadius: '100px', fontSize: '0.85rem', fontWeight: 'bold' }}>
             <Lock size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} /> Votación Cerrada
           </div>
@@ -186,7 +184,7 @@ export default function MVP({ isAdmin, historicalTournaments, setHistoricalTourn
 
         {isAdmin && (
           <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem', justifyContent: 'center', borderTop: '1px solid var(--light-glass-border)', paddingTop: '1.5rem' }}>
-            {!isVotingClosed ? (
+            {!mvpClosed ? (
               <button className="btn btn-danger" style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }} onClick={handleCloseVoting}>
                  <Lock size={14} style={{ marginRight: '4px' }} /> Cerrar Votación
               </button>
@@ -207,20 +205,20 @@ export default function MVP({ isAdmin, historicalTournaments, setHistoricalTourn
         {sortedPodium.map((player, index) => {
           const { count, voters } = getPlayerVotes(player.id);
           const percentage = maxVotes === 0 ? 0 : (count / maxVotes) * 100;
-          const iVotedForThis = myVoterName && votesData[myVoterName] === player.id;
+          const iVotedForThis = myVoterName && mvpVotes[myVoterName] === player.id;
           
           return (
-            <div key={player.id} className="glass-panel-light" style={{ padding: '1.5rem', position: 'relative', overflow: 'hidden', border: iVotedForThis && !isVotingClosed ? '2px solid var(--accent-warning)' : (index === 0 && isVotingClosed ? '2px solid var(--accent-primary)' : '1px solid var(--light-glass-border)') }}>
-              <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', width: `${percentage}%`, background: index === 0 && maxVotes > 0 ? (isVotingClosed ? 'rgba(79, 70, 229, 0.1)' : 'rgba(245, 158, 11, 0.2)') : 'rgba(0,0,0,0.03)', transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)', zIndex: 0 }}></div>
+            <div key={player.id} className="glass-panel-light" style={{ padding: '1.5rem', position: 'relative', overflow: 'hidden', border: iVotedForThis && !mvpClosed ? '2px solid var(--accent-warning)' : (index === 0 && mvpClosed ? '2px solid var(--accent-primary)' : '1px solid var(--light-glass-border)') }}>
+              <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', width: `${percentage}%`, background: index === 0 && maxVotes > 0 ? (mvpClosed ? 'rgba(79, 70, 229, 0.1)' : 'rgba(245, 158, 11, 0.2)') : 'rgba(0,0,0,0.03)', transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)', zIndex: 0 }}></div>
 
               <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                   <div style={{ fontSize: '1.5rem', fontWeight: '900', color: 'var(--light-text-muted)', width: '30px' }}>#{index + 1}</div>
-                  <div className="avatar-placeholder" style={{ background: index === 0 && maxVotes > 0 ? (isVotingClosed ? 'var(--accent-primary)' : 'var(--accent-warning)') : 'var(--accent-neon)' }}>
+                  <div className="avatar-placeholder" style={{ background: index === 0 && maxVotes > 0 ? (mvpClosed ? 'var(--accent-primary)' : 'var(--accent-warning)') : 'var(--accent-neon)' }}>
                     {player.firstName.charAt(0)}
                   </div>
                   <div>
-                    <h3 style={{ fontSize: '1.25rem', margin: 0, color: index === 0 && isVotingClosed ? 'var(--accent-primary)' : '#000' }}>
+                    <h3 style={{ fontSize: '1.25rem', margin: 0, color: index === 0 && mvpClosed ? 'var(--accent-primary)' : '#000' }}>
                       {player.firstName} "{player.nickname}" {player.lastName}
                     </h3>
                     <div style={{ fontSize: '0.8rem', color: 'var(--light-text-muted)', marginTop: '4px' }}>
@@ -239,12 +237,12 @@ export default function MVP({ isAdmin, historicalTournaments, setHistoricalTourn
                     <div style={{ fontSize: '1.5rem', fontWeight: '900', color: 'var(--accent-primary)' }}>{count}</div>
                   </div>
                   
-                  {!isVotingClosed && (
+                  {!mvpClosed && (
                     <button className="btn" style={{ background: iVotedForThis ? 'var(--accent-warning)' : 'black', color: iVotedForThis ? 'black' : 'white', padding: '0.75rem' }} onClick={() => handleVote(player.id)}>
                       <ChevronUp size={24} /> {iVotedForThis ? 'TU VOTO' : 'VOTAR'}
                     </button>
                   )}
-                  {isVotingClosed && index === 0 && maxVotes > 0 && (
+                  {mvpClosed && index === 0 && maxVotes > 0 && (
                      <div style={{ color: 'var(--accent-primary)', fontWeight: 'bold' }}>
                        <Award size={32} />
                      </div>

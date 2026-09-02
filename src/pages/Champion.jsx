@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Crown, Upload, Share2, Trophy, Medal, Star, Map } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import html2canvas from 'html2canvas';
+import { Crown, Upload, Share2, Trophy, Medal, Star, Map, Download } from 'lucide-react';
 import TacticalPitch from '../components/TacticalPitch';
 
 export default function Champion({ teams, matches, matchEvents, onFinalize }) {
@@ -22,6 +23,24 @@ export default function Champion({ teams, matches, matchEvents, onFinalize }) {
       </div>
     );
   }
+
+  const flyerRef = useRef(null);
+
+  const handleDownloadFlyer = async () => {
+    if (flyerRef.current) {
+      try {
+        const canvas = await html2canvas(flyerRef.current, { useCORS: true, backgroundColor: '#0a0a0a' });
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+        const link = document.createElement('a');
+        link.download = `LCDF_Campeon_${new Date().toISOString().split('T')[0]}.jpg`;
+        link.href = dataUrl;
+        link.click();
+      } catch (err) {
+        console.error("Error generating flyer", err);
+        alert("Hubo un error al generar el flyer.");
+      }
+    }
+  };
 
   const getMatchScore = (matchId, t1Name, t2Name) => {
     const events = matchEvents.filter(e => e.matchId === matchId);
@@ -189,18 +208,48 @@ export default function Champion({ teams, matches, matchEvents, onFinalize }) {
               <TacticalPitch team={championTeam} events={finalEvents} selectedPlayerId={null} onPlayerClick={null} />
             </div>
           ) : (
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
               {championPhoto ? (
-                <div style={{ position: 'relative', width: 'fit-content' }}>
-                  <img src={championPhoto} alt="Campeón" style={{ maxWidth: '100%', maxHeight: '400px', borderRadius: '16px', border: '4px solid var(--accent-neon)' }} />
-                  <button className="btn" style={{ position: 'absolute', bottom: '-40px', left: '50%', transform: 'translateX(-50%)', background: 'transparent', color: 'var(--dark-text-muted)', fontSize: '0.8rem' }} onClick={() => setChampionPhoto(null)}>
-                    Cambiar Foto
-                  </button>
-                </div>
+                <>
+                  {/* Contenedor del Flyer */}
+                  <div ref={flyerRef} style={{ width: '100%', maxWidth: '600px', background: 'var(--dark-bg)', padding: '2rem', borderRadius: '16px', position: 'relative', border: `4px solid ${championTeam.color || 'var(--accent-neon)'}`, overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: `linear-gradient(to bottom, transparent, ${championTeam.color}33)`, zIndex: 0 }}></div>
+                    
+                    <div style={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
+                      <h2 style={{ fontFamily: 'var(--font-heading)', color: 'var(--accent-neon)', fontSize: '2.5rem', margin: '0 0 1rem 0', textTransform: 'uppercase' }}>¡CAMPEÓN LCDF!</h2>
+                      
+                      <div style={{ border: '2px solid rgba(255,255,255,0.2)', borderRadius: '12px', overflow: 'hidden', marginBottom: '1.5rem', background: '#000' }}>
+                        <img src={championPhoto} alt="Campeón" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                      </div>
+                      
+                      <h3 style={{ fontFamily: 'var(--font-heading)', color: 'white', fontSize: '2rem', margin: '0 0 1rem 0' }}>{championTeam.name.toUpperCase()}</h3>
+                      
+                      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                        {[...championTeam.players].map(p => (
+                          <span key={p.id} style={{ background: 'rgba(255,255,255,0.1)', padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 'bold' }}>{p.firstName} {p.lastName}</span>
+                        ))}
+                      </div>
+
+                      <div style={{ fontSize: '0.8rem', color: 'var(--dark-text-muted)', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem', marginTop: '1rem' }}>
+                        Jornada: {new Date().toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Acciones del Flyer */}
+                  <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button className="btn btn-dark" style={{ border: '1px solid var(--accent-neon)', color: 'var(--accent-neon)' }} onClick={handleDownloadFlyer}>
+                      <Download size={18} style={{ marginRight: '8px' }} /> Descargar Flyer
+                    </button>
+                    <button className="btn" style={{ background: 'transparent', color: 'var(--dark-text-muted)', fontSize: '0.9rem' }} onClick={() => setChampionPhoto(null)}>
+                      Cambiar Foto
+                    </button>
+                  </div>
+                </>
               ) : (
                 <div style={{ width: '100%', maxWidth: '400px', border: '2px dashed rgba(255,255,255,0.2)', padding: '3rem', borderRadius: '16px', cursor: 'pointer', textAlign: 'center' }} onClick={() => document.getElementById('photoUpload').click()}>
                   <Upload size={32} color="var(--dark-text-muted)" style={{ margin: '0 auto 1rem auto' }} />
-                  <p style={{ color: 'var(--dark-text-muted)' }}>Sube una foto del equipo campeón</p>
+                  <p style={{ color: 'var(--dark-text-muted)' }}>Sube una foto del equipo campeón para armar el Flyer</p>
                   <input type="file" id="photoUpload" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoUpload} />
                 </div>
               )}
