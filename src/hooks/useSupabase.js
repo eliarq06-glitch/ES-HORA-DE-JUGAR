@@ -57,19 +57,19 @@ export function useSupabaseTable(tableName, defaultValue = []) {
   }, [tableName]);
 
   // Función para actualizar los datos (reemplaza el setter de useState/localStorage)
-  const setDataAndSync = useCallback(async (newValueOrFn) => {
-    const newValue = typeof newValueOrFn === 'function' ? newValueOrFn(data) : newValueOrFn;
-    
-    // Bail out to prevent infinite loops if state hasn't changed
-    if (newValue === data) return;
-    
-    // Update local state immediately (optimistic)
-    setData(newValue);
-    localStorage.setItem(`cache_${tableName}`, JSON.stringify(newValue));
-    
-    // Sync to Supabase
-    await syncToDB(tableName, newValue);
-  }, [tableName, data]);
+  const setDataAndSync = useCallback((newValueOrFn) => {
+    setData(prevData => {
+      const newValue = typeof newValueOrFn === 'function' ? newValueOrFn(prevData) : newValueOrFn;
+      if (JSON.stringify(newValue) === JSON.stringify(prevData)) return prevData; // Deep compare to prevent loops
+      
+      localStorage.setItem(`cache_${tableName}`, JSON.stringify(newValue));
+      
+      // Lanzar sync de fondo sin bloquear
+      syncToDB(tableName, newValue).catch(e => console.error("Sync error:", e));
+      
+      return newValue;
+    });
+  }, [tableName]);
 
   return [data, setDataAndSync, loading];
 }
@@ -109,14 +109,21 @@ export function useSupabaseConfig(key, defaultValue) {
     return () => { supabase.removeChannel(sub); };
   }, [key]);
 
-  const updateConfig = async (newValue) => {
-    setValue(newValue);
-    localStorage.setItem(`cache_config_${key}`, JSON.stringify(newValue));
-    const stringValue = typeof newValue === 'object' ? JSON.stringify(newValue) : String(newValue);
-    await supabase.from('app_config').upsert({ key, value: stringValue, updated_at: new Date() });
-  };
-
-  return [value, updateConfig];
+  return [value, (newValueOrFn) => {
+    setValue(prevValue => {
+      const newValue = typeof newValueOrFn === 'function' ? newValueOrFn(prevValue) : newValueOrFn;
+      if (JSON.stringify(newValue) === JSON.stringify(prevValue)) return prevValue;
+      
+      const stringValue = typeof newValue === 'object' ? JSON.stringify(newValue) : String(newValue);
+      localStorage.setItem(`cache_config_${key}`, stringValue);
+      
+      // Sync to Supabase in background
+      supabase.from('app_config').upsert({ key, value: stringValue, updated_at: new Date() })
+        .catch(e => console.error("Config sync error:", e));
+        
+      return newValue;
+    });
+  }];
 }
 
 // ============================================================

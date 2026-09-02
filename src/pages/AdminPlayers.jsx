@@ -307,7 +307,7 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
 
       <div className="glass-panel-dark" style={{ marginTop: '2rem' }}>
         <h3 className="title-main" style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--accent-neon)', marginBottom: '1rem' }}>
-          <ImageIcon /> Gestión de Auspiciantes ({sponsorsConfig.length})
+          <ImageIcon /> Gestión de Auspiciantes ({sponsorsConfig?.length || 0})
         </h3>
         <p style={{ color: 'var(--dark-text-muted)', marginBottom: '1rem' }}>Sube el logo de los auspiciantes. Se acomodarán automáticamente en el banner de Jugadores.</p>
         
@@ -323,7 +323,8 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
                     const { error: uploadError } = await supabase.storage.from('fotos').upload(fileName, file);
                     if (uploadError) throw uploadError;
                     const { data: { publicUrl } } = supabase.storage.from('fotos').getPublicUrl(fileName);
-                    setSponsorsConfig([...sponsorsConfig, { id: Date.now(), url: publicUrl }]);
+                    const currentSponsors = sponsorsConfig || [];
+                    setSponsorsConfig([...currentSponsors, { id: Date.now(), url: publicUrl }]);
                     alert('Auspiciante agregado.');
                   } catch (error) {
                     alert('Error al subir: ' + error.message);
@@ -333,10 +334,10 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
         </div>
 
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-            {sponsorsConfig.map(sponsor => (
+            {sponsorsConfig && sponsorsConfig.map(sponsor => (
                 <div key={sponsor.id} style={{ background: 'white', padding: '10px', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', width: '120px' }}>
                     <img src={sponsor.url} alt="Sponsor" style={{ width: '100px', height: '100px', objectFit: 'contain' }} />
-                    <button className="btn btn-danger" onClick={() => setSponsorsConfig(sponsorsConfig.filter(s => s.id !== sponsor.id))} style={{ padding: '0.3rem', width: '100%' }}>
+                    <button className="btn btn-danger" onClick={() => setSponsorsConfig((sponsorsConfig || []).filter(s => s.id !== sponsor.id))} style={{ padding: '0.3rem', width: '100%' }}>
                         Eliminar
                     </button>
                 </div>

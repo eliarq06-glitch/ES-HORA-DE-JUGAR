@@ -154,9 +154,9 @@ export default function Players({ players }) {
 
         {/* CONTENEDOR DE LOGOS */}
         <div style={{ background: 'white', padding: '2rem 2rem 6rem 2rem' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(${Math.max(120, 300 - sponsorsConfig.length * 15)}px, 1fr))`, gap: '2.5rem', alignItems: 'center', justifyItems: 'center' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(${Math.max(120, 300 - (sponsorsConfig?.length || 0) * 15)}px, 1fr))`, gap: '2.5rem', alignItems: 'center', justifyItems: 'center' }}>
             
-            {sponsorsConfig.length > 0 ? sponsorsConfig.map((sponsor, idx) => (
+            {sponsorsConfig && sponsorsConfig.length > 0 ? sponsorsConfig.map((sponsor, idx) => (
               <div key={sponsor.id || idx} style={{ width: '100%', height: '160px', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 6px 20px rgba(0,0,0,0.1)', backgroundColor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', transition: 'transform 0.3s' }} className="sponsor-card">
                 <img src={sponsor.url} alt={sponsor.name || 'Auspiciante'} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </div>

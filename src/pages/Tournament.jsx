@@ -16,7 +16,7 @@ export default function Tournament({ teams, matches, setMatches, matchEvents }) 
     for (let i = 0; i < teams.length; i++) {
       for (let j = i + 1; j < teams.length; j++) {
         newMatches.push({
-          id: `match_${matchCounter++}`,
+          id: Math.floor(Math.random() * 10000000) + matchCounter++,
           team1Id: teams[i].id,
           team2Id: teams[j].id,
           status: 'pending', // pending, active, finished
@@ -28,7 +28,7 @@ export default function Tournament({ teams, matches, setMatches, matchEvents }) 
     // Add a pending Final Match if there are > 2 teams
     if (teams.length > 2) {
       newMatches.push({
-        id: `match_final`,
+        id: Math.floor(Math.random() * 10000000) + matchCounter,
         team1Id: null, // To be defined
         team2Id: null, // To be defined
         status: 'pending',
