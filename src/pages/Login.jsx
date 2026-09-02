@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Lock, User, Mail, UserPlus, LogIn } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
-export default function Login({ onBack, allPlayers = [], setPlayersDB }) {
+export default function Login({ onBack, allPlayers = [], setPlayersDB, activeSession, updateConfirmedPlayers }) {
   const [isRegistering, setIsRegistering] = useState(false);
   
   // Form fields
@@ -43,7 +43,14 @@ export default function Login({ onBack, allPlayers = [], setPlayersDB }) {
            setPlayersDB(prev => prev.map(p => p.id === player.id ? { ...p, email } : p));
         }
 
-        alert('¡Registro exitoso! Ya puedes iniciar sesión.');
+        // AUTO-CONFIRM IN ACTIVE SESSION
+        if (activeSession && updateConfirmedPlayers) {
+           if (!activeSession.confirmedIds.includes(player.id)) {
+              updateConfirmedPlayers([...activeSession.confirmedIds, player.id]);
+           }
+        }
+
+        alert('¡Registro exitoso! Has sido confirmado automáticamente para la jornada.');
         setIsRegistering(false);
       } else {
         // Login
