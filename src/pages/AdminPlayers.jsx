@@ -235,7 +235,12 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
                   
                   <div style={{ flex: 1, minWidth: '180px' }}>
                     <label style={{fontSize:'0.7rem', color:'gray'}}>Actualizar Foto</label>
-                    <input type="file" accept="image/*" onChange={(e) => handleUploadPhoto(e, false)} style={{ width: '100%', color: 'white' }} />
+                    <div style={{ display: 'flex', gap: '5px' }}>
+                      <input type="file" accept="image/*" onChange={(e) => handleUploadPhoto(e, false)} style={{ width: '100%', color: 'white' }} />
+                      {editData.photoUrl && (
+                        <button className="btn btn-danger" type="button" onClick={() => setEditData({...editData, photoUrl: ''})} style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem' }}>Borrar</button>
+                      )}
+                    </div>
                   </div>
                   <button className="btn btn-neon" onClick={() => handleSaveEdit(p.id)} style={{ padding: '0.5rem' }}>
                     <Save size={18} />

@@ -27,18 +27,38 @@ export default function Players({ players }) {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '2rem', padding: '1rem' }}>
-        {playerStats.map((player, index) => (
-          <div key={player.id} className="fifa-card">
-            <div className="fifa-card-bg"></div>
+        {playerStats.map((player) => {
+          const stars = player.stars || 3;
+          let bgImage = '/card_gold.png';
+          let textColor = '#4a3810';
+          let statsColor = '#3b2511';
+          
+          if (stars >= 5) {
+            bgImage = '/card_legend.png';
+            textColor = '#886d34';
+            statsColor = '#886d34';
+          } else if (stars === 4) {
+            bgImage = '/card_toty.png';
+            textColor = '#c9b065';
+            statsColor = '#c9b065';
+          } else if (stars === 3) {
+            bgImage = '/card_gold.png';
+            textColor = '#4a3810';
+            statsColor = '#3b2511';
+          } else {
+            bgImage = '/card_bronze.png';
+            textColor = '#3b2511';
+            statsColor = '#3b2511';
+          }
+
+          return (
+          <div key={player.id} className="fifa-card" style={{ backgroundImage: `url(${bgImage})` }}>
             <div className="fifa-card-content">
               
               <div className="fifa-card-top">
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <div className="fifa-card-ovr">{Math.round((player.stars / 5) * 99) || 50}</div>
-                  <div className="fifa-card-pos">OVR</div>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
-                  <span style={{ color: index === 0 ? 'var(--accent-neon)' : index === 1 ? '#e2e8f0' : index === 2 ? '#cd7f32' : 'var(--dark-text-muted)', fontWeight: 'bold', fontSize: '1.2rem' }}>#{index + 1}</span>
+                  <div className="fifa-card-ovr" style={{ color: textColor }}>{Math.round((player.stars / 5) * 99) || 50}</div>
+                  <div className="fifa-card-pos" style={{ color: textColor }}>OVR</div>
                 </div>
               </div>
 
@@ -46,23 +66,22 @@ export default function Players({ players }) {
                 {player.photoUrl ? (
                   <img src={player.photoUrl} alt={player.firstName} />
                 ) : (
-                  <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', color: '#c9b065', fontWeight: 'bold', marginBottom: '1rem' }}>
+                  <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', color: textColor, fontWeight: 'bold', marginBottom: '1rem' }}>
                     {player.firstName[0]}
                   </div>
                 )}
               </div>
 
               <div className="fifa-card-bottom">
-                <div className="fifa-card-name">{player.firstName} {player.lastName}</div>
+                <div className="fifa-card-name" style={{ color: textColor }}>{player.firstName} {player.lastName}</div>
                 {player.historicalChampionships > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'center', gap: '2px', marginBottom: '8px' }}>
                     {Array.from({ length: Math.min(player.historicalChampionships, 5) }).map((_, i) => (
-                      <Star key={i} size={12} fill="var(--accent-warning)" color="var(--accent-warning)" />
+                      <Star key={i} size={12} fill={textColor} color={textColor} />
                     ))}
-                    {player.historicalChampionships > 5 && <span style={{fontSize: '10px', color: 'var(--accent-warning)', marginLeft: '2px'}}>+{player.historicalChampionships - 5}</span>}
                   </div>
                 )}
-                <div className="fifa-card-stats">
+                <div className="fifa-card-stats" style={{ color: statsColor }}>
                   <div className="fifa-card-stat">
                     <span>{player.historicalGoals || 0}</span>
                     <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.5)' }}>GLS</span>
@@ -80,7 +99,8 @@ export default function Players({ players }) {
               
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* SPONSORS SECTION - VIP BANNER */}
