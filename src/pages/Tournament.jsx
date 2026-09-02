@@ -1,9 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { Trophy, Play, CheckCircle2, ChevronRight, Activity, CalendarDays, BarChart3, PlusCircle } from 'lucide-react';
 
-export default function Tournament({ activeSession, teams, matches, setMatches, matchEvents, updateSession }) {
+export default function Tournament({ activeSession, teams, matches, setMatches, matchEvents, setMatchEvents, updateSession }) {
   const [manualTeam1, setManualTeam1] = useState('');
   const [manualTeam2, setManualTeam2] = useState('');
+  const [fastLogMatchId, setFastLogMatchId] = useState(null);
+
+  const handleQuickEvent = (matchId, player, teamName, typeId) => {
+    const newEvent = {
+      id: Date.now() + Math.random(),
+      matchId,
+      type: typeId,
+      player,
+      team: teamName,
+      details: 'Carga Rápida',
+      timeString: 'FT',
+      timestamp: new Date().toLocaleTimeString()
+    };
+    setMatchEvents([...matchEvents, newEvent]);
+  };
 
   const generateFixture = () => {
     if (teams.length < 2) {
@@ -250,11 +265,69 @@ export default function Tournament({ activeSession, teams, matches, setMatches, 
                       </div>
                     </div>
 
-                    <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-                      {m.status === 'pending' && <span style={{ fontSize: '0.8rem', color: 'var(--dark-text-muted)', textTransform: 'uppercase' }}>Pendiente</span>}
+                    <div style={{ textAlign: 'center', marginTop: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem' }}>
+                      {m.status === 'pending' && (
+                        <>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--dark-text-muted)', textTransform: 'uppercase' }}>Pendiente</span>
+                          <button className="btn btn-dark btn-sm" style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', border: '1px solid var(--accent-neon)', color: 'var(--accent-neon)' }} onClick={() => setFastLogMatchId(fastLogMatchId === m.id ? null : m.id)}>
+                            📝 Carga Rápida
+                          </button>
+                        </>
+                      )}
                       {m.status === 'active' && <span style={{ fontSize: '0.8rem', color: 'var(--accent-neon)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}><Activity size={14} /> En Vivo (Ve al VAR)</span>}
                       {m.status === 'finished' && <span style={{ fontSize: '0.8rem', color: 'var(--accent-warning)', textTransform: 'uppercase' }}>Finalizado</span>}
                     </div>
+
+                    {fastLogMatchId === m.id && m.status === 'pending' && (
+                      <div style={{ marginTop: '1.5rem', background: 'rgba(0,0,0,0.4)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        <h4 style={{ margin: '0 0 1rem 0', textAlign: 'center', color: 'white', fontSize: '0.9rem' }}>Carga de Estadísticas (Rápido)</h4>
+                        
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                          {/* Equipo 1 */}
+                          <div>
+                            <div style={{ color: 'var(--accent-neon)', fontWeight: 'bold', fontSize: '0.8rem', marginBottom: '0.5rem', textAlign: 'right' }}>{t1?.name}</div>
+                            {t1?.players.map(p => {
+                              const pEvents = matchEvents.filter(e => e.matchId === m.id && e.player.id === p.id && e.type === 'goal');
+                              return (
+                                <div key={p.id} style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.5rem', marginBottom: '4px', fontSize: '0.8rem' }}>
+                                  <span style={{ color: 'var(--dark-text-muted)' }}>{p.firstName}</span>
+                                  <button className="btn btn-dark" style={{ padding: '2px 6px', fontSize: '0.7rem' }} onClick={() => handleQuickEvent(m.id, p, t1.name, 'goal')}>
+                                    + Gol
+                                  </button>
+                                  {pEvents.length > 0 && <span style={{ color: 'var(--accent-neon)', fontWeight: 'bold' }}>x{pEvents.length}</span>}
+                                </div>
+                              )
+                            })}
+                          </div>
+                          
+                          {/* Equipo 2 */}
+                          <div>
+                            <div style={{ color: 'white', fontWeight: 'bold', fontSize: '0.8rem', marginBottom: '0.5rem', textAlign: 'left' }}>{t2?.name}</div>
+                            {t2?.players.map(p => {
+                              const pEvents = matchEvents.filter(e => e.matchId === m.id && e.player.id === p.id && e.type === 'goal');
+                              return (
+                                <div key={p.id} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', gap: '0.5rem', marginBottom: '4px', fontSize: '0.8rem' }}>
+                                  {pEvents.length > 0 && <span style={{ color: 'var(--accent-neon)', fontWeight: 'bold' }}>x{pEvents.length}</span>}
+                                  <button className="btn btn-dark" style={{ padding: '2px 6px', fontSize: '0.7rem' }} onClick={() => handleQuickEvent(m.id, p, t2.name, 'goal')}>
+                                    + Gol
+                                  </button>
+                                  <span style={{ color: 'var(--dark-text-muted)' }}>{p.firstName}</span>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
+
+                        <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+                          <button className="btn btn-neon" style={{ padding: '0.5rem 2rem', fontSize: '0.8rem' }} onClick={() => {
+                            setMatches(matches.map(x => x.id === m.id ? { ...x, status: 'finished' } : x));
+                            setFastLogMatchId(null);
+                          }}>
+                            Finalizar Partido
+                          </button>
+                        </div>
+                      </div>
+                    )}
 
                   </div>
                 )
