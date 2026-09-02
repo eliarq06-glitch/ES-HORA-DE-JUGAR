@@ -1,8 +1,8 @@
 export const FIXED_CAPTAINS = {
-  santiago: '/captains/santiago.png',
-  luis: '/captains/luis.png',
-  fabricio: '/captains/fabricio.png',
-  carlos: '/captains/carlos.png'
+  santiago: '/captains/santiago.jpg',
+  luis: '/captains/luis.jpg',
+  fabricio: '/captains/fabricio.jpg',
+  carlos: '/captains/carlos.jpg'
 };
 
 export const getCaptainImage = (firstName) => {
