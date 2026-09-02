@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { Lock, User, Mail, UserPlus, LogIn } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
-export default function Login({ onBack }) {
+export default function Login({ onBack, allPlayers = [], setPlayersDB }) {
   const [isRegistering, setIsRegistering] = useState(false);
   
   // Form fields
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
+  const [selectedPlayerId, setSelectedPlayerId] = useState('');
   
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -20,17 +20,29 @@ export default function Login({ onBack }) {
 
     try {
       if (isRegistering) {
+        if (!selectedPlayerId) {
+          throw new Error('Debes seleccionar quién eres en la liga. Si no estás en la lista, un Admin debe agregarte a la Plantilla General primero.');
+        }
+        
+        const player = allPlayers.find(p => p.id === parseInt(selectedPlayerId));
+        const derivedFullName = `${player.firstName} ${player.lastName}`.trim().toUpperCase();
+
         // Registro
         const { error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
             data: {
-              full_name: fullName.toUpperCase(),
+              full_name: derivedFullName,
             }
           }
         });
         if (signUpError) throw signUpError;
+        
+        if (setPlayersDB) {
+           setPlayersDB(prev => prev.map(p => p.id === player.id ? { ...p, email } : p));
+        }
+
         alert('¡Registro exitoso! Ya puedes iniciar sesión.');
         setIsRegistering(false);
       } else {
@@ -69,15 +81,19 @@ export default function Login({ onBack }) {
         
         {isRegistering && (
           <div className="form-group" style={{ margin: 0, textAlign: 'left' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--dark-text-muted)' }}><User size={16} /> Nombre Completo</label>
-            <input 
-              type="text" 
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--dark-text-muted)' }}><User size={16} /> Selecciona tu Jugador</label>
+            <select
               className="input-dark" 
-              value={fullName} 
-              onChange={(e) => setFullName(e.target.value)} 
-              placeholder="Ej. Juan Pérez"
+              value={selectedPlayerId} 
+              onChange={(e) => setSelectedPlayerId(e.target.value)} 
               required={isRegistering}
-            />
+              style={{ width: '100%' }}
+            >
+              <option value="">-- ¿Quién eres en la liga? --</option>
+              {allPlayers.filter(p => !p.email).sort((a,b) => a.firstName.localeCompare(b.firstName)).map(p => (
+                <option key={p.id} value={p.id}>{p.firstName} {p.lastName} {p.nickname ? `("${p.nickname}")` : ''}</option>
+              ))}
+            </select>
           </div>
         )}
 
