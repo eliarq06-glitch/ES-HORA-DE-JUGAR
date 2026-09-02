@@ -296,7 +296,7 @@ function App() {
         <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {route === 'confirm' && <Confirm isAdmin={isAdmin} user={user} activeSession={activeSession} confirmedPlayers={confirmedPlayers} allPlayers={allPlayers} updateConfirmedPlayers={updateConfirmedPlayers} setPlayersDB={setPlayersDB} />}
           {route === 'admin-players' && isAdmin && <AdminPlayers allPlayers={playersDB} setPlayersDB={setPlayersDB} isGlobalAdmin={isGlobalAdmin} />}
-          {route === 'sessions' && isAdmin && <Sessions sessions={sessions} setSessions={setSessions} activeSessionId={activeSessionId} setActiveSessionId={setActiveSessionId} historicalTournaments={historicalTournaments} />}
+          {route === 'sessions' && isAdmin && <Sessions sessions={sessions} setSessions={setSessions} activeSessionId={activeSessionId} setActiveSessionId={setActiveSessionId} historicalTournaments={historicalTournaments} teams={teams} />}
           {route === 'finances' && <Finances sessions={sessions} setSessions={setSessions} activeSessionId={activeSessionId} allPlayers={playersDB} initialFund={initialFund} setInitialFund={setInitialFund} />}
           {route === 'draw' && isAdmin && <Draw players={confirmedPlayers} activeSession={activeSession} teams={teams} setTeams={setTeams} />}
           {route === 'tournament' && isAdmin && <Tournament activeSession={activeSession} teams={teams} setTeams={setTeams} matchEvents={matchEvents} setMatchEvents={setMatchEvents} matches={matches} setMatches={setMatches} updateSession={updateSession} />}

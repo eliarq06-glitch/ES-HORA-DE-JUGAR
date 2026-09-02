@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Calendar, Plus, Trash2, Check, Trophy, ChevronDown, ChevronUp, Crown, Activity, Star, Lock, Unlock } from 'lucide-react';
 
-export default function Sessions({ sessions, setSessions, activeSessionId, setActiveSessionId, historicalTournaments = [] }) {
+export default function Sessions({ sessions, setSessions, activeSessionId, setActiveSessionId, historicalTournaments = [], teams = [] }) {
   const [newSessionName, setNewSessionName] = useState('');
   const [newSessionDate, setNewSessionDate] = useState('');
   const [expandedHistoryId, setExpandedHistoryId] = useState(null);
@@ -50,9 +50,11 @@ export default function Sessions({ sessions, setSessions, activeSessionId, setAc
         </form>
       </div>
 
-      {/* Jornadas activas/abiertas */}
+      {/* Lista de Jornadas Abiertas */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '3rem' }}>
-        {sessions.filter(s => s.status !== 'closed').map(s => (
+        {sessions.filter(s => s.status !== 'closed').map(s => {
+          const hasDrawnTeams = activeSessionId === s.id && teams && teams.length > 0;
+          return (
           <div key={s.id} className="glass-panel-dark" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: activeSessionId === s.id ? '2px solid var(--accent-neon)' : '1px solid var(--dark-glass-border)' }}>
             <div>
               <h3 style={{ fontSize: '1.25rem', margin: 0, color: 'white' }}>{s.name}</h3>
@@ -72,9 +74,15 @@ export default function Sessions({ sessions, setSessions, activeSessionId, setAc
               )}
               <button 
                 className="btn btn-dark" 
-                style={{ border: s.status === 'locked' ? '1px solid var(--accent-danger)' : '1px solid var(--accent-warning)', color: s.status === 'locked' ? 'var(--accent-danger)' : 'var(--accent-warning)', padding: '0.75rem' }} 
-                onClick={() => setSessions(sessions.map(sess => sess.id === s.id ? { ...sess, status: sess.status === 'locked' ? 'open' : 'locked' } : sess))}
-                title={s.status === 'locked' ? "Abrir Inscripciones" : "Cerrar Convocatoria (Bloquear)"}
+                style={{ border: s.status === 'locked' ? '1px solid var(--accent-danger)' : '1px solid var(--accent-warning)', color: s.status === 'locked' ? 'var(--accent-danger)' : 'var(--accent-warning)', padding: '0.75rem', opacity: (s.status === 'locked' && hasDrawnTeams) ? 0.5 : 1, cursor: (s.status === 'locked' && hasDrawnTeams) ? 'not-allowed' : 'pointer' }} 
+                onClick={() => {
+                  if (s.status === 'locked' && hasDrawnTeams) {
+                    alert('No puedes reabrir esta convocatoria porque ya se han sorteado los equipos para jugar.');
+                    return;
+                  }
+                  setSessions(sessions.map(sess => sess.id === s.id ? { ...sess, status: sess.status === 'locked' ? 'open' : 'locked' } : sess));
+                }}
+                title={s.status === 'locked' ? (hasDrawnTeams ? "Sorteo iniciado, no se puede reabrir" : "Abrir Inscripciones") : "Cerrar Convocatoria (Bloquear)"}
               >
                 {s.status === 'locked' ? <Lock size={18} /> : <Unlock size={18} />}
               </button>
@@ -83,7 +91,7 @@ export default function Sessions({ sessions, setSessions, activeSessionId, setAc
               </button>
             </div>
           </div>
-        ))}
+        )})}
       </div>
 
       {/* Historial de Jornadas Cerradas */}
