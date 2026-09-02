@@ -55,11 +55,23 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
       }
     }
   };
+  const formatTitleCase = (str) => {
+    if (!str) return '';
+    return str.replace(/['"]/g, '').trim().toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  };
+
   const handleCreateNew = (e) => {
     e.preventDefault();
     if (!newPlayer.firstName) return;
     const newId = Date.now();
-    const playerObj = { id: newId, ...newPlayer, ratings: [] };
+    const playerObj = { 
+      id: newId, 
+      ...newPlayer, 
+      firstName: newPlayer.firstName.toUpperCase(),
+      lastName: newPlayer.lastName.toUpperCase(),
+      nickname: formatTitleCase(newPlayer.nickname),
+      ratings: [] 
+    };
     setPlayersDB(prev => [...prev, playerObj]);
     setNewPlayer({ firstName: '', lastName: '', nickname: '', email: '', photoUrl: '', stars: 3 });
   };
@@ -70,7 +82,14 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
   };
 
   const handleSaveEdit = (id) => {
-    setPlayersDB(prev => prev.map(p => p.id === id ? { ...p, ...editData, stars: parseInt(editData.stars) } : p));
+    setPlayersDB(prev => prev.map(p => p.id === id ? { 
+      ...p, 
+      ...editData, 
+      firstName: editData.firstName.toUpperCase(),
+      lastName: editData.lastName.toUpperCase(),
+      nickname: formatTitleCase(editData.nickname),
+      stars: parseInt(editData.stars) 
+    } : p));
     setEditingId(null);
   };
 
@@ -175,7 +194,7 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
       </div>
 
       <div className="glass-panel-dark">
-        <h3 style={{ margin: '0 0 1rem 0', color: 'var(--accent-neon)' }}>Lista Completa</h3>
+        <h3 style={{ margin: '0 0 1rem 0', color: 'var(--accent-neon)' }}>Plantilla General (Todos los jugadores)</h3>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           {sortedPlayers.map(p => (

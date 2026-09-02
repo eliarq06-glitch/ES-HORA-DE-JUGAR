@@ -174,9 +174,9 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
       {/* Lista de Confirmados visible para todos */}
       <div className="glass-panel-light" style={{ background: 'rgba(255,255,255,0.95)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <h2 className="title-main" style={{ fontSize: '1.5rem', margin: 0 }}>Confirmados</h2>
-            <span style={{ background: 'black', color: 'white', padding: '4px 12px', borderRadius: '100px', fontWeight: 'bold' }}>{confirmedPlayers.length}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+            <h2 className="title-main" style={{ fontSize: '1.3rem', margin: 0 }}>Lista Completa de la Jornada</h2>
+            <span style={{ background: 'black', color: 'white', padding: '4px 12px', borderRadius: '100px', fontWeight: 'bold' }}>{confirmedPlayers.length} / 27</span>
           </div>
           <button 
             className="btn btn-dark" 

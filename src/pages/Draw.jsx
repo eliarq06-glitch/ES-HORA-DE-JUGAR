@@ -136,6 +136,23 @@ export default function Draw({ players, teams, setTeams }) {
     }
   };
 
+  const handleDrawCaptainsOrder = () => {
+    let currentCaptains = [];
+    Object.keys(captains).forEach(teamIndex => {
+      if (captains[teamIndex] && captains[teamIndex].length > 0) {
+        const p = players.find(p => p.id === captains[teamIndex][0]);
+        if (p) currentCaptains.push(p);
+      }
+    });
+    if (currentCaptains.length < 2) {
+      alert('Debes seleccionar al menos 2 capitanes primero para sortear el orden.');
+      return;
+    }
+    const shuffled = [...currentCaptains].sort(() => Math.random() - 0.5);
+    const orderText = shuffled.map((c, i) => `${i + 1}º Elige: ${c.firstName} ${c.lastName}`).join('\n');
+    alert(`🎯 ORDEN DE ELECCIÓN (CAPITANES) 🎯\n\n${orderText}`);
+  };
+
   // --- DRAG AND DROP LOGIC ---
   const handleDragStart = (e, playerId, sourceTeamIndex) => {
     e.dataTransfer.setData('playerId', playerId);
@@ -214,6 +231,11 @@ export default function Draw({ players, teams, setTeams }) {
             {draftMode === 'auto' && (
                 <button className="btn btn-neon" style={{ marginTop: '1.25rem', padding: '0.75rem 1.5rem' }} onClick={handleDrawAuto}>
                   <Shuffle size={20} /> BALANCEAR AUTO
+                </button>
+            )}
+            {draftMode === 'manual' && (
+                <button className="btn btn-neon" style={{ marginTop: '1.25rem', padding: '0.75rem 1.5rem', background: '#eab308', color: 'black' }} onClick={handleDrawCaptainsOrder}>
+                  <Shuffle size={20} /> ORDEN CAPITANES
                 </button>
             )}
             <button className="btn btn-danger" style={{ marginTop: '1.25rem', padding: '0.75rem 1.5rem', background: 'transparent' }} onClick={resetTeams}>
