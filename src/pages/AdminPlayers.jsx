@@ -122,6 +122,7 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
               <thead>
                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                   <th style={{ padding: '0.5rem', color: 'var(--accent-warning)' }}>Usuario</th>
+                  <th style={{ padding: '0.5rem', color: 'var(--accent-warning)' }}>Apodo</th>
                   <th style={{ padding: '0.5rem', color: 'var(--accent-warning)' }}>Rol Actual</th>
                   <th style={{ padding: '0.5rem', color: 'var(--accent-warning)' }}>Cambiar Rol</th>
                 </tr>
@@ -133,11 +134,9 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
                   <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                     <td style={{ padding: '0.5rem', color: 'white' }}>
                       {p.full_name?.toUpperCase() || p.email?.toLowerCase() || 'DESCONOCIDO'}
-                      {matchingPlayer && matchingPlayer.nickname && (
-                        <span style={{ color: 'var(--accent-warning)', fontSize: '0.85rem', marginLeft: '8px' }}>
-                          "{matchingPlayer.nickname}"
-                        </span>
-                      )}
+                    </td>
+                    <td style={{ padding: '0.5rem', color: 'var(--accent-warning)', fontSize: '0.9rem' }}>
+                      {matchingPlayer && matchingPlayer.nickname ? `"${matchingPlayer.nickname}"` : '-'}
                     </td>
                     <td style={{ padding: '0.5rem', fontWeight: 'bold', color: p.role === 'global_admin' ? 'var(--accent-danger)' : p.role === 'admin' ? 'var(--accent-neon)' : 'white' }}>
                       {p.role === 'global_admin' ? 'SUPER ADMIN' : p.role === 'admin' ? 'ADMIN' : 'Jugador'}
@@ -158,7 +157,7 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
                   </tr>
                 )})}
                 {profiles.length === 0 && (
-                  <tr><td colSpan="3" style={{ padding: '1rem', textAlign: 'center', color: 'white' }}>Cargando usuarios o sin datos...</td></tr>
+                  <tr><td colSpan="4" style={{ padding: '1rem', textAlign: 'center', color: 'white' }}>Cargando usuarios o sin datos...</td></tr>
                 )}
               </tbody>
             </table>
