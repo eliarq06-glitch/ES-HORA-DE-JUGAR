@@ -38,9 +38,9 @@ export default function Players({ players }) {
             textColor = '#886d34';
             statsColor = '#886d34';
           } else if (stars === 4) {
-            bgImage = '/card_toty.png';
-            textColor = '#c9b065';
-            statsColor = '#c9b065';
+            bgImage = '/card_silver.png';
+            textColor = '#334155'; // Slate/dark gray text for silver card
+            statsColor = '#1e293b';
           } else if (stars === 3) {
             bgImage = '/card_gold.png';
             textColor = '#4a3810';
