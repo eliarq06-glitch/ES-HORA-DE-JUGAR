@@ -33,7 +33,7 @@ export default function Tournament({ activeSession, teams, matches, setMatches, 
     for (let i = 0; i < teams.length; i++) {
       for (let j = i + 1; j < teams.length; j++) {
         newMatches.push({
-          id: Math.floor(Math.random() * 10000000) + matchCounter++,
+          id: Date.now() + matchCounter++,
           team1Id: teams[i].id,
           team2Id: teams[j].id,
           status: 'pending', // pending, active, finished
@@ -45,7 +45,7 @@ export default function Tournament({ activeSession, teams, matches, setMatches, 
     // Add a pending Final Match if there are > 2 teams
     if (teams.length > 2) {
       newMatches.push({
-        id: Math.floor(Math.random() * 10000000) + matchCounter,
+        id: Date.now() + matchCounter,
         team1Id: null, // To be defined
         team2Id: null, // To be defined
         status: 'pending',
@@ -62,7 +62,7 @@ export default function Tournament({ activeSession, teams, matches, setMatches, 
       return;
     }
     const newMatch = {
-      id: Math.floor(Math.random() * 10000000),
+      id: Date.now(),
       team1Id: parseInt(manualTeam1),
       team2Id: parseInt(manualTeam2),
       status: 'pending',

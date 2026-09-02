@@ -16,10 +16,16 @@ export function useSupabaseTable(tableName, defaultValue = []) {
     try {
       const orderByCol = tableName === 'historical_tournaments' ? 'saved_at' : 'created_at';
       const isAscending = tableName !== 'historical_tournaments';
-      const { data: rows, error } = await supabase
-        .from(tableName)
-        .select('*')
-        .order(orderByCol, { ascending: isAscending });
+      
+      let query = supabase.from(tableName).select('*').order(orderByCol, { ascending: isAscending });
+      
+      // Añadir orden secundario por ID para evitar que cambien de lugar 
+      // si tienen el mismo timestamp de creación (ej: creados en bloque)
+      if (tableName === 'teams' || tableName === 'matches') {
+        query = query.order('id', { ascending: true });
+      }
+
+      const { data: rows, error } = await query;
 
       if (error) throw error;
 

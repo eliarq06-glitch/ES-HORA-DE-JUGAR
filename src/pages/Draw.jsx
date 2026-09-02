@@ -2,6 +2,33 @@ import React, { useState, useEffect } from 'react';
 import { Users, Shuffle, Star, Settings2, Trash2, GripHorizontal, Crown } from 'lucide-react';
 import { getCaptainImage } from '../utils/captains';
 
+const TeamNameInput = ({ teamName, onNameChange, capPlayer }) => {
+  const [localName, setLocalName] = useState(teamName);
+  
+  useEffect(() => {
+    setLocalName(teamName);
+  }, [teamName]);
+
+  return (
+    <input 
+      className="input-dark" 
+      value={localName}
+      onChange={(e) => setLocalName(e.target.value)}
+      onBlur={() => {
+        if (localName !== teamName) {
+          onNameChange(localName);
+        }
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          e.target.blur();
+        }
+      }}
+      style={{ fontSize: '1.4rem', fontWeight: '900', fontFamily: 'var(--font-heading)', textTransform: 'uppercase', textAlign: 'center', background: 'rgba(0,0,0,0.5)', border: 'none', borderBottom: '2px solid rgba(255,255,255,0.1)', width: '100%', padding: '0.8rem', color: capPlayer ? 'var(--accent-neon)' : 'white', zIndex: 3 }}
+    />
+  );
+};
+
 export default function Draw({ players, teams, setTeams }) {
   const [numTeams, setNumTeams] = useState(4);
   const [captains, setCaptains] = useState({});
@@ -303,16 +330,16 @@ export default function Draw({ players, teams, setTeams }) {
             onDrop={(e) => handleDrop(e, index)}
             onDragOver={handleDragOver}
           >
-            <input className="input-dark" value={team.name}
-              onChange={(e) => {
-                const val = e.target.value;
+            <TeamNameInput 
+              teamName={team.name}
+              capPlayer={capPlayer}
+              onNameChange={(val) => {
                 setTeams(prev => {
                    const newTeams = [...prev];
                    newTeams[index] = { ...newTeams[index], name: val };
                    return newTeams;
                 });
               }}
-              style={{ fontSize: '1.4rem', fontWeight: '900', fontFamily: 'var(--font-heading)', textTransform: 'uppercase', textAlign: 'center', background: 'rgba(0,0,0,0.5)', border: 'none', borderBottom: '2px solid rgba(255,255,255,0.1)', width: '100%', padding: '0.8rem', color: capPlayer ? 'var(--accent-neon)' : 'white', zIndex: 3 }}
             />
 
             <div style={{ display: 'flex', flex: 1, position: 'relative', zIndex: 2, minHeight: '300px' }}>
