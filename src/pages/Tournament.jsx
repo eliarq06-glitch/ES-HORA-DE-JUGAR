@@ -20,7 +20,7 @@ export default function Tournament({ activeSession, teams, matches, setMatches, 
     setMatchEvents([...matchEvents, newEvent]);
   };
 
-  const generateFixture = () => {
+  const generateRoundRobin = () => {
     if (teams.length < 2) {
       alert("Necesitas al menos 2 equipos para jugar un torneo.");
       return;
@@ -29,30 +29,47 @@ export default function Tournament({ activeSession, teams, matches, setMatches, 
     let newMatches = [];
     let matchCounter = 1;
 
-    // Round Robin (Todos contra todos)
     for (let i = 0; i < teams.length; i++) {
       for (let j = i + 1; j < teams.length; j++) {
         newMatches.push({
           id: Date.now() + matchCounter++,
           team1Id: teams[i].id,
           team2Id: teams[j].id,
-          status: 'pending', // pending, active, finished
+          status: 'pending',
           isFinal: false
         });
       }
     }
 
-    // Add a pending Final Match if there are > 2 teams
     if (teams.length > 2) {
       newMatches.push({
         id: Date.now() + matchCounter,
-        team1Id: null, // To be defined
-        team2Id: null, // To be defined
+        team1Id: null,
+        team2Id: null,
         status: 'pending',
         isFinal: true
       });
     }
 
+    setMatches(newMatches);
+  };
+
+  const generateCup = () => {
+    if (teams.length !== 4) {
+      alert("La Copa Eliminatoria es exclusiva para 4 equipos.");
+      return;
+    }
+    
+    // Sortear equipos (Aleatorio)
+    const shuffled = [...teams].sort(() => Math.random() - 0.5);
+    
+    const newMatches = [
+      { id: Date.now() + 1, team1Id: shuffled[0].id, team2Id: shuffled[1].id, status: 'pending', isCupMatch: true },
+      { id: Date.now() + 2, team1Id: shuffled[2].id, team2Id: shuffled[3].id, status: 'pending', isCupMatch: true },
+      { id: Date.now() + 3, team1Id: null, team2Id: null, status: 'pending', isThirdPlace: true },
+      { id: Date.now() + 4, team1Id: null, team2Id: null, status: 'pending', isFinal: true }
+    ];
+    
     setMatches(newMatches);
   };
 
@@ -126,9 +143,41 @@ export default function Tournament({ activeSession, teams, matches, setMatches, 
   };
 
   const setFinalTeams = () => {
-    const st = calculateStandings();
-    if(st.length >= 2) {
-      setMatches(matches.map(m => m.isFinal ? { ...m, team1Id: st[0].id, team2Id: st[1].id } : m));
+    const isCupMode = matches.some(m => m.isCupMatch);
+    
+    if (isCupMode) {
+       const semis = matches.filter(m => m.isCupMatch && m.status === 'finished');
+       if (semis.length < 2) {
+           alert("Deben finalizar las dos semifinales (partidos 1 y 2) para asignar las finales.");
+           return;
+       }
+       let winners = [];
+       let losers = [];
+       
+       semis.forEach(m => {
+           const t1 = teams.find(t => t.id === m.team1Id);
+           const t2 = teams.find(t => t.id === m.team2Id);
+           const { s1, s2 } = getMatchScore(m.id, t1?.name, t2?.name);
+           if (s1 > s2) { winners.push(t1.id); losers.push(t2.id); }
+           else if (s2 > s1) { winners.push(t2.id); losers.push(t1.id); }
+           else { 
+             // Empate, sortear al azar si no hubo penales registrados
+             if(Math.random() > 0.5) { winners.push(t1.id); losers.push(t2.id); }
+             else { winners.push(t2.id); losers.push(t1.id); }
+           }
+       });
+       
+       setMatches(matches.map(m => {
+           if (m.isFinal) return { ...m, team1Id: winners[0], team2Id: winners[1] };
+           if (m.isThirdPlace) return { ...m, team1Id: losers[0], team2Id: losers[1] };
+           return m;
+       }));
+    } else {
+       // Liga (Round Robin) - Usa Standings
+       const st = calculateStandings();
+       if(st.length >= 2) {
+         setMatches(matches.map(m => m.isFinal ? { ...m, team1Id: st[0].id, team2Id: st[1].id } : m));
+       }
     }
   };
 
@@ -146,9 +195,15 @@ export default function Tournament({ activeSession, teams, matches, setMatches, 
           </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: '400px', margin: '0 auto' }}>
-            <button className="btn btn-neon" style={{ fontSize: '1.2rem', padding: '1rem 2rem' }} onClick={generateFixture}>
-              <CalendarDays size={24} /> GENERAR TODOS CONTRA TODOS
+            <button className="btn btn-neon" style={{ fontSize: '1rem', padding: '1rem 2rem' }} onClick={generateRoundRobin}>
+              <CalendarDays size={20} /> GENERAR LIGA (Todos contra todos)
             </button>
+            
+            {teams.length === 4 && (
+              <button className="btn btn-warning" style={{ fontSize: '1rem', padding: '1rem 2rem', background: '#eab308', color: 'black' }} onClick={generateCup}>
+                <Trophy size={20} /> GENERAR COPA (Eliminatorias)
+              </button>
+            )}
 
             <div style={{ padding: '1.5rem', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
               <h4 style={{ margin: '0 0 1rem 0', color: 'white' }}>Crear Partido Manual</h4>
@@ -212,7 +267,7 @@ export default function Tournament({ activeSession, teams, matches, setMatches, 
 
             {teams.length > 2 && (
               <button className="btn btn-dark" style={{ width: '100%', marginTop: '1.5rem', border: '1px solid var(--accent-neon)' }} onClick={setFinalTeams}>
-                Actualizar Finalistas (Top 2)
+                {matches.some(m => m.isCupMatch) ? 'Actualizar Final y 3er Puesto (De Semis)' : 'Actualizar Finalistas (Del Ranking)'}
               </button>
             )}
             
@@ -241,7 +296,9 @@ export default function Tournament({ activeSession, teams, matches, setMatches, 
                     borderRadius: '12px',
                     borderLeft: m.isFinal ? '4px solid var(--accent-warning)' : (m.status === 'active' ? '4px solid var(--accent-neon)' : '4px solid transparent')
                   }}>
-                    {m.isFinal && <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--accent-warning)', textTransform: 'uppercase', marginBottom: '0.5rem', textAlign: 'center' }}>GRAN FINAL</div>}
+                    {m.isFinal && <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--accent-warning)', textTransform: 'uppercase', marginBottom: '0.5rem', textAlign: 'center' }}>🏆 GRAN FINAL</div>}
+                    {m.isThirdPlace && <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#cbd5e1', textTransform: 'uppercase', marginBottom: '0.5rem', textAlign: 'center' }}>🥉 TERCER PUESTO</div>}
+                    {m.isCupMatch && <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--accent-neon)', textTransform: 'uppercase', marginBottom: '0.5rem', textAlign: 'center' }}>⚔️ SEMIFINAL</div>}
                     
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
                       <div style={{ flex: 1, textAlign: 'right', fontWeight: 'bold', fontSize: '1.2rem', color: m.status === 'finished' && s1 > s2 ? 'var(--accent-neon)' : 'white' }}>
