@@ -30,7 +30,8 @@ const TeamNameInput = ({ teamName, onNameChange, capPlayer }) => {
 };
 
 export default function Draw({ players, teams, setTeams }) {
-  const [numTeams, setNumTeams] = useState(4);
+  const defaultTeams = players.length <= 16 ? 2 : (players.length <= 21 ? 3 : 4);
+  const [numTeams, setNumTeams] = useState(defaultTeams);
   const [captains, setCaptains] = useState({});
   const [draftMode, setDraftMode] = useState('auto'); // 'auto' or 'manual'
 
@@ -47,7 +48,7 @@ export default function Draw({ players, teams, setTeams }) {
       // If we need more teams, append them with unique IDs
       while (newTeams.length < numTeams) {
         newTeams.push({
-          id: Math.floor(Math.random() * 1000000) + newTeams.length,
+          id: Date.now() + newTeams.length,
           name: `Equipo ${String.fromCharCode(65 + newTeams.length)}`,
           players: [],
           captainId: null
@@ -55,7 +56,7 @@ export default function Draw({ players, teams, setTeams }) {
       }
       return newTeams;
     });
-  }, [numTeams, setTeams]);
+  }, [numTeams]);
 
   const shuffleArray = (array) => {
     let newArr = [...array];
@@ -67,10 +68,7 @@ export default function Draw({ players, teams, setTeams }) {
   };
 
   const getAvailablePlayers = () => {
-    const allAssignedIds = [];
-    teams.forEach(t => t.players.forEach(p => {
-       if(!allAssignedIds.includes(p.id)) allAssignedIds.push(p.id);
-    }));
+    const allAssignedIds = teams.flatMap(t => t.players.map(p => p.id));
     return players.filter(p => !allAssignedIds.includes(p.id));
   };
 
@@ -84,28 +82,39 @@ export default function Draw({ players, teams, setTeams }) {
     });
 
     if (missingCaptains) {
-      alert("⚠️ Debes elegir al menos un capitán (👑) para cada equipo antes de realizar el sorteo automático.");
+      alert("¡Alto! Debes elegir al menos un capitán (👑) para cada equipo antes de realizar el sorteo automático.\n\n(Asegúrate de que la cantidad de equipos en el selector superior sea correcta).");
       return;
     }
 
-    const availablePlayers = getAvailablePlayers();
+    let availablePlayers = getAvailablePlayers();
+    let startingTeams = teams.map(team => ({ ...team, players: [...team.players] }));
+    
+    // Si ya no hay jugadores disponibles, significa que quieren volver a sortear todo.
+    // Limpiamos los equipos dejando solo a los capitanes.
+    if (availablePlayers.length === 0) {
+        startingTeams = startingTeams.map((team, index) => {
+          const teamCaps = (captains[index] || []).map(id => players.find(p => p.id === id));
+          return { ...team, players: teamCaps.filter(p => p) };
+        });
+        
+        const allAssignedIds = startingTeams.flatMap(t => t.players.map(p => p.id));
+        availablePlayers = players.filter(p => !allAssignedIds.includes(p.id));
+    }
+
     const grouped = { 5: [], 4: [], 3: [], 2: [], 1: [] };
     availablePlayers.forEach(p => grouped[p.stars].push(p));
-
-    let newTeams = teams.map((team) => {
-      return { ...team, players: [...team.players] };
-    });
 
     [5, 4, 3, 2, 1].forEach(starLevel => {
       const group = shuffleArray(grouped[starLevel]);
       group.forEach(player => {
-        const minPlayers = Math.min(...newTeams.map(t => t.players.length));
-        const eligibleTeams = newTeams.map((t, idx) => ({ t, idx })).filter(item => item.t.players.length === minPlayers);
-        const selectedTeam = eligibleTeams[0];
-        newTeams[selectedTeam.idx].players.push(player);
+        const minPlayers = Math.min(...startingTeams.map(t => t.players.length));
+        const eligibleTeams = startingTeams.map((t, idx) => ({ t, idx })).filter(item => item.t.players.length === minPlayers);
+        const selectedTeam = eligibleTeams[0]; // Ya están aleatorizados si es necesario, o toma el primero
+        startingTeams[selectedTeam.idx].players.push(player);
       });
     });
-    setTeams(newTeams);
+    
+    setTeams(startingTeams);
   };
 
   const toggleCaptain = (playerId, teamIndex) => {
