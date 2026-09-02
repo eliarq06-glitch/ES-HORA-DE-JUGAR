@@ -54,18 +54,26 @@ export default function Players({ players }) {
 
               <div className="fifa-card-bottom">
                 <div className="fifa-card-name">{player.firstName} {player.lastName}</div>
+                {player.historicalChampionships > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '2px', marginBottom: '8px' }}>
+                    {Array.from({ length: Math.min(player.historicalChampionships, 5) }).map((_, i) => (
+                      <Star key={i} size={12} fill="var(--accent-warning)" color="var(--accent-warning)" />
+                    ))}
+                    {player.historicalChampionships > 5 && <span style={{fontSize: '10px', color: 'var(--accent-warning)', marginLeft: '2px'}}>+{player.historicalChampionships - 5}</span>}
+                  </div>
+                )}
                 <div className="fifa-card-stats">
                   <div className="fifa-card-stat">
-                    <span>{player.goals || 0}</span>
+                    <span>{player.historicalGoals || 0}</span>
                     <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.5)' }}>GLS</span>
                   </div>
                   <div className="fifa-card-stat">
-                    <span>{player.assists || 0}</span>
+                    <span>{player.historicalAssists || 0}</span>
                     <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.5)' }}>AST</span>
                   </div>
                   <div className="fifa-card-stat">
-                    <span>{player.matches || 0}</span>
-                    <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.5)' }}>PJ</span>
+                    <span>{player.historicalChampionships || 0}</span>
+                    <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.5)' }}>CAMP</span>
                   </div>
                 </div>
               </div>
