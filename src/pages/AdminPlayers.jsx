@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UserPlus, Save, Trash2, Edit2, Shield, Users, ShieldAlert, Image as ImageIcon } from 'lucide-react';
+import { UserPlus, Save, Trash2, Edit2, Shield, Users, ShieldAlert, Image as ImageIcon, Upload } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useSupabaseConfig } from '../hooks/useSupabase';
 
@@ -108,9 +108,52 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
   // Ordenar alfabéticamente
   const sortedPlayers = [...allPlayers].sort((a, b) => a.firstName.localeCompare(b.firstName));
 
+  const handleRescuePlayers = () => {
+    try {
+      const oldStr = localStorage.getItem('players');
+      if (!oldStr) {
+        alert("No se encontró ningún respaldo de jugadores en la memoria local de tu navegador. Deberás volver a ingresarlos manualmente.");
+        return;
+      }
+      const parsed = JSON.parse(oldStr);
+      if (parsed && Array.isArray(parsed) && parsed.length > 0) {
+        const merged = [...allPlayers];
+        let added = 0;
+        parsed.forEach(oldP => {
+          if (!merged.find(p => p.id === oldP.id)) {
+            merged.push(oldP);
+            added++;
+          }
+        });
+        if (added > 0) {
+          setPlayersDB(merged);
+          alert(`¡Éxito! Se han rescatado ${added} jugadores desde tu respaldo local.`);
+        } else {
+          alert("Los jugadores del respaldo local ya se encuentran en la base de datos, no hay nada nuevo que rescatar.");
+        }
+      } else {
+        alert("El respaldo local existe pero está vacío o corrupto.");
+      }
+    } catch(err) {
+      alert("Error rescatando jugadores: " + err.message);
+    }
+  };
+
   return (
     <div style={{ width: '100%', maxWidth: '900px', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       
+      {allPlayers.length === 0 && (
+        <div style={{ background: 'var(--accent-danger)', color: 'black', padding: '1.5rem', borderRadius: '12px', fontWeight: 'bold' }}>
+          <h3 style={{ margin: '0 0 1rem 0' }}>¿Tus jugadores desaparecieron?</h3>
+          <p style={{ margin: '0 0 1rem 0', fontWeight: 'normal' }}>
+            Al conectar la base de datos oficial, es posible que se haya sobreescrito tu lista de pruebas. Si tenías jugadores guardados en este navegador, puedes intentar rescatarlos:
+          </p>
+          <button className="btn btn-dark" style={{ background: 'black', color: 'var(--accent-warning)', border: '1px solid var(--accent-warning)' }} onClick={handleRescuePlayers}>
+            <Upload size={18} /> RESCATAR JUGADORES (Desde Memoria Local)
+          </button>
+        </div>
+      )}
+
       {isGlobalAdmin && (
         <div className="glass-panel-dark" style={{ border: '2px solid var(--accent-neon)' }}>
           <h2 className="title-main" style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: 0, marginBottom: '1rem', color: 'var(--accent-neon)' }}>
