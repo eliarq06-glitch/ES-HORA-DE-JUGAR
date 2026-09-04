@@ -125,7 +125,7 @@ export function useSupabaseConfig(key, defaultValue) {
       
       // Sync to Supabase in background
       supabase.from('app_config').upsert({ key, value: stringValue, updated_at: new Date() })
-        .catch(e => console.error("Config sync error:", e));
+        .then(({ error }) => { if (error) console.error("Config sync error:", error) });
         
       return newValue;
     });
