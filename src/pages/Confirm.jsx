@@ -233,34 +233,16 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
           <p className="subtitle" style={{ marginBottom: '2rem', color: 'var(--light-text-muted)' }}>Jornada: {activeSession?.name} ({activeSession?.date})</p>
           
           {activeSession.confirmedIds.includes(loggedInPlayer.id) ? (
-            (() => {
-              const myIndex = confirmedPlayers.findIndex(p => p.id === loggedInPlayer.id);
-              const myPos = myIndex !== -1 ? myIndex + 1 : activeSession.confirmedIds.indexOf(loggedInPlayer.id) + 1;
-              const isTitular = myPos <= 24;
-              const isAlterno = myPos > 24 && myPos <= 30;
-              const myTier = isTitular ? 'TITULAR' : isAlterno ? 'ALTERNO' : 'LENTOTE 😂';
-              const myColor = isTitular ? 'var(--accent-primary)' : isAlterno ? 'var(--accent-warning)' : 'var(--accent-danger)';
-
-              return (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', color: myColor, fontWeight: 'bold' }}>
-                  <CheckCircle2 size={48} />
-                  <span style={{ fontSize: '1.5rem', color: 'var(--accent-neon)' }}>¡Estás Confirmado!</span>
-                  
-                  <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '12px', border: `1px solid ${myColor}`, width: '100%', maxWidth: '300px' }}>
-                    <div style={{ fontSize: '1.2rem', color: 'var(--light-text)' }}>
-                      Tu posición actual: <strong style={{ fontSize: '1.8rem', color: 'var(--light-text)' }}>#{myPos}</strong>
-                    </div>
-                    <div style={{ fontSize: '1.5rem', fontWeight: '900', color: myColor, marginTop: '0.5rem', letterSpacing: '2px' }}>
-                      {myTier}
-                    </div>
-                  </div>
-
-                  <p style={{ color: 'var(--light-text-muted)', fontWeight: 'normal', fontSize: '0.85rem', maxWidth: '400px', lineHeight: '1.4' }}>
-                    * Recuerda que tu ubicación final puede variar de acuerdo al Auditor de Disciplina Interno (Lucho). ¡Los verdaderos elementos tienen prioridad!
-                  </p>
-                </div>
-              );
-            })()
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', color: 'var(--accent-neon)', fontWeight: 'bold' }}>
+              <CheckCircle2 size={48} />
+              <span style={{ fontSize: '1.5rem', color: 'var(--accent-neon)' }}>¡Estás Confirmado!</span>
+              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '12px', border: `1px solid var(--accent-neon)`, width: '100%', maxWidth: '300px' }}>
+                <p style={{ color: 'var(--light-text)', margin: 0 }}>Tu asistencia ha sido registrada exitosamente. ¡Nos vemos en la cancha!</p>
+              </div>
+              <p style={{ color: 'var(--light-text-muted)', fontWeight: 'normal', fontSize: '0.85rem', maxWidth: '400px', lineHeight: '1.4' }}>
+                * Recuerda que tu ubicación final (Titular, Alterno o Suplente) dependerá de tu estricto cumplimiento con el Auditor de Disciplina Interno (Lucho). ¡Los verdaderos elementos tienen prioridad al armar la lista final!
+              </p>
+            </div>
           ) : (activeSession.status === 'locked' || activeSession.status === 'closed') ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', color: 'var(--accent-danger)', fontWeight: 'bold', padding: '1rem', border: '2px dashed var(--accent-danger)', borderRadius: '16px', background: 'rgba(239, 68, 68, 0.05)' }}>
               <div style={{ fontSize: '1.5rem' }}>¡CONVOCATORIA CERRADA! 🚫</div>

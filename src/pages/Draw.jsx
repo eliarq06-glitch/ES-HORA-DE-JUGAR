@@ -34,6 +34,7 @@ export default function Draw({ players, teams, setTeams }) {
   const [numTeams, setNumTeams] = useState(defaultTeams);
   const [captains, setCaptains] = useState({});
   const [draftMode, setDraftMode] = useState('auto'); // 'auto' or 'manual'
+  const [movingPlayerId, setMovingPlayerId] = useState(null);
 
   useEffect(() => {
     setTeams(prev => {
@@ -217,11 +218,7 @@ export default function Draw({ players, teams, setTeams }) {
     e.dataTransfer.setData('sourceTeamIndex', sourceTeamIndex);
   };
 
-  const handleDrop = (e, targetTeamIndex) => {
-    e.preventDefault();
-    const playerId = e.dataTransfer.getData('playerId');
-    const sourceTeamIndex = e.dataTransfer.getData('sourceTeamIndex');
-    
+  const executeMove = (playerId, sourceTeamIndex, targetTeamIndex) => {
     if (!playerId) return;
     const pId = parseInt(playerId);
 
@@ -249,6 +246,14 @@ export default function Draw({ players, teams, setTeams }) {
         }
         return newTeams;
     });
+    setMovingPlayerId(null);
+  };
+
+  const handleDrop = (e, targetTeamIndex) => {
+    e.preventDefault();
+    const playerId = e.dataTransfer.getData('playerId');
+    const sourceTeamIndex = e.dataTransfer.getData('sourceTeamIndex');
+    executeMove(playerId, sourceTeamIndex, targetTeamIndex);
   };
 
   const handleDragOver = (e) => {
@@ -371,45 +376,62 @@ export default function Draw({ players, teams, setTeams }) {
               
               {team.players.map(p => {
                 const isCaptain = (captains[index] || []).includes(p.id);
+                const isMoving = movingPlayerId === p.id;
+                
                 return (
-                  <div 
-                    key={p.id} 
-                    draggable={true}
-                    onDragStart={(e) => handleDragStart(e, p.id, index)}
-                    style={{ 
-                      display: 'flex', justifyContent: 'space-between', padding: '0.5rem', background: 'rgba(255,255,255,0.08)', borderRadius: '8px', marginBottom: '0.5rem', 
-                      borderLeft: isCaptain ? '4px solid var(--accent-neon)' : '4px solid transparent',
-                      cursor: 'grab'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <GripHorizontal size={14} color="var(--dark-text-muted)" style={{ cursor: 'grab' }} />
-                      <div className="avatar-placeholder" style={{ width: '24px', height: '24px', fontSize: '0.7rem' }}>{p.firstName.charAt(0)}</div>
-                      <div>
-                        <span style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px', lineHeight: 1, fontSize: '0.85rem' }}>
-                          {p.firstName} {p.lastName.substring(0,1)}.
-                        </span>
-                        {p.nickname && <span style={{ color: 'var(--accent-warning)', fontSize: '0.65rem' }}>"{p.nickname}"</span>}
+                  <div key={p.id} style={{ marginBottom: '0.5rem' }}>
+                    <div 
+                      draggable={!isMoving}
+                      onDragStart={(e) => handleDragStart(e, p.id, index)}
+                      onClick={() => setMovingPlayerId(isMoving ? null : p.id)}
+                      style={{ 
+                        display: 'flex', justifyContent: 'space-between', padding: '0.5rem', background: isMoving ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)', borderRadius: '8px', 
+                        borderLeft: isCaptain ? '4px solid var(--accent-neon)' : '4px solid transparent',
+                        cursor: isMoving ? 'default' : 'grab'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <GripHorizontal size={14} color="var(--dark-text-muted)" style={{ cursor: 'grab' }} />
+                        <div className="avatar-placeholder" style={{ width: '24px', height: '24px', fontSize: '0.7rem' }}>{p.firstName.charAt(0)}</div>
+                        <div>
+                          <span style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px', lineHeight: 1, fontSize: '0.85rem' }}>
+                            {p.firstName} {p.lastName.substring(0,1)}.
+                          </span>
+                          {p.nickname && <span style={{ color: 'var(--accent-warning)', fontSize: '0.65rem' }}>"{p.nickname}"</span>}
+                        </div>
                       </div>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                      <button 
-                        className="btn" 
-                        style={{ padding: '2px', background: 'transparent', color: isCaptain ? 'var(--accent-neon)' : 'var(--dark-text-muted)' }} 
-                        onClick={() => toggleCaptain(p.id, index)}
-                        title={isCaptain ? "Quitar cinta de capitán" : "Hacer capitán"}
-                      >
-                        <Crown size={16} />
-                      </button>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '2px', color: 'var(--accent-warning)', marginLeft: '4px' }}>
-                        <Star size={12} fill="var(--accent-warning)" /> <span style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>{p.stars}</span>
-                      </div>
-                      {draftMode === 'manual' && !isCaptain && (
-                        <button className="btn" style={{ padding: '2px', background: 'transparent', color: 'var(--accent-danger)' }} onClick={() => removePlayerManual(p.id, index)}>
-                           <Trash2 size={14} />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <button 
+                          className="btn" 
+                          style={{ padding: '2px', background: 'transparent', color: isCaptain ? 'var(--accent-neon)' : 'var(--dark-text-muted)' }} 
+                          onClick={(e) => { e.stopPropagation(); toggleCaptain(p.id, index); }}
+                          title={isCaptain ? "Quitar cinta de capitán" : "Hacer capitán"}
+                        >
+                          <Crown size={16} />
                         </button>
-                      )}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '2px', color: 'var(--accent-warning)', marginLeft: '4px' }}>
+                          <Star size={12} fill="var(--accent-warning)" /> <span style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>{p.stars}</span>
+                        </div>
+                        {draftMode === 'manual' && !isCaptain && (
+                          <button className="btn" style={{ padding: '2px', background: 'transparent', color: 'var(--accent-danger)' }} onClick={(e) => { e.stopPropagation(); removePlayerManual(p.id, index); }}>
+                             <Trash2 size={14} />
+                          </button>
+                        )}
+                      </div>
                     </div>
+                    {isMoving && (
+                      <div style={{ display: 'flex', gap: '4px', marginTop: '4px', padding: '6px', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', justifyContent: 'center' }}>
+                         <span style={{ fontSize: '0.7rem', color: 'var(--light-text)', alignSelf: 'center', marginRight: '4px' }}>Mover a:</span>
+                         {teams.map((t, tIdx) => {
+                            if (tIdx === index) return null;
+                            return (
+                              <button key={tIdx} onClick={(e) => { e.stopPropagation(); executeMove(p.id, index, tIdx); }} style={{ padding: '4px 10px', fontSize: '0.75rem', background: 'var(--accent-primary)', color: 'white', borderRadius: '4px', border: 'none', fontWeight: 'bold' }}>
+                                 {String.fromCharCode(65 + tIdx)}
+                              </button>
+                            );
+                         })}
+                      </div>
+                    )}
                   </div>
                 )
               })}
