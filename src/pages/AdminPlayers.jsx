@@ -9,6 +9,7 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
   const [editingId, setEditingId] = useState(null);
   const [editData, setEditData] = useState({ firstName: '', lastName: '', nickname: '', email: '', photoUrl: '', stars: 3, status: 'active' });
   const [profiles, setProfiles] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [sponsorsConfig, setSponsorsConfig] = useSupabaseConfig('sponsors', []);
   const [activityLog, setActivityLog] = useSupabaseConfig('activityLog', []);
 
@@ -180,73 +181,16 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
     }
   };
 
-  // Ordenar alfabéticamente
-  const sortedPlayers = [...allPlayers].sort((a, b) => a.firstName.localeCompare(b.firstName));
+  // Filtrar y Ordenar alfabéticamente
+  const filteredPlayers = allPlayers
+    .filter(p => {
+      const searchStr = `${p.firstName} ${p.lastName} ${p.nickname} ${p.email}`.toLowerCase();
+      return searchStr.includes(searchTerm.toLowerCase());
+    })
+    .sort((a, b) => a.firstName.localeCompare(b.firstName));
 
   return (
     <div style={{ width: '100%', maxWidth: '900px', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      
-      {isGlobalAdmin && (
-        <div className="glass-panel-dark" style={{ border: '2px solid var(--accent-neon)' }}>
-          <h2 className="title-main" style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: 0, marginBottom: '1rem', color: 'var(--accent-neon)' }}>
-            <ShieldAlert size={28} /> Accesos (Solo Super Admin)
-          </h2>
-          <p style={{ color: 'var(--dark-text-muted)', marginBottom: '1.5rem' }}>
-            Aquí puedes darle permisos de Admin a otros usuarios (ej. Lucho) cuando se registren.
-          </p>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                  <th style={{ padding: '0.5rem', color: 'var(--accent-warning)' }}>Usuario</th>
-                  <th style={{ padding: '0.5rem', color: 'var(--accent-warning)' }}>Apodo</th>
-                  <th style={{ padding: '0.5rem', color: 'var(--accent-warning)' }}>Rol Actual</th>
-                  <th style={{ padding: '0.5rem', color: 'var(--accent-warning)' }}>Cambiar Rol</th>
-                </tr>
-              </thead>
-              <tbody>
-                {profiles.map(p => {
-                  const matchingPlayer = allPlayers.find(ap => {
-                    const matchByEmail = ap.email && p.email && ap.email.toLowerCase() === p.email.toLowerCase();
-                    const matchByName = p.full_name && ap.firstName && 
-                      p.full_name.toLowerCase().includes(ap.firstName.toLowerCase()) && 
-                      (!ap.lastName || p.full_name.toLowerCase().includes(ap.lastName.toLowerCase()));
-                    return matchByEmail || matchByName;
-                  });
-                  return (
-                  <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                    <td style={{ padding: '0.5rem', color: 'white' }}>
-                      {p.full_name?.toUpperCase() || p.email?.toLowerCase() || 'DESCONOCIDO'}
-                    </td>
-                    <td style={{ padding: '0.5rem', color: 'var(--accent-warning)', fontSize: '0.9rem' }}>
-                      {matchingPlayer && matchingPlayer.nickname ? `"${matchingPlayer.nickname}"` : '-'}
-                    </td>
-                    <td style={{ padding: '0.5rem', fontWeight: 'bold', color: p.role === 'global_admin' ? 'var(--accent-danger)' : p.role === 'admin' ? 'var(--accent-neon)' : 'white' }}>
-                      {p.role === 'global_admin' ? 'SUPER ADMIN' : p.role === 'admin' ? 'ADMIN' : 'Jugador'}
-                    </td>
-                    <td style={{ padding: '0.5rem' }}>
-                      {p.role !== 'global_admin' && (
-                        <select 
-                          className="input-dark" 
-                          value={p.role || 'player'} 
-                          onChange={(e) => handleUpdateRole(p.id, p.role, e.target.value)}
-                          style={{ padding: '0.3rem', fontSize: '0.8rem' }}
-                        >
-                          <option value="player">Jugador (Sin permisos)</option>
-                          <option value="admin">Admin (Lucho)</option>
-                        </select>
-                      )}
-                    </td>
-                  </tr>
-                )})}
-                {profiles.length === 0 && (
-                  <tr><td colSpan="4" style={{ padding: '1rem', textAlign: 'center', color: 'white' }}>Cargando usuarios o sin datos...</td></tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
 
       <div className="glass-panel-dark">
         <h2 className="title-main" style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: 0, marginBottom: '1rem' }}>
@@ -297,10 +241,20 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
       </div>
 
       <div className="glass-panel-dark">
-        <h3 style={{ margin: '0 0 1rem 0', color: 'var(--accent-neon)' }}>Plantilla General (Todos los jugadores)</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
+          <h3 style={{ margin: 0, color: 'var(--accent-neon)' }}>Plantilla General (Todos los jugadores)</h3>
+          <input 
+            type="text" 
+            className="input-light" 
+            placeholder="🔍 Buscar por nombre, apodo o correo..." 
+            value={searchTerm} 
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{ width: '100%', maxWidth: '300px' }}
+          />
+        </div>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          {sortedPlayers.map(p => (
+          {filteredPlayers.map(p => (
             <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', flexWrap: 'wrap', gap: '1rem' }}>
               
               {editingId === p.id ? (
@@ -391,14 +345,36 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
                   </button>
                 </div>
               ) : (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, flexWrap: 'wrap' }}>
                   <div className="avatar-placeholder">{p.firstName.charAt(0)}</div>
-                  <div>
+                  <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 'bold' }}>{p.firstName} {p.lastName} {p.nickname && <span style={{ color: 'var(--accent-warning)', fontSize: '0.85rem' }}>"{p.nickname}"</span>}</div>
                     <div style={{ fontSize: '0.8rem', color: p.email ? 'var(--accent-neon)' : 'var(--dark-text-muted)' }}>
                       {p.email ? `✉️ ${p.email}` : 'Sin cuenta vinculada'}
                     </div>
                   </div>
+                  
+                  {isGlobalAdmin && (
+                    <div style={{ minWidth: '150px' }}>
+                      {(() => {
+                        const matchingProfile = p.email ? profiles.find(pr => pr.email?.toLowerCase() === p.email.toLowerCase()) : null;
+                        if (!matchingProfile) return <span style={{ fontSize: '0.7rem', color: 'gray' }}>No Autenticado</span>;
+                        
+                        return (
+                          <select 
+                            className="input-dark" 
+                            value={matchingProfile.role || 'player'} 
+                            onChange={(e) => handleUpdateRole(matchingProfile.id, matchingProfile.role, e.target.value)}
+                            style={{ padding: '0.3rem', fontSize: '0.8rem', width: '100%', borderColor: matchingProfile.role === 'admin' ? 'var(--accent-neon)' : '' }}
+                          >
+                            <option value="player">Jugador (Sin permisos)</option>
+                            <option value="admin">Admin (Lucho)</option>
+                            {matchingProfile.role === 'global_admin' && <option value="global_admin">SUPER ADMIN</option>}
+                          </select>
+                        );
+                      })()}
+                    </div>
+                  )}
                 </div>
               )}
 
