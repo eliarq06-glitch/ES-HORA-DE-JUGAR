@@ -9,6 +9,7 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
   const [editData, setEditData] = useState({ firstName: '', lastName: '', nickname: '', email: '', photoUrl: '', stars: 3, status: 'active' });
   const [profiles, setProfiles] = useState([]);
   const [sponsorsConfig, setSponsorsConfig] = useSupabaseConfig('sponsors', []);
+  const [activityLog, setActivityLog] = useSupabaseConfig('activityLog', []);
 
   useEffect(() => {
     if (isGlobalAdmin) {
@@ -90,6 +91,12 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
   };
 
   const handleSaveEdit = (id) => {
+    const oldPlayer = allPlayers.find(p => p.id === id);
+    if (oldPlayer && oldPlayer.status !== editData.status) {
+      const statusName = editData.status === 'injured' ? 'LESIONADO/AUSENTE' : editData.status === 'occasional' ? 'CASTIGADO/OCASIONAL' : editData.status === 'frequent' ? 'FRECUENTE (Toma Biela)' : 'ACTIVO';
+      setActivityLog(prev => [{ id: Date.now(), text: `⚠️ La Directiva cambió el estado de ${oldPlayer.firstName} ${oldPlayer.lastName} a: ${statusName}`, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }, ...(prev || [])].slice(0, 15));
+    }
+
     setPlayersDB(prev => prev.map(p => p.id === id ? { 
       ...p, 
       ...editData, 

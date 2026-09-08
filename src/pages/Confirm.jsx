@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
-import { UserPlus, Trash2, Edit2, CheckCircle2, Shield, Link as LinkIcon } from 'lucide-react';
+import { UserPlus, Trash2, Edit2, CheckCircle2, Shield, Link as LinkIcon, MessageSquare } from 'lucide-react';
+import { useSupabaseConfig } from '../hooks/useSupabase';
 
 export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers, allPlayers, updateConfirmedPlayers, setPlayersDB }) {
   const [selectedPlayerId, setSelectedPlayerId] = useState('');
   const [linkPlayerId, setLinkPlayerId] = useState('');
   const [justConfirmed, setJustConfirmed] = useState(false);
   const [newPlayer, setNewPlayer] = useState({ firstName: '', lastName: '', nickname: '' });
+  const [activityLog, setActivityLog] = useSupabaseConfig('activityLog', []);
 
   const loggedInPlayer = allPlayers.find(p => p.email === user.email);
+
+  const logActivity = (message) => {
+    setActivityLog(prev => [{ id: Date.now(), text: message, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }, ...(prev || [])].slice(0, 15));
+  };
 
   const handleLinkAccount = (e) => {
     e.preventDefault();
@@ -27,6 +33,7 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
     }
     if (!activeSession.confirmedIds.includes(loggedInPlayer.id)) {
       updateConfirmedPlayers([...activeSession.confirmedIds, loggedInPlayer.id]);
+      logActivity(`⚽ ${loggedInPlayer.firstName} ${loggedInPlayer.lastName} acaba de confirmar su asistencia.`);
       setJustConfirmed(true);
       setTimeout(() => setJustConfirmed(false), 2000);
     }
@@ -43,6 +50,7 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
     }
     if (!activeSession.confirmedIds.includes(pid)) {
       updateConfirmedPlayers([...activeSession.confirmedIds, pid]);
+      if (p) logActivity(`⚽ El Administrador confirmó a ${p.firstName} ${p.lastName}.`);
       setJustConfirmed(true);
       setTimeout(() => setJustConfirmed(false), 2000);
     }
@@ -204,58 +212,78 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
           </button>
         </div>
         
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          {confirmedPlayers.map((player, index) => {
-            const isTitular = index < 24;
-            return (
-            <div key={player.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'rgba(0,0,0,0.03)', borderRadius: '16px', border: '1px solid rgba(0,0,0,0.05)' }}>
-              
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{ fontWeight: 'bold', color: 'var(--light-text-muted)', width: '25px', textAlign: 'right' }}>#{index + 1}</div>
-                <div className="avatar-placeholder">{player.firstName.charAt(0)}</div>
-                <div>
-                  <div style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--light-text)' }}>
-                    {player.firstName} {player.nickname ? <span style={{ color: 'var(--accent-warning)' }}>"{player.nickname}"</span> : ''} {player.lastName}
-                  </div>
-                  <div style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-                     <span style={{ background: isTitular ? 'var(--accent-neon)' : 'var(--accent-danger)', color: 'black', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold', fontSize: '0.7rem' }}>
-                        {isTitular ? 'TITULAR' : 'ALTERNO'}
-                     </span>
-                     <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--light-text-muted)' }}><Shield size={12} /> OVR {player.ovr}</span>
-                     
-                     {player.status === 'frequent' && (
-                       <span style={{ background: 'rgba(255,193,7,0.2)', color: 'var(--accent-warning)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                         🍻 Toma Biela
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {confirmedPlayers.map((player, index) => {
+              const isTitular = index < 24;
+              return (
+              <div key={player.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'rgba(0,0,0,0.03)', borderRadius: '16px', border: '1px solid rgba(0,0,0,0.05)' }}>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{ fontWeight: 'bold', color: 'var(--light-text-muted)', width: '25px', textAlign: 'right' }}>#{index + 1}</div>
+                  <div className="avatar-placeholder">{player.firstName.charAt(0)}</div>
+                  <div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--light-text)' }}>
+                      {player.firstName} {player.nickname ? <span style={{ color: 'var(--accent-warning)' }}>"{player.nickname}"</span> : ''} {player.lastName}
+                    </div>
+                    <div style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
+                       <span style={{ background: isTitular ? 'var(--accent-neon)' : 'var(--accent-danger)', color: 'black', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold', fontSize: '0.7rem' }}>
+                          {isTitular ? 'TITULAR' : 'ALTERNO'}
                        </span>
-                     )}
-                     {player.status === 'occasional' && (
-                       <span style={{ background: 'rgba(239,68,68,0.2)', color: 'var(--accent-danger)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                         🚫 Castigado / Ocasional
-                       </span>
-                     )}
+                       <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--light-text-muted)' }}><Shield size={12} /> OVR {player.ovr}</span>
+                       
+                       {player.status === 'frequent' && (
+                         <span style={{ background: 'rgba(255,193,7,0.2)', color: 'var(--accent-warning)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                           🍻 Toma Biela
+                         </span>
+                       )}
+                       {player.status === 'occasional' && (
+                         <span style={{ background: 'rgba(239,68,68,0.2)', color: 'var(--accent-danger)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                           🚫 Castigado / Ocasional
+                         </span>
+                       )}
+                    </div>
                   </div>
                 </div>
+                
+                {isAdmin && (
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button className="btn" style={{ padding: '0.5rem', background: 'transparent', color: 'var(--accent-danger)' }} onClick={() => handleRemove(player.id)}>
+                      <Trash2 size={20} />
+                    </button>
+                  </div>
+                )}
               </div>
-              
-              {isAdmin && (
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <button className="btn" style={{ padding: '0.5rem', background: 'transparent', color: 'var(--accent-danger)' }} onClick={() => handleRemove(player.id)}>
-                    <Trash2 size={20} />
-                  </button>
-                </div>
-              )}
-            </div>
-            );
-          })}
-          {confirmedPlayers.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--light-text-muted)' }}>
-              Aún no hay confirmados para esta jornada.
-            </div>
-          )}
+              );
+            })}
+            {confirmedPlayers.length === 0 && (
+              <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--light-text-muted)' }}>
+                Aún no hay confirmados para esta jornada.
+              </div>
+            )}
+          </div>
         </div>
+
+        {/* Activity Log / Feed */}
+        <div className="glass-panel-dark" style={{ background: 'rgba(15,23,42,0.8)' }}>
+          <h3 className="title-main" style={{ fontSize: '1.2rem', margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <MessageSquare size={20} color="var(--accent-neon)" /> Actividad Reciente
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '300px', overflowY: 'auto', paddingRight: '10px' }}>
+            {(!activityLog || activityLog.length === 0) ? (
+              <p style={{ color: 'var(--dark-text-muted)', fontSize: '0.9rem', textAlign: 'center' }}>No hay actividad reciente en esta jornada.</p>
+            ) : (
+              activityLog.map((log) => (
+                <div key={log.id} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '8px' }}>
+                  <div style={{ color: 'var(--accent-warning)', fontSize: '0.7rem', minWidth: '45px', paddingTop: '2px' }}>{log.time}</div>
+                  <div style={{ color: 'var(--light-text)', fontSize: '0.9rem', flex: 1 }}>{log.text}</div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        </>
+        )}
       </div>
-      </>
-      )}
-    </div>
   );
 }
