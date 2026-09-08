@@ -17,8 +17,8 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
 
   const loggedInPlayer = allPlayers.find(p => p.email === user.email);
 
-  const logActivity = (message) => {
-    setActivityLog(prev => [{ id: Date.now(), text: message, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }, ...(prev || [])].slice(0, 30));
+  const logActivity = (message, meta = {}) => {
+    setActivityLog(prev => [{ id: Date.now(), text: message, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), ...meta }, ...(prev || [])].slice(0, 30));
   };
 
   const handleExportPDF = () => {
@@ -161,7 +161,11 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
     const confirmedIdsStr = (activeSession.confirmedIds || []).map(String);
     if (!confirmedIdsStr.includes(String(pid))) {
       updateConfirmedPlayers([...(activeSession.confirmedIds || []), pid]);
-      logActivity(`⚽ ${p.firstName} ${p.lastName} acaba de confirmar su asistencia.`);
+      logActivity(`⚽ ${p.firstName} ${p.lastName} acaba de confirmar su asistencia.`, { 
+        adminAction: true, 
+        adminName: user.user_metadata?.full_name || user.email, 
+        playerName: `${p.firstName} ${p.lastName}` 
+      });
       setJustConfirmed(true);
       setSearchPlayerText('');
       setTimeout(() => setJustConfirmed(false), 2000);
@@ -177,7 +181,11 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
     const playerObj = { id: newId, ...newPlayer, ratings: [] };
     setPlayersDB(prev => [...prev, playerObj]);
     updateConfirmedPlayers([...activeSession.confirmedIds, newId]);
-    logActivity(`⚽ ${newPlayer.firstName} ${newPlayer.lastName} acaba de confirmar su asistencia.`);
+    logActivity(`⚽ ${newPlayer.firstName} ${newPlayer.lastName} acaba de confirmar su asistencia.`, {
+      adminAction: true,
+      adminName: user.user_metadata?.full_name || user.email,
+      playerName: `${newPlayer.firstName} ${newPlayer.lastName}`
+    });
     setNewPlayer({ firstName: '', lastName: '', nickname: '' });
     setJustConfirmed(true);
     setTimeout(() => setJustConfirmed(false), 2000);
@@ -430,12 +438,18 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
             {(!activityLog || activityLog.length === 0) ? (
               <p style={{ color: 'var(--dark-text-muted)', fontSize: '0.9rem', textAlign: 'center' }}>No hay actividad reciente en esta jornada.</p>
             ) : (
-              activityLog.map((log) => (
-                <div key={log.id} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '8px' }}>
-                  <div style={{ color: 'var(--accent-warning)', fontSize: '0.7rem', minWidth: '45px', paddingTop: '2px' }}>{log.time}</div>
-                  <div style={{ color: 'var(--light-text)', fontSize: '0.9rem', flex: 1 }}>{log.text}</div>
-                </div>
-              ))
+              activityLog.map((log) => {
+                const displayText = (isAdmin && log.adminAction) 
+                  ? `⚽ El Administrador (${log.adminName.split('@')[0]}) confirmó a ${log.playerName}.`
+                  : log.text;
+
+                return (
+                  <div key={log.id} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '8px' }}>
+                    <div style={{ color: 'var(--accent-warning)', fontSize: '0.7rem', minWidth: '45px', paddingTop: '2px' }}>{log.time}</div>
+                    <div style={{ color: 'var(--light-text)', fontSize: '0.9rem', flex: 1 }}>{displayText}</div>
+                  </div>
+                );
+              })
             )}
           </div>
         </div>
