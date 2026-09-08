@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { UserPlus, Trash2, Edit2, CheckCircle2, Shield, Link as LinkIcon, MessageSquare } from 'lucide-react';
+import { UserPlus, Trash2, Edit2, CheckCircle2, Shield, Link as LinkIcon, MessageSquare, FileDown } from 'lucide-react';
 import { useSupabaseConfig } from '../hooks/useSupabase';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers, allPlayers, updateConfirmedPlayers, setPlayersDB }) {
   const [selectedPlayerId, setSelectedPlayerId] = useState('');
@@ -9,10 +11,78 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
   const [newPlayer, setNewPlayer] = useState({ firstName: '', lastName: '', nickname: '' });
   const [activityLog, setActivityLog] = useSupabaseConfig('activityLog', []);
 
+  const CAPTAINS = ['LUIS', 'SANTIAGO', 'FABRICIO', 'CARLOS'];
+
   const loggedInPlayer = allPlayers.find(p => p.email === user.email);
 
   const logActivity = (message) => {
-    setActivityLog(prev => [{ id: Date.now(), text: message, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }, ...(prev || [])].slice(0, 15));
+    setActivityLog(prev => [{ id: Date.now(), text: message, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }, ...(prev || [])].slice(0, 30));
+  };
+
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    // Header
+    doc.setFillColor(0, 0, 0);
+    doc.rect(0, 0, pageWidth, 45, 'F');
+    doc.setTextColor(225, 193, 110);
+    doc.setFontSize(28);
+    doc.setFont('helvetica', 'bold');
+    doc.text('LCDF', pageWidth / 2, 22, { align: 'center' });
+    doc.setFontSize(10);
+    doc.setTextColor(255, 255, 255);
+    doc.text('La Catedral del Fútbol', pageWidth / 2, 30, { align: 'center' });
+    doc.setFontSize(9);
+    doc.setTextColor(200, 200, 200);
+    doc.text(`${activeSession?.name || 'Jornada'} — ${activeSession?.date || new Date().toISOString().split('T')[0]}`, pageWidth / 2, 38, { align: 'center' });
+    
+    // Table
+    const titulares = confirmedPlayers.slice(0, 24);
+    const alternos = confirmedPlayers.slice(24);
+    
+    const bodyRows = [];
+    
+    titulares.forEach((p, i) => {
+      const isCaptain = CAPTAINS.some(c => p.firstName?.toUpperCase().includes(c));
+      bodyRows.push([
+        { content: `${i + 1}`, styles: { fontStyle: 'bold', halign: 'center' } },
+        { content: `${p.firstName} ${p.nickname ? `"${p.nickname}"` : ''} ${p.lastName}`, styles: isCaptain ? { fontStyle: 'bold', textColor: [225, 193, 110] } : {} },
+        { content: p.position || 'MCO', styles: { halign: 'center' } },
+        { content: isCaptain ? '⭐ CAPITÁN' : 'TITULAR', styles: isCaptain ? { fontStyle: 'bold', textColor: [225, 193, 110] } : { textColor: [34, 197, 94] } }
+      ]);
+    });
+    
+    if (alternos.length > 0) {
+      bodyRows.push([{ content: 'ALTERNOS', colSpan: 4, styles: { fillColor: [239, 68, 68], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center', fontSize: 10 } }]);
+      alternos.forEach((p, i) => {
+        bodyRows.push([
+          { content: `${24 + i + 1}`, styles: { fontStyle: 'bold', halign: 'center' } },
+          `${p.firstName} ${p.nickname ? `"${p.nickname}"` : ''} ${p.lastName}`,
+          { content: p.position || 'MCO', styles: { halign: 'center' } },
+          { content: 'ALTERNO', styles: { textColor: [239, 68, 68] } }
+        ]);
+      });
+    }
+
+    autoTable(doc, {
+      startY: 50,
+      head: [['#', 'JUGADOR', 'POS', 'ROL']],
+      body: bodyRows,
+      theme: 'grid',
+      headStyles: { fillColor: [30, 30, 30], textColor: [225, 193, 110], fontStyle: 'bold', fontSize: 10 },
+      styles: { fontSize: 9, cellPadding: 4 },
+      columnStyles: { 0: { cellWidth: 12 }, 2: { cellWidth: 18 }, 3: { cellWidth: 30 } },
+      alternateRowStyles: { fillColor: [245, 245, 245] }
+    });
+    
+    // Footer
+    const finalY = doc.lastAutoTable.finalY + 10;
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.text(`Generado por La Catedral del Fútbol — ${new Date().toLocaleString()}`, pageWidth / 2, finalY, { align: 'center' });
+    
+    doc.save(`LCDF_Lista_${activeSession?.date || 'jornada'}.pdf`);
   };
 
   const handleLinkAccount = (e) => {
@@ -200,16 +270,27 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
             <h2 className="title-main" style={{ fontSize: '1.3rem', margin: 0 }}>Lista Completa de la Jornada</h2>
             <span style={{ background: 'black', color: 'white', padding: '4px 12px', borderRadius: '100px', fontWeight: 'bold' }}>{confirmedPlayers.length} / 27</span>
           </div>
-          <button 
-            className="btn btn-dark" 
-            style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}
-            onClick={() => {
-              navigator.clipboard.writeText(`¡Es Hora de Jugar! Confirma tu asistencia en La Catedral del Fútbol:\n👉 ${window.location.origin}`);
-              alert('¡Link de invitación copiado al portapapeles!');
-            }}
-          >
-            <LinkIcon size={16} /> Compartir
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <button 
+              className="btn btn-dark" 
+              style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}
+              onClick={() => {
+                navigator.clipboard.writeText(`¡Es Hora de Jugar! Confirma tu asistencia en La Catedral del Fútbol:\n👉 ${window.location.origin}`);
+                alert('¡Link de invitación copiado al portapapeles!');
+              }}
+            >
+              <LinkIcon size={16} /> Compartir
+            </button>
+            {isAdmin && (
+              <button 
+                className="btn btn-neon" 
+                style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}
+                onClick={handleExportPDF}
+              >
+                <FileDown size={16} /> Exportar PDF
+              </button>
+            )}
+          </div>
         </div>
         
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>

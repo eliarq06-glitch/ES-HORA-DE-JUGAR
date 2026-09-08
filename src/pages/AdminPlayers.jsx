@@ -85,19 +85,39 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
       stars: p.stars || 3,
       status: p.status || 'active',
       cardType: p.cardType || 'default',
-      historicalGoals: p.historicalGoals || 0,
-      historicalAssists: p.historicalAssists || 0,
-      historicalChampionships: p.historicalChampionships || 0
+      position: p.position || 'MCO'
     });
   };
 
   const handleSaveEdit = (id) => {
     const oldPlayer = allPlayers.find(p => p.id === id);
+    const logs = [];
+    const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    const name = `${oldPlayer.firstName} ${oldPlayer.lastName}`;
+
     const oldStatus = oldPlayer?.status || 'active';
     const newStatus = editData.status || 'active';
-    if (oldPlayer && oldStatus !== newStatus) {
+    if (oldStatus !== newStatus) {
       const statusName = newStatus === 'injured' ? 'LESIONADO/AUSENTE' : newStatus === 'occasional' ? 'CASTIGADO/OCASIONAL' : newStatus === 'frequent' ? 'FRECUENTE (Toma Biela)' : 'ACTIVO';
-      setActivityLog(prev => [{ id: Date.now(), text: `⚠️ La Directiva cambió el estado de ${oldPlayer.firstName} ${oldPlayer.lastName} a: ${statusName}`, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }, ...(prev || [])].slice(0, 15));
+      logs.push({ id: Date.now(), text: `⚠️ La Directiva cambió el estado de ${name} a: ${statusName}`, time });
+    }
+
+    const cardNames = { default: 'Por Defecto', blue: 'Ultimate Blue', white: 'Icon White', black: 'TOTW Black', gold: 'Rare Gold', bronze: 'Bronze' };
+    if ((oldPlayer?.cardType || 'default') !== (editData.cardType || 'default')) {
+      logs.push({ id: Date.now() + 1, text: `🃏 ${name} ahora tiene carta FIFA: ${cardNames[editData.cardType] || editData.cardType}`, time });
+    }
+
+    if ((oldPlayer?.position || 'MCO') !== (editData.position || 'MCO')) {
+      logs.push({ id: Date.now() + 2, text: `🔄 ${name} cambió de posición a: ${editData.position}`, time });
+    }
+
+    const oldStars = oldPlayer?.stars || 3;
+    if (oldStars !== parseInt(editData.stars)) {
+      logs.push({ id: Date.now() + 3, text: `⭐ ${name} ahora es Bombo ${6 - parseInt(editData.stars)} (${editData.stars} Estrellas)`, time });
+    }
+
+    if (logs.length > 0) {
+      setActivityLog(prev => [...logs, ...(prev || [])].slice(0, 30));
     }
 
     setPlayersDB(prev => prev.map(p => p.id === id ? { 
@@ -109,9 +129,7 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
       stars: parseInt(editData.stars),
       status: editData.status,
       cardType: editData.cardType,
-      historicalGoals: parseInt(editData.historicalGoals) || 0,
-      historicalAssists: parseInt(editData.historicalAssists) || 0,
-      historicalChampionships: parseInt(editData.historicalChampionships) || 0
+      position: editData.position
     } : p));
     setEditingId(null);
   };
@@ -278,9 +296,24 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
                     </select>
                   </div>
                   
-                  <div style={{ flex: 1, minWidth: '100px' }}><label style={{fontSize:'0.7rem', color:'gray'}}>Hist. Goles</label><input type="number" min="0" className="input-dark" value={editData.historicalGoals} onChange={e => setEditData({...editData, historicalGoals: e.target.value})} style={{ width: '100%' }} /></div>
-                  <div style={{ flex: 1, minWidth: '100px' }}><label style={{fontSize:'0.7rem', color:'gray'}}>Hist. Asist.</label><input type="number" min="0" className="input-dark" value={editData.historicalAssists} onChange={e => setEditData({...editData, historicalAssists: e.target.value})} style={{ width: '100%' }} /></div>
-                  <div style={{ flex: 1, minWidth: '100px' }}><label style={{fontSize:'0.7rem', color:'gray'}}>Hist. Campeón</label><input type="number" min="0" className="input-dark" value={editData.historicalChampionships} onChange={e => setEditData({...editData, historicalChampionships: e.target.value})} style={{ width: '100%' }} /></div>
+                  <div style={{ flex: 1, minWidth: '100px' }}>
+                    <label style={{fontSize:'0.7rem', color:'gray'}}>Posición</label>
+                    <select className="input-dark" value={editData.position || 'MCO'} onChange={e => setEditData({...editData, position: e.target.value})} style={{ width: '100%' }}>
+                      <option value="POR">POR</option>
+                      <option value="DFC">DFC</option>
+                      <option value="LI">LI</option>
+                      <option value="LD">LD</option>
+                      <option value="MCD">MCD</option>
+                      <option value="MC">MC</option>
+                      <option value="MCO">MCO</option>
+                      <option value="MI">MI</option>
+                      <option value="MD">MD</option>
+                      <option value="EI">EI</option>
+                      <option value="ED">ED</option>
+                      <option value="DC">DC</option>
+                      <option value="DEL">DEL</option>
+                    </select>
+                  </div>
 
                   <div style={{ flex: 1.5, minWidth: '150px' }}><label style={{fontSize:'0.7rem', color:'gray'}}>Email Vinculado</label><input type="email" className="input-dark" placeholder="Email vinculado" value={editData.email} onChange={e => setEditData({...editData, email: e.target.value})} style={{ width: '100%' }} /></div>
 
