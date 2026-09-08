@@ -421,14 +421,14 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
                 <p style={{ color: 'var(--dark-text-muted)', fontSize: '0.9rem', textAlign: 'center' }}>No hay actividad reciente en esta jornada.</p>
               ) : (
                 activityLog.map((log) => {
-                  const displayText = (log.adminAction) 
+                  const displayText = log.adminAction 
                     ? `⚽ El Administrador (${log.adminName?.split('@')[0]}) confirmó a ${log.playerName}.`
                     : log.text;
 
                   return (
                     <div key={log.id} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '8px' }}>
                       <div style={{ color: 'var(--accent-warning)', fontSize: '0.7rem', minWidth: '45px', paddingTop: '2px' }}>{log.time}</div>
-                      <div style={{ color: 'var(--light-text)', fontSize: '0.9rem', flex: 1 }}>{displayText}</div>
+                      <div style={{ color: 'white', fontSize: '0.9rem', flex: 1 }}>{displayText}</div>
                     </div>
                   );
                 })
