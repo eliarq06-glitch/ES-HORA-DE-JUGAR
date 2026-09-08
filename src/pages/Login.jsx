@@ -6,9 +6,11 @@ export default function Login({ onBack, allPlayers = [], setPlayersDB, activeSes
   const [isRegistering, setIsRegistering] = useState(false);
   
   // Form fields
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [nickname, setNickname] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [selectedPlayerId, setSelectedPlayerId] = useState('');
   const [position, setPosition] = useState('MCO');
   
   const [error, setError] = useState('');
@@ -21,9 +23,34 @@ export default function Login({ onBack, allPlayers = [], setPlayersDB, activeSes
 
     try {
       if (isRegistering) {
-        const player = allPlayers.find(p => p.email && p.email.toLowerCase().trim() === email.toLowerCase().trim());
+        if (!firstName || !lastName || !nickname) {
+           throw new Error("Nombre, Apellido y Apodo son obligatorios para registrarse.");
+        }
+
+        let player = allPlayers.find(p => p.email && p.email.toLowerCase().trim() === email.toLowerCase().trim());
+        
         if (!player) {
-          throw new Error('No autorizado. El Administrador (Lucho/Víctor) debe crear tu perfil y vincular este correo en la Plantilla General antes de registrarte.');
+           // Create a new player!
+           const newId = Date.now();
+           player = {
+             id: newId,
+             firstName: firstName.toUpperCase(),
+             lastName: lastName.toUpperCase(),
+             nickname: nickname.toUpperCase(),
+             email: email.toLowerCase().trim(),
+             position,
+             ratings: [],
+             stars: 3,
+             status: 'active'
+           };
+           if (setPlayersDB) {
+              setPlayersDB(prev => [...prev, player]);
+           }
+        } else {
+           // Update position for existing player
+           if (setPlayersDB) {
+              setPlayersDB(prev => prev.map(p => p.id === player.id ? { ...p, position } : p));
+           }
         }
         
         const derivedFullName = `${player.firstName} ${player.lastName}`.trim().toUpperCase();
@@ -45,11 +72,6 @@ export default function Login({ onBack, allPlayers = [], setPlayersDB, activeSes
           }
           throw signUpError;
         }
-        
-        // Actualizamos la posición si la cambiaron al registrarse
-        if (setPlayersDB) {
-           setPlayersDB(prev => prev.map(p => p.id === player.id ? { ...p, position } : p));
-        }
 
         // AUTO-CONFIRM IN ACTIVE SESSION
         if (activeSession && updateConfirmedPlayers) {
@@ -58,7 +80,7 @@ export default function Login({ onBack, allPlayers = [], setPlayersDB, activeSes
            }
         }
 
-        alert('¡Registro exitoso! Has sido confirmado automáticamente para la jornada si hay una activa.');
+        alert('¡Registro exitoso! Tu perfil ha sido creado. Has sido confirmado automáticamente para la jornada si hay una activa.');
         setIsRegistering(false);
       } else {
         // Login
@@ -114,30 +136,44 @@ export default function Login({ onBack, allPlayers = [], setPlayersDB, activeSes
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         
         {isRegistering && (
-          <div className="form-group" style={{ margin: 0, textAlign: 'left' }}>
-            <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px dashed var(--accent-warning)', padding: '1rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.85rem', color: 'var(--accent-warning)' }}>
-              <strong>Aviso:</strong> Para poder registrarte, el Administrador debe haber creado tu perfil en la Plantilla General y haber vinculado tu correo electrónico exacto.
-            </div>
+          <div className="form-group" style={{ margin: 0, textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--dark-text-muted)' }}><User size={16} /> Tu Posición Principal</label>
-            <select
-              className="input-dark" 
-              value={position} 
-              onChange={(e) => setPosition(e.target.value)} 
-              required={isRegistering}
-              style={{ width: '100%' }}
-            >
-              <option value="POR">Portero (POR)</option>
-              <option value="DEF">Defensa Central (DEF)</option>
-              <option value="LD">Lateral Derecho (LD)</option>
-              <option value="LI">Lateral Izquierdo (LI)</option>
-              <option value="MCD">Medio Centro Defensivo (MCD)</option>
-              <option value="MC">Medio Centro (MC)</option>
-              <option value="MCO">Medio Centro Ofensivo (MCO)</option>
-              <option value="ED">Extremo Derecho (ED)</option>
-              <option value="EI">Extremo Izquierdo (EI)</option>
-              <option value="DC">Delantero Centro (DC)</option>
-            </select>
+            <div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--dark-text-muted)' }}><User size={16} /> Tu Nombre (En mayúsculas)</label>
+              <input type="text" className="input-dark" value={firstName} onChange={e => setFirstName(e.target.value.toUpperCase())} required={isRegistering} style={{ width: '100%' }} />
+            </div>
+
+            <div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--dark-text-muted)' }}><User size={16} /> Tu Apellido (En mayúsculas)</label>
+              <input type="text" className="input-dark" value={lastName} onChange={e => setLastName(e.target.value.toUpperCase())} required={isRegistering} style={{ width: '100%' }} />
+            </div>
+
+            <div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--dark-text-muted)' }}><User size={16} /> Apodo (Cómo te dicen en la cancha)</label>
+              <input type="text" className="input-dark" value={nickname} onChange={e => setNickname(e.target.value.toUpperCase())} required={isRegistering} style={{ width: '100%' }} />
+            </div>
+
+            <div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--dark-text-muted)' }}><User size={16} /> Tu Posición Principal</label>
+              <select
+                className="input-dark" 
+                value={position} 
+                onChange={(e) => setPosition(e.target.value)} 
+                required={isRegistering}
+                style={{ width: '100%' }}
+              >
+                <option value="POR">Portero (POR)</option>
+                <option value="DEF">Defensa Central (DEF)</option>
+                <option value="LD">Lateral Derecho (LD)</option>
+                <option value="LI">Lateral Izquierdo (LI)</option>
+                <option value="MCD">Medio Centro Defensivo (MCD)</option>
+                <option value="MC">Medio Centro (MC)</option>
+                <option value="MCO">Medio Centro Ofensivo (MCO)</option>
+                <option value="ED">Extremo Derecho (ED)</option>
+                <option value="EI">Extremo Izquierdo (EI)</option>
+                <option value="DC">Delantero Centro (DC)</option>
+              </select>
+            </div>
           </div>
         )}
 

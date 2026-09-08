@@ -276,8 +276,10 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
                   <div style={{ flex: 1, minWidth: '100px' }}>
                     <label style={{fontSize:'0.7rem', color:'gray'}}>Estado</label>
                     <select className="input-dark" value={editData.status || 'active'} onChange={e => setEditData({...editData, status: e.target.value})} style={{ width: '100%' }}>
-                      <option value="active">Activo</option>
-                      <option value="injured">Lesionado / Ausente</option>
+                      <option value="frequent">Frecuente (Toma Biela)</option>
+                      <option value="active">Activo (Normal)</option>
+                      <option value="occasional">Ocasional (Ausente / Castigado)</option>
+                      <option value="injured">Lesionado (Descartado)</option>
                     </select>
                   </div>
                   

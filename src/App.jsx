@@ -156,9 +156,27 @@ function App() {
 
   const activeSession = sessions.find(s => s.id === activeSessionId) || null;
   const allPlayers = getPlayersWithStats();
-  // Preserve confirmation order for Titulares (1-24) vs Alternos (25+)
+  const getStatusWeight = (status) => {
+    switch(status) {
+      case 'frequent': return 1;
+      case 'active': return 2;
+      case 'occasional': return 3;
+      case 'injured': return 4;
+      default: return 2; // active by default
+    }
+  };
+
   const confirmedPlayers = activeSession 
-    ? activeSession.confirmedIds.map(id => allPlayers.find(p => p.id === id)).filter(p => p) 
+    ? activeSession.confirmedIds
+        .map(id => allPlayers.find(p => p.id === id))
+        .filter(Boolean)
+        .sort((a, b) => {
+           const weightA = getStatusWeight(a.status);
+           const weightB = getStatusWeight(b.status);
+           if (weightA !== weightB) return weightA - weightB;
+           // If same status tier, preserve the chronological order they confirmed in
+           return activeSession.confirmedIds.indexOf(a.id) - activeSession.confirmedIds.indexOf(b.id);
+        })
     : [];
 
   const updateConfirmedPlayers = (newIds) => {

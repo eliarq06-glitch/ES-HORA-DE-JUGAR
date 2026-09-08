@@ -126,13 +126,18 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
               </p>
             </div>
           ) : (
-            <button 
-              className="btn btn-neon" 
-              style={{ fontSize: '1.5rem', padding: '1rem 2rem', width: '100%', maxWidth: '400px' }}
-              onClick={handleSelfConfirm}
-            >
-              Confirmar mi Asistencia
-            </button>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', width: '100%', maxWidth: '400px' }}>
+              <div style={{ background: 'rgba(255,193,7,0.1)', border: '1px solid var(--accent-warning)', padding: '1rem', borderRadius: '8px', color: 'var(--accent-warning)', fontSize: '0.85rem', textAlign: 'center' }}>
+                <strong>⚽ OJO CON TU POSICIÓN:</strong> Tu ubicación final (Titular o Alterno) dependerá de tu Estado en la base de datos. ¡Tendrán preferencia los verdaderos elementos que han <strong>"Tomado Biela"</strong> religiosamente! Los que recién asoman, no beben o están castigados irán al fondo de la lista 😂🍻
+              </div>
+              <button 
+                className="btn btn-neon" 
+                style={{ fontSize: '1.5rem', padding: '1rem 2rem', width: '100%' }}
+                onClick={handleSelfConfirm}
+              >
+                Confirmar mi Asistencia
+              </button>
+            </div>
           )}
         </div>
       )}
@@ -217,6 +222,17 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
                         {isTitular ? 'TITULAR' : 'ALTERNO'}
                      </span>
                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--light-text-muted)' }}><Shield size={12} /> OVR {player.ovr}</span>
+                     
+                     {player.status === 'frequent' && (
+                       <span style={{ background: 'rgba(255,193,7,0.2)', color: 'var(--accent-warning)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                         🍻 Toma Biela
+                       </span>
+                     )}
+                     {player.status === 'occasional' && (
+                       <span style={{ background: 'rgba(239,68,68,0.2)', color: 'var(--accent-danger)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                         🚫 Castigado / Ocasional
+                       </span>
+                     )}
                   </div>
                 </div>
               </div>
