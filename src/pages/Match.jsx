@@ -142,8 +142,8 @@ export default function Match({ teams, matchEvents, setMatchEvents, matches, set
           </h2>
           <div className="form-group" style={{ margin: 0 }}>
             <label>Seleccionar Partido Activo</label>
-            <select className="input-dark" value={activeMatchId} onChange={(e) => {
-              const newId = e.target.value;
+            <select className="input-dark" value={activeMatchId || ''} onChange={(e) => {
+              const newId = parseInt(e.target.value);
               setActiveMatchId(newId);
               const selectedM = matches.find(m => m.id === newId);
               const duration = selectedM?.isFinal ? 15 : 12;

@@ -337,11 +337,15 @@ export default function Champion({ teams, matches, matchEvents, onFinalize }) {
             <Share2 size={20} /> Compartir (Copiar Texto)
           </button>
           <button className="btn btn-danger" style={{ padding: '1rem 2rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--accent-danger)', color: 'black' }} onClick={() => {
-            if(window.confirm('¿Estás seguro de Finalizar el Torneo? Esto guardará las estadísticas en el Historial General y borrará el progreso para empezar una nueva jornada.')) {
-              onFinalize();
+            if(window.confirm('¿Estás seguro de Finalizar el Torneo? Esto guardará las estadísticas en el Historial General y borrará los equipos para empezar una nueva jornada.')) {
+              if (championTeam) {
+                onFinalize(championTeam.id);
+              } else {
+                alert("No se pudo determinar al equipo campeón.");
+              }
             }
           }}>
-            <Crown size={20} /> Cerrar Jornada y Guardar Historial
+            <Crown size={20} /> Cerrar Jornada y Sumar Campeonatos
           </button>
         </div>
       </div>

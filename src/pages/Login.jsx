@@ -27,10 +27,30 @@ export default function Login({ onBack, allPlayers = [], setPlayersDB, activeSes
            throw new Error("Nombre, Apellido y Apodo son obligatorios para registrarse.");
         }
 
+        const derivedFullName = `${firstName} ${lastName}`.trim().toUpperCase();
+
+        // Registro
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: email.toLowerCase().trim(),
+          password,
+          options: {
+            data: {
+              full_name: derivedFullName,
+            }
+          }
+        });
+        
+        if (signUpError) {
+          if (signUpError.message.includes('already registered')) {
+            throw new Error('Este correo ya está registrado. Por favor selecciona la opción "Inicia sesión".');
+          }
+          throw signUpError;
+        }
+
+        // Si el registro fue exitoso, creamos el jugador o actualizamos si ya existe
         let player = allPlayers.find(p => p.email && p.email.toLowerCase().trim() === email.toLowerCase().trim());
         
         if (!player) {
-           // Create a new player!
            const newId = Date.now();
            player = {
              id: newId,
@@ -47,30 +67,9 @@ export default function Login({ onBack, allPlayers = [], setPlayersDB, activeSes
               setPlayersDB(prev => [...prev, player]);
            }
         } else {
-           // Update position for existing player
            if (setPlayersDB) {
-              setPlayersDB(prev => prev.map(p => p.id === player.id ? { ...p, position } : p));
+              setPlayersDB(prev => prev.map(p => p.id === player.id ? { ...p, position, nickname: nickname.toUpperCase() } : p));
            }
-        }
-        
-        const derivedFullName = `${player.firstName} ${player.lastName}`.trim().toUpperCase();
-
-        // Registro
-        const { error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              full_name: derivedFullName,
-            }
-          }
-        });
-        
-        if (signUpError) {
-          if (signUpError.message.includes('already registered')) {
-            throw new Error('Este correo ya está registrado. Por favor selecciona la opción "Inicia sesión".');
-          }
-          throw signUpError;
         }
 
         // AUTO-CONFIRM IN ACTIVE SESSION

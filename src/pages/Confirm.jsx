@@ -139,7 +139,7 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
   };
 
   const handleRemove = (id) => {
-    updateConfirmedPlayers(activeSession.confirmedIds.filter(pid => pid !== id));
+    updateConfirmedPlayers(activeSession.confirmedIds.filter(pid => Number(pid) !== Number(id)));
   };
 
   return (

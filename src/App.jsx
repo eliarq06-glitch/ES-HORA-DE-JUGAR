@@ -143,6 +143,30 @@ function App() {
     await supabase.auth.signOut();
   };
 
+  const handleCloseTournament = (championTeamId) => {
+    if (!window.confirm('¿Estás seguro de cerrar esta jornada? Esto sumará un campeonato a los ganadores y limpiará los equipos para la próxima jornada.')) return;
+
+    const championTeam = teams.find(t => t.id === championTeamId);
+    if (championTeam) {
+       setPlayersDB(playersDB.map(p => {
+          if (championTeam.players.some(tp => tp.id === p.id)) {
+             return { ...p, historicalChampionships: (p.historicalChampionships || 0) + 1 };
+          }
+          return p;
+       }));
+    }
+
+    // Cambiar estado de la sesión a closed
+    if (activeSessionId) {
+      setSessions(sessions.map(s => s.id === activeSessionId ? { ...s, status: 'closed' } : s));
+    }
+
+    setTeams([]);
+    setMatches([]);
+    alert('¡Jornada cerrada exitosamente! Estadísticas actualizadas y estrellas asignadas.');
+    setRoute('ranking');
+  };
+
   const handleResetAll = () => {
     if(window.confirm('¿Estás seguro de borrar todos los datos del torneo? Esto no se puede deshacer y borrará los equipos y goles.')) {
       setPlayersDB(MOCK_PLAYERS);
@@ -369,7 +393,7 @@ function App() {
           {route === 'draw' && isAdmin && <Draw players={confirmedPlayers} activeSession={activeSession} teams={teams} setTeams={setTeams} />}
           {route === 'tournament' && isAdmin && <Tournament activeSession={activeSession} teams={teams} setTeams={setTeams} matchEvents={matchEvents} setMatchEvents={setMatchEvents} matches={matches} setMatches={setMatches} updateSession={updateSession} />}
           {route === 'match' && isAdmin && <Match activeSession={activeSession} teams={teams} matchEvents={matchEvents} setMatchEvents={setMatchEvents} updateSession={updateSession} matches={matches} setMatches={setMatches} />}
-          {route === 'champion' && isAdmin && <Champion teams={teams} matches={matches} matchEvents={matchEvents} onFinalize={handleFinalizeTournament} />}
+          {route === 'champion' && isAdmin && <Champion teams={teams} matches={matches} matchEvents={matchEvents} onFinalize={handleCloseTournament} />}
           {route === 'ratings' && isAdmin && <Ratings players={confirmedPlayers} updatePlayerRating={updatePlayerRating} matchEvents={matchEvents} activeSessionId={activeSessionId} />}
           {route === 'players' && <Players players={allPlayers} />}
           {route === 'history' && <History players={allPlayers} historicalTournaments={historicalTournaments} />}
