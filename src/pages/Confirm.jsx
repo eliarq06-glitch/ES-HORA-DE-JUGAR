@@ -39,7 +39,8 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
     
     // Table
     const titulares = confirmedPlayers.slice(0, 24);
-    const alternos = confirmedPlayers.slice(24);
+    const alternos = confirmedPlayers.slice(24, 30);
+    const lentotes = confirmedPlayers.slice(30);
     
     const bodyRows = [];
     
@@ -54,13 +55,25 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
     });
     
     if (alternos.length > 0) {
-      bodyRows.push([{ content: 'ALTERNOS', colSpan: 4, styles: { fillColor: [239, 68, 68], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center', fontSize: 10 } }]);
+      bodyRows.push([{ content: 'ALTERNOS', colSpan: 4, styles: { fillColor: [245, 158, 11], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center', fontSize: 10 } }]);
       alternos.forEach((p, i) => {
         bodyRows.push([
           { content: `${24 + i + 1}`, styles: { fontStyle: 'bold', halign: 'center' } },
-          `${p.firstName} ${p.nickname ? `"${p.nickname}"` : ''} ${p.lastName}`,
+          { content: `${p.firstName} ${p.nickname ? `"${p.nickname}"` : ''} ${p.lastName}`, styles: {} },
           { content: p.position || 'MCO', styles: { halign: 'center' } },
-          { content: 'ALTERNO', styles: { textColor: [239, 68, 68] } }
+          { content: 'ALTERNO', styles: { textColor: [245, 158, 11], fontStyle: 'bold' } }
+        ]);
+      });
+    }
+
+    if (lentotes.length > 0) {
+      bodyRows.push([{ content: 'LENTOTES (NO ALCANZARON)', colSpan: 4, styles: { fillColor: [239, 68, 68], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center', fontSize: 10 } }]);
+      lentotes.forEach((p, i) => {
+        bodyRows.push([
+          { content: `${30 + i + 1}`, styles: { fontStyle: 'bold', halign: 'center' } },
+          { content: `${p.firstName} ${p.nickname ? `"${p.nickname}"` : ''} ${p.lastName}`, styles: {} },
+          { content: p.position || 'MCO', styles: { halign: 'center' } },
+          { content: 'LENTOTE', styles: { textColor: [239, 68, 68], fontStyle: 'bold' } }
         ]);
       });
     }
@@ -161,24 +174,16 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
         <>
 
       {!loggedInPlayer && (
-        <div className="glass-panel-dark" style={{ border: '2px solid var(--accent-warning)', background: 'rgba(255,193,7,0.1)' }}>
-          <h2 className="title-main" style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--accent-warning)', margin: 0, marginBottom: '1rem' }}>
-            <LinkIcon size={28} /> Vincula tu Perfil
+        <div className="glass-panel-dark" style={{ border: '2px solid var(--accent-danger)', background: 'rgba(239,68,68,0.1)' }}>
+          <h2 className="title-main" style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--accent-danger)', margin: 0, marginBottom: '1rem' }}>
+            <LinkIcon size={28} /> Perfil No Vinculado
           </h2>
           <p style={{ color: 'white', marginBottom: '1.5rem' }}>
-            Hola <strong>{user.user_metadata?.full_name || user.email}</strong>, para poder confirmar tu asistencia necesitamos saber qué jugador de la base de datos eres tú. Selecciona tu nombre en la lista de abajo:
+            Hola <strong>{user.user_metadata?.full_name || user.email}</strong>, no hemos podido encontrar tu perfil en la lista general de jugadores.
           </p>
-          <form onSubmit={handleLinkAccount} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-            <select className="input-dark" style={{ flex: 1, minWidth: '200px' }} value={linkPlayerId} onChange={e => setLinkPlayerId(e.target.value)} required>
-              <option value="">-- Selecciona tu nombre --</option>
-              {allPlayers.filter(p => !p.email).sort((a,b) => a.firstName.localeCompare(b.firstName)).map(p => (
-                <option key={p.id} value={p.id}>{p.firstName} {p.lastName} {p.nickname ? `("${p.nickname}")` : ''}</option>
-              ))}
-            </select>
-            <button type="submit" className="btn btn-warning" style={{ background: 'var(--accent-warning)', color: 'black', fontWeight: 'bold' }}>
-              Vincular
-            </button>
-          </form>
+          <p style={{ color: 'var(--light-text-muted)', fontSize: '0.9rem' }}>
+            Para mantener el orden, ya no puedes vincular tu cuenta manualmente. Si el Administrador te agregó a la lista general, pídele que asocie tu correo (<strong>{user.email}</strong>) a tu ficha de jugador. Luego de que lo haga, simplemente recarga la página. Si eres un jugador nuevo, usa la opción "Crear Cuenta" al iniciar sesión.
+          </p>
         </div>
       )}
 
@@ -194,14 +199,13 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', color: 'var(--accent-neon)', fontWeight: 'bold' }}>
               <CheckCircle2 size={48} />
               <span style={{ fontSize: '1.5rem' }}>¡Estás Confirmado!</span>
-              <p style={{ color: 'var(--light-text-muted)', fontWeight: 'normal' }}>Nos vemos en la cancha.</p>
-            </div>
-          ) : activeSession.status === 'locked' || activeSession.confirmedIds.length >= 27 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', color: 'var(--accent-danger)', fontWeight: 'bold', padding: '1rem', border: '2px dashed var(--accent-danger)', borderRadius: '16px', background: 'rgba(239, 68, 68, 0.05)' }}>
-              <div style={{ fontSize: '1.5rem' }}>¡CUPOS LLENOS! 🚫</div>
-              <p style={{ color: 'var(--light-text)', fontWeight: 'normal', fontSize: '1.1rem', margin: 0 }}>
-                Ya no entraste en esta convocatoria...<br/>deberías inscribirte más temprano ¡Bolsa! 😂
+              <p style={{ color: 'var(--light-text-muted)', fontWeight: 'normal' }}>
+                Tu lugar en la lista se actualiza en tiempo real. ¡Nos vemos en la cancha!
               </p>
+            </div>
+          ) : activeSession.status === 'locked' ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', color: 'var(--accent-danger)', fontWeight: 'bold', padding: '1rem', border: '2px dashed var(--accent-danger)', borderRadius: '16px', background: 'rgba(239, 68, 68, 0.05)' }}>
+              <div style={{ fontSize: '1.5rem' }}>¡CONVOCATORIA CERRADA! 🚫</div>
             </div>
           ) : (
             <div style={{ margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', width: '100%', maxWidth: '400px' }}>
@@ -263,14 +267,15 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
         </div>
       )}
 
-      {/* Lista de Confirmados visible para todos */}
-      <div className="glass-panel-light" style={{ background: 'rgba(255,255,255,0.95)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+      {/* Lista de Confirmados visible solo para ADMIN */}
+      {isAdmin && (
+        <div className="glass-panel-dark" style={{ background: 'rgba(0,0,0,0.4)', padding: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <div>
             <h2 className="title-main" style={{ fontSize: '1.3rem', margin: 0 }}>Lista Completa de la Jornada</h2>
-            <span style={{ background: 'black', color: 'white', padding: '4px 12px', borderRadius: '100px', fontWeight: 'bold' }}>{confirmedPlayers.length} / 27</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <span style={{ background: 'black', color: 'white', padding: '4px 12px', borderRadius: '100px', fontWeight: 'bold' }}>{confirmedPlayers.length} Confirmados</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
             <button 
               className="btn btn-dark" 
               style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}
@@ -281,21 +286,27 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
             >
               <LinkIcon size={16} /> Compartir
             </button>
-            {isAdmin && (
-              <button 
+            <button 
                 className="btn btn-neon" 
                 style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}
                 onClick={handleExportPDF}
               >
                 <FileDown size={16} /> Exportar PDF
               </button>
-            )}
+            </div>
           </div>
-        </div>
         
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {confirmedPlayers.map((player, index) => {
               const isTitular = index < 24;
+              const isAlterno = index >= 24 && index < 30;
+              const isLentote = index >= 30;
+              
+              let badgeColor = 'var(--accent-neon)';
+              let badgeText = 'TITULAR';
+              if (isAlterno) { badgeColor = 'var(--accent-warning)'; badgeText = 'ALTERNO'; }
+              if (isLentote) { badgeColor = 'var(--accent-danger)'; badgeText = 'LENTOTE 😂'; }
+
               return (
               <div key={player.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'rgba(0,0,0,0.03)', borderRadius: '16px', border: '1px solid rgba(0,0,0,0.05)' }}>
                 
@@ -307,8 +318,8 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
                       {player.firstName} {player.nickname ? <span style={{ color: 'var(--accent-warning)' }}>"{player.nickname}"</span> : ''} {player.lastName}
                     </div>
                     <div style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
-                       <span style={{ background: isTitular ? 'var(--accent-neon)' : 'var(--accent-danger)', color: 'black', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold', fontSize: '0.7rem' }}>
-                          {isTitular ? 'TITULAR' : 'ALTERNO'}
+                       <span style={{ background: badgeColor, color: 'black', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold', fontSize: '0.7rem' }}>
+                          {badgeText}
                        </span>
                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--light-text-muted)' }}><Shield size={12} /> OVR {player.ovr}</span>
                        
@@ -343,6 +354,7 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
             )}
           </div>
         </div>
+      )}
 
         {/* Activity Log / Feed */}
         <div className="glass-panel-dark" style={{ background: 'rgba(15,23,42,0.8)' }}>

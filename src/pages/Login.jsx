@@ -50,6 +50,11 @@ export default function Login({ onBack, allPlayers = [], setPlayersDB, activeSes
         // Si el registro fue exitoso, creamos el jugador o actualizamos si ya existe
         let player = allPlayers.find(p => p.email && p.email.toLowerCase().trim() === email.toLowerCase().trim());
         
+        // Si no lo encuentra por correo, lo busca por Nombre y Apellido exactos (por si el admin lo creó manualmente)
+        if (!player) {
+           player = allPlayers.find(p => p.firstName.toUpperCase() === firstName.toUpperCase() && p.lastName.toUpperCase() === lastName.toUpperCase());
+        }
+
         if (!player) {
            const newId = Date.now();
            player = {
@@ -57,18 +62,24 @@ export default function Login({ onBack, allPlayers = [], setPlayersDB, activeSes
              firstName: firstName.toUpperCase(),
              lastName: lastName.toUpperCase(),
              nickname: nickname.toUpperCase(),
-             email: email.toLowerCase().trim(),
              position,
+             email: email.toLowerCase().trim(),
              ratings: [],
+             historicalGoals: 0,
+             historicalAssists: 0,
+             historicalFouls: 0,
+             historicalChampionships: 0,
+             status: 'active',
              stars: 3,
-             status: 'active'
+             cardType: 'base',
+             photoUrl: ''
            };
            if (setPlayersDB) {
               setPlayersDB(prev => [...prev, player]);
            }
         } else {
            if (setPlayersDB) {
-              setPlayersDB(prev => prev.map(p => p.id === player.id ? { ...p, position, nickname: nickname.toUpperCase() } : p));
+              setPlayersDB(prev => prev.map(p => p.id === player.id ? { ...p, position, nickname: nickname.toUpperCase(), email: email.toLowerCase().trim() } : p));
            }
         }
 
