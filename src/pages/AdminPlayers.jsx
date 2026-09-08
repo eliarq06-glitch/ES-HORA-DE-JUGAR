@@ -289,6 +289,39 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
       </div>
 
       <div className="glass-panel-dark">
+        {(() => {
+          const seen = new Set();
+          const dups = [];
+          allPlayers.forEach(p => {
+            const key = p.email ? p.email.toLowerCase() : `${p.firstName.toLowerCase()}-${p.lastName?.toLowerCase() || ''}`;
+            if (seen.has(key)) {
+              if (!dups.find(d => d.firstName === p.firstName && d.lastName === p.lastName)) {
+                dups.push(p);
+              }
+            } else {
+              seen.add(key);
+            }
+          });
+
+          if (dups.length > 0) {
+            return (
+              <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid var(--accent-danger)', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
+                <h4 style={{ color: 'var(--accent-danger)', margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <ShieldAlert size={18} /> ¡ADVERTENCIA: Jugadores Duplicados!
+                </h4>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: 'white' }}>
+                  El sistema detectó jugadores repetidos (mismo nombre/apellido o correo): 
+                  <strong style={{ color: 'var(--accent-warning)', marginLeft: '0.5rem' }}>
+                    {dups.map(d => `${d.firstName} ${d.lastName}`).join(', ')}
+                  </strong>. 
+                  Por favor, busca a estos jugadores en la lista y elimina el registro que sobre (o el que no tenga correo vinculado).
+                </p>
+              </div>
+            );
+          }
+          return null;
+        })()}
+
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
           <h3 style={{ margin: 0, color: 'var(--accent-neon)' }}>Plantilla General (Todos los jugadores)</h3>
           
@@ -411,7 +444,13 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
                   {isGlobalAdmin && (
                     <div style={{ minWidth: '150px' }}>
                       {(() => {
-                        const matchingProfile = p.email ? profiles.find(pr => pr.email?.toLowerCase() === p.email.toLowerCase()) : null;
+                        const matchingProfile = profiles.find(pr => {
+                          const matchByEmail = pr.email && p.email && pr.email.toLowerCase() === p.email.toLowerCase();
+                          const matchByName = pr.full_name && p.firstName && 
+                            pr.full_name.toLowerCase().includes(p.firstName.toLowerCase()) && 
+                            (!p.lastName || pr.full_name.toLowerCase().includes(p.lastName.toLowerCase()));
+                          return matchByEmail || matchByName;
+                        });
                         if (!matchingProfile) return <span style={{ fontSize: '0.7rem', color: 'gray' }}>No Autenticado</span>;
                         
                         return (
