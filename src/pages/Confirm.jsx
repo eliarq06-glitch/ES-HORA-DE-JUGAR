@@ -11,6 +11,7 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
   const [justConfirmed, setJustConfirmed] = useState(false);
   const [newPlayer, setNewPlayer] = useState({ firstName: '', lastName: '', nickname: '' });
   const [activityLog, setActivityLog] = useSupabaseConfig('activityLog', []);
+  const [selectedCaptains, setSelectedCaptains] = useState([]);
 
   const CAPTAINS = ['LUIS', 'SANTIAGO', 'FABRICIO', 'CARLOS'];
 
@@ -26,7 +27,7 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
     
     // Header
     doc.setFillColor(0, 0, 0);
-    doc.rect(0, 0, pageWidth, 45, 'F');
+    doc.rect(0, 0, pageWidth, 55, 'F');
     doc.setTextColor(225, 193, 110);
     doc.setFontSize(28);
     doc.setFont('helvetica', 'bold');
@@ -38,6 +39,17 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
     doc.setTextColor(200, 200, 200);
     doc.text(`${activeSession?.name || 'Jornada'} — ${activeSession?.date || new Date().toISOString().split('T')[0]}`, pageWidth / 2, 38, { align: 'center' });
     
+    let startY = 60;
+    if (activeSession?.status === 'locked' || activeSession?.status === 'closed') {
+      doc.setFontSize(11);
+      doc.setTextColor(34, 197, 94); // Green text
+      doc.setFont('helvetica', 'bold');
+      doc.text("SE HA CERRADO LA CONVOCATORIA. LOS SELECCIONADOS Y CAPITANES SON LOS SIGUIENTES:", pageWidth / 2, 48, { align: 'center' });
+      startY = 60;
+    } else {
+      startY = 50;
+    }
+
     // Table
     const titulares = confirmedPlayers.slice(0, 24);
     const alternos = confirmedPlayers.slice(24, 30);
@@ -46,7 +58,7 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
     const bodyRows = [];
     
     titulares.forEach((p, i) => {
-      const isCaptain = CAPTAINS.some(c => p.firstName?.toUpperCase().includes(c));
+      const isCaptain = selectedCaptains.includes(p.id);
       bodyRows.push([
         { content: `${i + 1}`, styles: { fontStyle: 'bold', halign: 'center' } },
         { content: `${p.firstName} ${p.nickname ? `"${p.nickname}"` : ''} ${p.lastName}`, styles: isCaptain ? { fontStyle: 'bold', textColor: [225, 193, 110] } : {} },
@@ -80,7 +92,7 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
     }
 
     autoTable(doc, {
-      startY: 50,
+      startY: startY,
       head: [['#', 'JUGADOR', 'POS', 'ROL']],
       body: bodyRows,
       theme: 'grid',
@@ -178,22 +190,19 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '100%', maxWidth: '600px' }}>
       
-      {(!activeSession || activeSession.status === 'closed' || activeSession.status === 'locked') && (
+      {(!activeSession || activeSession.status === 'closed' || activeSession.status === 'locked') && !isAdmin && (
         <div className="glass-panel-light" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
-          <h2 className="title-main" style={{ fontSize: '2rem', marginBottom: '1rem', color: 'var(--light-text)' }}>NO HAY CONVOCATORIA ABIERTA</h2>
+          <h2 className="title-main" style={{ fontSize: '2rem', marginBottom: '1rem', color: 'var(--light-text)' }}>CONVOCATORIA CERRADA</h2>
           <p style={{ color: 'var(--light-text-muted)', fontSize: '1.2rem', marginBottom: '2rem' }}>
-            Para confirmar jugadores, el administrador debe crear o activar una nueva jornada en estado Abierto.
+            Esta jornada ha sido cerrada por el administrador. ¡Nos vemos en la cancha!
           </p>
-          {isAdmin && (
-            <p style={{ color: 'var(--light-text)', fontWeight: 'bold' }}>Ve a la pestaña "Jornadas" para crear o reanudar una.</p>
-          )}
         </div>
       )}
 
-      {(activeSession && activeSession.status !== 'closed' && activeSession.status !== 'locked') && (
+      {activeSession && (
         <>
 
-      {!loggedInPlayer && (
+      {(!loggedInPlayer && activeSession.status !== 'locked' && activeSession.status !== 'closed' && !isAdmin) && (
         <div className="glass-panel-dark" style={{ border: '2px solid var(--accent-danger)', background: 'rgba(239,68,68,0.1)' }}>
           <h2 className="title-main" style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--accent-danger)', margin: 0, marginBottom: '1rem' }}>
             <LinkIcon size={28} /> Perfil No Vinculado
@@ -202,12 +211,12 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
             Hola <strong>{user.user_metadata?.full_name || user.email}</strong>, no hemos podido encontrar tu perfil en la lista general de jugadores.
           </p>
           <p style={{ color: 'var(--light-text-muted)', fontSize: '0.9rem' }}>
-            Para mantener el orden, ya no puedes vincular tu cuenta manualmente. Si el Administrador te agregó a la lista general, pídele que asocie tu correo (<strong>{user.email}</strong>) a tu ficha de jugador. Luego de que lo haga, simplemente recarga la página. Si eres un jugador nuevo, usa la opción "Crear Cuenta" al iniciar sesión.
+            Para mantener el orden, ya no puedes vincular tu cuenta manualmente. Si el Administrador te agregó a la lista general, pídele que asocie tu correo a tu ficha de jugador. Luego de que lo haga, simplemente recarga la página.
           </p>
         </div>
       )}
 
-      {loggedInPlayer && (
+      {(loggedInPlayer && !isAdmin) && (
         <div className="glass-panel-light" style={{ textAlign: 'center', padding: '3rem 1rem' }}>
           <div className="avatar-placeholder" style={{ width: '80px', height: '80px', fontSize: '2.5rem', margin: '0 auto 1.5rem auto', boxShadow: '0 0 20px var(--accent-neon)' }}>
             {loggedInPlayer.firstName.charAt(0)}
@@ -244,7 +253,7 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
                 </div>
               );
             })()
-          ) : activeSession.status === 'locked' ? (
+          ) : (activeSession.status === 'locked' || activeSession.status === 'closed') ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', color: 'var(--accent-danger)', fontWeight: 'bold', padding: '1rem', border: '2px dashed var(--accent-danger)', borderRadius: '16px', background: 'rgba(239, 68, 68, 0.05)' }}>
               <div style={{ fontSize: '1.5rem' }}>¡CONVOCATORIA CERRADA! 🚫</div>
             </div>
@@ -265,7 +274,7 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
         </div>
       )}
 
-      {isAdmin && (
+      {isAdmin && activeSession && activeSession.status !== 'closed' && activeSession.status !== 'locked' && (
         <div className="glass-panel-light">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
@@ -384,7 +393,17 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
                 </div>
                 
                 {isAdmin && (
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <button className="btn" style={{ padding: '0.5rem', background: selectedCaptains.includes(player.id) ? 'var(--accent-neon)' : 'transparent', color: selectedCaptains.includes(player.id) ? 'black' : 'var(--light-text-muted)', border: '1px solid var(--accent-neon)', fontSize: '0.7rem', fontWeight: 'bold' }} onClick={() => {
+                      if (selectedCaptains.includes(player.id)) {
+                        setSelectedCaptains(selectedCaptains.filter(id => id !== player.id));
+                      } else {
+                        if (selectedCaptains.length >= 4) return alert("Solo puedes seleccionar hasta 4 capitanes.");
+                        setSelectedCaptains([...selectedCaptains, player.id]);
+                      }
+                    }}>
+                      ⭐ {selectedCaptains.includes(player.id) ? 'CAPITÁN' : 'Hacer Capitán'}
+                    </button>
                     <button className="btn" style={{ padding: '0.5rem', background: 'transparent', color: 'var(--accent-danger)' }} onClick={() => handleRemove(player.id)}>
                       <Trash2 size={20} />
                     </button>
