@@ -32,35 +32,43 @@ export default function Players({ players }) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '2rem', padding: '1rem' }}>
         {playerStats.map((player) => {
           const stars = player.stars || 3;
+          let cardTheme = player.cardType || 'default';
+          
+          if (cardTheme === 'default') {
+            if (stars >= 5) cardTheme = 'blue';
+            else if (stars === 4) cardTheme = 'white';
+            else if (stars === 3) cardTheme = 'black';
+            else if (stars === 2) cardTheme = 'gold';
+            else cardTheme = 'bronze';
+          }
+
           let bgImage = '/card_gold.png';
-          let textColor = '#4a3810';
+          let textColor = '#3b2511';
           let statsColor = '#3b2511';
           
-          if (stars >= 5) {
-            bgImage = '/card_legend.png'; // Blanco
-            textColor = '#886d34';
-            statsColor = '#886d34';
-          } else if (stars === 4) {
-            bgImage = '/card_toty.png'; // Azul
+          if (cardTheme === 'blue') {
+            bgImage = '/card_toty.png';
             textColor = '#c9b065';
             statsColor = '#c9b065';
-          } else if (stars === 3) {
-            // Negro - We use Silver and darken it heavily via CSS below
-            bgImage = '/card_silver.png'; 
-            textColor = '#e2e8f0'; 
+          } else if (cardTheme === 'white') {
+            bgImage = '/card_legend.png';
+            textColor = '#886d34';
+            statsColor = '#886d34';
+          } else if (cardTheme === 'black') {
+            bgImage = '/card_silver.png';
+            textColor = '#e2e8f0';
             statsColor = '#94a3b8';
-          } else if (stars === 2) {
-            bgImage = '/card_gold.png'; // Dorado
+          } else if (cardTheme === 'gold') {
+            bgImage = '/card_gold.png';
             textColor = '#4a3810';
             statsColor = '#3b2511';
-          } else {
-            bgImage = '/card_bronze.png'; // Bronce
-            textColor = '#3b2511';
+          } else if (cardTheme === 'bronze') {
+            bgImage = '/card_bronze.png';
+            textColor = '#4a3810';
             statsColor = '#3b2511';
           }
 
-          // Darken the silver card to make it black
-          const extraStyle = stars === 3 ? { filter: 'brightness(0.3) contrast(1.2)' } : {};
+          const extraStyle = cardTheme === 'black' ? { filter: 'brightness(0.3) contrast(1.2)' } : {};
 
           const ovr = Math.round((player.stars / 5) * 99) || 50;
           const pos = player.position || 'MCO';

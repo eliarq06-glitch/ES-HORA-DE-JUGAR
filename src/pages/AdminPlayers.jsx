@@ -84,6 +84,7 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
       photoUrl: p.photoUrl || '', 
       stars: p.stars || 3,
       status: p.status || 'active',
+      cardType: p.cardType || 'default',
       historicalGoals: p.historicalGoals || 0,
       historicalAssists: p.historicalAssists || 0,
       historicalChampionships: p.historicalChampionships || 0
@@ -105,6 +106,7 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
       nickname: formatTitleCase(editData.nickname),
       stars: parseInt(editData.stars),
       status: editData.status,
+      cardType: editData.cardType,
       historicalGoals: parseInt(editData.historicalGoals) || 0,
       historicalAssists: parseInt(editData.historicalAssists) || 0,
       historicalChampionships: parseInt(editData.historicalChampionships) || 0
@@ -287,6 +289,18 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
                       <option value="active">Activo (Normal)</option>
                       <option value="occasional">Ocasional (Ausente / Castigado)</option>
                       <option value="injured">Lesionado (Descartado)</option>
+                    </select>
+                  </div>
+                  
+                  <div style={{ flex: 1, minWidth: '100px' }}>
+                    <label style={{fontSize:'0.7rem', color:'gray'}}>Carta FIFA</label>
+                    <select className="input-dark" value={editData.cardType || 'default'} onChange={e => setEditData({...editData, cardType: e.target.value})} style={{ width: '100%' }}>
+                      <option value="default">Por Defecto (según Estrellas)</option>
+                      <option value="blue">Ultimate Blue (Azul)</option>
+                      <option value="white">Icon White (Blanca)</option>
+                      <option value="black">TOTW Black (Negra)</option>
+                      <option value="gold">Rare Gold (Dorada)</option>
+                      <option value="bronze">Bronze (Bronce)</option>
                     </select>
                   </div>
                   
