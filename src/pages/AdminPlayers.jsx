@@ -93,8 +93,10 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
 
   const handleSaveEdit = (id) => {
     const oldPlayer = allPlayers.find(p => p.id === id);
-    if (oldPlayer && oldPlayer.status !== editData.status) {
-      const statusName = editData.status === 'injured' ? 'LESIONADO/AUSENTE' : editData.status === 'occasional' ? 'CASTIGADO/OCASIONAL' : editData.status === 'frequent' ? 'FRECUENTE (Toma Biela)' : 'ACTIVO';
+    const oldStatus = oldPlayer?.status || 'active';
+    const newStatus = editData.status || 'active';
+    if (oldPlayer && oldStatus !== newStatus) {
+      const statusName = newStatus === 'injured' ? 'LESIONADO/AUSENTE' : newStatus === 'occasional' ? 'CASTIGADO/OCASIONAL' : newStatus === 'frequent' ? 'FRECUENTE (Toma Biela)' : 'ACTIVO';
       setActivityLog(prev => [{ id: Date.now(), text: `⚠️ La Directiva cambió el estado de ${oldPlayer.firstName} ${oldPlayer.lastName} a: ${statusName}`, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }, ...(prev || [])].slice(0, 15));
     }
 
