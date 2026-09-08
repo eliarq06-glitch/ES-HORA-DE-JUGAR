@@ -114,11 +114,14 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
       alert('Actualmente estás marcado como LESIONADO o AUSENTE por el Administrador. No puedes confirmar tu asistencia.');
       return;
     }
-    if (!activeSession.confirmedIds.includes(loggedInPlayer.id)) {
-      updateConfirmedPlayers([...activeSession.confirmedIds, loggedInPlayer.id]);
+    const confirmedIdsStr = (activeSession.confirmedIds || []).map(String);
+    if (!confirmedIdsStr.includes(String(loggedInPlayer.id))) {
+      updateConfirmedPlayers([...(activeSession.confirmedIds || []), loggedInPlayer.id]);
       logActivity(`⚽ ${loggedInPlayer.firstName} ${loggedInPlayer.lastName} acaba de confirmar su asistencia.`);
       setJustConfirmed(true);
       setTimeout(() => setJustConfirmed(false), 2000);
+    } else {
+      alert('¡Ya estás confirmado en la lista de esta jornada!');
     }
   };
 
@@ -131,11 +134,15 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
       alert('Este jugador está marcado como LESIONADO o AUSENTE y no puede ser convocado.');
       return;
     }
-    if (!activeSession.confirmedIds.includes(pid)) {
-      updateConfirmedPlayers([...activeSession.confirmedIds, pid]);
+    const confirmedIdsStr = (activeSession.confirmedIds || []).map(String);
+    if (!confirmedIdsStr.includes(String(pid))) {
+      updateConfirmedPlayers([...(activeSession.confirmedIds || []), pid]);
       if (p) logActivity(`⚽ El Administrador confirmó a ${p.firstName} ${p.lastName}.`);
       setJustConfirmed(true);
+      setSelectedPlayerId('');
       setTimeout(() => setJustConfirmed(false), 2000);
+    } else {
+      alert('¡Este jugador ya está confirmado en la lista!');
     }
   };
 
@@ -244,7 +251,7 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
               onChange={(e) => setSelectedPlayerId(e.target.value)}
             >
               <option value="">Seleccionar jugador existente...</option>
-              {allPlayers.filter(p => p.status !== 'injured' && !activeSession?.confirmedIds.includes(p.id)).sort((a,b) => a.firstName.localeCompare(b.firstName)).map(p => (
+              {allPlayers.filter(p => p.status !== 'injured' && !(activeSession?.confirmedIds || []).map(String).includes(String(p.id))).sort((a,b) => a.firstName.localeCompare(b.firstName)).map(p => (
                 <option key={p.id} value={p.id}>{p.firstName} {p.lastName} {p.nickname ? `"${p.nickname}"` : ''}</option>
               ))}
             </select>
