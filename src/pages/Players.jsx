@@ -44,17 +44,23 @@ export default function Players({ players }) {
 
           let bgImage = `/cards/${cardTheme}.png`;
           let textColor = '#3b2511';
+          let maskGradient = 'linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.95))';
           
           if (cardTheme === 'blue') {
             textColor = '#e8c678';
+            maskGradient = 'linear-gradient(to bottom, rgba(15,24,71,0.8), rgba(10,15,40,0.95))';
           } else if (cardTheme === 'white') {
             textColor = '#b9975b';
+            maskGradient = 'linear-gradient(to bottom, rgba(255,255,255,0.7), rgba(255,255,255,1))';
           } else if (cardTheme === 'black') {
             textColor = '#d4af37';
+            maskGradient = 'linear-gradient(to bottom, rgba(20,20,20,0.8), rgba(0,0,0,0.95))';
           } else if (cardTheme === 'gold') {
             textColor = '#4a3810';
+            maskGradient = 'linear-gradient(to bottom, rgba(220,180,80,0.8), rgba(200,160,60,0.95))';
           } else if (cardTheme === 'bronze') {
             textColor = '#4a3810';
+            maskGradient = 'linear-gradient(to bottom, rgba(160,110,80,0.8), rgba(130,80,50,0.95))';
           }
 
           const extraStyle = {};
@@ -75,7 +81,7 @@ export default function Players({ players }) {
           <div key={player.id} className="fifa-card">
             <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundImage: `url(${bgImage})`, backgroundSize: '100% 100%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', zIndex: 1, ...extraStyle }}></div>
             {/* Eraser Overlay for baked-in text */}
-            <div style={{ position: 'absolute', top: '48%', left: '10%', width: '80%', height: '45%', background: cardTheme === 'white' ? 'linear-gradient(to bottom, rgba(255,255,255,0.7), rgba(255,255,255,1))' : 'linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.95))', backdropFilter: 'blur(4px)', borderRadius: '10px', zIndex: 1 }}></div>
+            <div style={{ position: 'absolute', top: '48%', left: '10%', width: '80%', height: '45%', background: maskGradient, backdropFilter: 'blur(4px)', borderRadius: '10px', zIndex: 1 }}></div>
 
             <div className="fifa-card-content" style={{ zIndex: 2 }}>
               
