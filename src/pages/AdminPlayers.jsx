@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { UserPlus, Save, Trash2, Edit2, Shield, Users, ShieldAlert, Image as ImageIcon, Upload } from 'lucide-react';
+import { UserPlus, Save, Trash2, Edit2, Shield, Users, ShieldAlert, Image as ImageIcon, Upload, FileDown } from 'lucide-react';
 import { supabase, supabaseUrl, supabaseAnonKey } from '../lib/supabase';
 import { createClient } from '@supabase/supabase-js';
 import { useSupabaseConfig } from '../hooks/useSupabase';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }) {
   const [newPlayer, setNewPlayer] = useState({ firstName: '', lastName: '', nickname: '', email: '', password: '', photoUrl: '', stars: 3, status: 'active' });
@@ -181,6 +183,52 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
     }
   };
 
+  const handleExportAllPDF = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.width;
+    
+    doc.setFillColor(15, 20, 25);
+    doc.rect(0, 0, pageWidth, 40, 'F');
+    
+    doc.setTextColor(225, 193, 110);
+    doc.setFontSize(22);
+    doc.setFont("helvetica", "bold");
+    doc.text("LA CATEDRAL DEL FÚTBOL", pageWidth / 2, 20, { align: 'center' });
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Lista General de Jugadores Registrados - Total: ${allPlayers.length}`, pageWidth / 2, 30, { align: 'center' });
+
+    const sortedForPdf = [...allPlayers].sort((a, b) => a.firstName.localeCompare(b.firstName));
+
+    const bodyRows = sortedForPdf.map((p, i) => [
+      { content: `${i + 1}`, styles: { fontStyle: 'bold', halign: 'center' } },
+      { content: `${p.firstName} ${p.nickname ? `"${p.nickname}"` : ''} ${p.lastName}` },
+      { content: p.email || 'Sin correo', styles: { fontSize: 8, textColor: p.email ? [50, 50, 50] : [150, 150, 150] } },
+      { content: p.position || 'MCO', styles: { halign: 'center', fontStyle: 'bold' } },
+      { content: `Bombo ${6 - (p.stars || 3)}`, styles: { halign: 'center' } }
+    ]);
+
+    autoTable(doc, {
+      startY: 45,
+      head: [['#', 'JUGADOR', 'CORREO', 'POS', 'BOMBO']],
+      body: bodyRows,
+      theme: 'grid',
+      headStyles: { fillColor: [30, 30, 30], textColor: [225, 193, 110], fontStyle: 'bold', fontSize: 10 },
+      styles: { fontSize: 9, cellPadding: 4 },
+      columnStyles: { 0: { cellWidth: 12 }, 3: { cellWidth: 18 }, 4: { cellWidth: 25 } },
+      alternateRowStyles: { fillColor: [245, 245, 245] }
+    });
+    
+    const finalY = doc.lastAutoTable.finalY + 10;
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.text(`Generado por La Catedral del Fútbol — ${new Date().toLocaleString()}`, pageWidth / 2, finalY, { align: 'center' });
+    
+    doc.save(`LCDF_Lista_Jugadores.pdf`);
+  };
+
   // Filtrar y Ordenar alfabéticamente
   const filteredPlayers = allPlayers
     .filter(p => {
@@ -243,14 +291,20 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
       <div className="glass-panel-dark">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
           <h3 style={{ margin: 0, color: 'var(--accent-neon)' }}>Plantilla General (Todos los jugadores)</h3>
-          <input 
-            type="text" 
-            className="input-light" 
-            placeholder="🔍 Buscar por nombre, apodo o correo..." 
-            value={searchTerm} 
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ width: '100%', maxWidth: '300px' }}
-          />
+          
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', flex: 1, justifyContent: 'flex-end' }}>
+            <button className="btn btn-dark" onClick={handleExportAllPDF} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-warning)', border: '1px solid var(--accent-warning)' }}>
+              <FileDown size={18} /> Exportar PDF
+            </button>
+            <input 
+              type="text" 
+              className="input-light" 
+              placeholder="🔍 Buscar por nombre, apodo o correo..." 
+              value={searchTerm} 
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ width: '100%', maxWidth: '300px' }}
+            />
+          </div>
         </div>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
