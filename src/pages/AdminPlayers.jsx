@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UserPlus, Save, Trash2, Edit2, Shield, Users, ShieldAlert, Image as ImageIcon, Upload, FileDown } from 'lucide-react';
+import { UserPlus, Save, Trash2, Edit2, Shield, Users, ShieldAlert, Image as ImageIcon, Upload, FileDown, RotateCcw } from 'lucide-react';
 import { supabase, supabaseUrl, supabaseAnonKey } from '../lib/supabase';
 import { createClient } from '@supabase/supabase-js';
 import { useSupabaseConfig } from '../hooks/useSupabase';
@@ -301,6 +301,7 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
         <p style={{ color: 'var(--dark-text-muted)' }}>
           Aquí puedes clasificar a los jugadores por Bombos y subir sus fotos directamente.
         </p>
+      </div>
 
       <div className="glass-panel-light">
         <h3 style={{ margin: '0 0 1rem 0' }}>Agregar Nuevo Jugador y Crear su Cuenta</h3>
