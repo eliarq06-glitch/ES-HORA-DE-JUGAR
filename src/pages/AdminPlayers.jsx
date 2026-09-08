@@ -1,10 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { UserPlus, Save, Trash2, Edit2, Shield, Users, ShieldAlert, Image as ImageIcon, Upload } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import { useSupabaseConfig } from '../hooks/useSupabase';
 
+// Cliente secundario para no cerrar la sesión del admin al crear usuarios
+const authClient = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY,
+  { auth: { persistSession: false, autoRefreshToken: false } }
+);
+
 export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }) {
-  const [newPlayer, setNewPlayer] = useState({ firstName: '', lastName: '', nickname: '', email: '', photoUrl: '', stars: 3, status: 'active' });
+  const [newPlayer, setNewPlayer] = useState({ firstName: '', lastName: '', nickname: '', email: '', password: '', photoUrl: '', stars: 3, status: 'active' });
   const [editingId, setEditingId] = useState(null);
   const [editData, setEditData] = useState({ firstName: '', lastName: '', nickname: '', email: '', photoUrl: '', stars: 3, status: 'active' });
   const [profiles, setProfiles] = useState([]);
@@ -58,20 +66,48 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
     return str.replace(/['"]/g, '').trim().toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   };
 
-  const handleCreateNew = (e) => {
+  const handleCreateNew = async (e) => {
     e.preventDefault();
-    if (!newPlayer.firstName) return;
-    const newId = Date.now();
-    const playerObj = { 
-      id: newId, 
-      ...newPlayer, 
-      firstName: newPlayer.firstName.toUpperCase(),
-      lastName: newPlayer.lastName.toUpperCase(),
-      nickname: formatTitleCase(newPlayer.nickname),
-      ratings: [] 
-    };
-    setPlayersDB(prev => [...prev, playerObj]);
-    setNewPlayer({ firstName: '', lastName: '', nickname: '', email: '', photoUrl: '', stars: 3, status: 'active' });
+    if (!newPlayer.firstName || !newPlayer.email || !newPlayer.password) {
+      alert("Por favor, ingresa el Nombre, Correo y una Contraseña para poder crear al jugador.");
+      return;
+    }
+
+    try {
+      // 1. Crear el usuario en Supabase Auth silenciosamente
+      const { data: authData, error: authError } = await authClient.auth.signUp({
+        email: newPlayer.email.toLowerCase().trim(),
+        password: newPlayer.password,
+        options: {
+          data: {
+            full_name: `${newPlayer.firstName} ${newPlayer.lastName}`.trim().toUpperCase(),
+          }
+        }
+      });
+
+      if (authError) throw authError;
+
+      // 2. Crear el perfil del jugador en la base de datos
+      const newId = Date.now();
+      const playerObj = { 
+        ...newPlayer, 
+        id: newId, 
+        firstName: newPlayer.firstName.toUpperCase(),
+        lastName: newPlayer.lastName.toUpperCase(),
+        nickname: formatTitleCase(newPlayer.nickname),
+        email: newPlayer.email.toLowerCase().trim(),
+        ratings: [] 
+      };
+      
+      // Removemos el password del objeto antes de guardarlo en playersDB
+      delete playerObj.password;
+
+      setPlayersDB(prev => [...prev, playerObj]);
+      setNewPlayer({ firstName: '', lastName: '', nickname: '', email: '', password: '', photoUrl: '', stars: 3, status: 'active' });
+      alert(`¡Jugador y cuenta creados exitosamente!\nPasale estos datos:\nCorreo: ${playerObj.email}\nContraseña: ${newPlayer.password}`);
+    } catch (err) {
+      alert("Error al crear la cuenta: " + err.message);
+    }
   };
 
   const handleStartEdit = (p) => {
@@ -222,12 +258,14 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
       </div>
 
       <div className="glass-panel-light">
-        <h3 style={{ margin: '0 0 1rem 0' }}>Agregar Nuevo Jugador</h3>
+        <h3 style={{ margin: '0 0 1rem 0' }}>Agregar Nuevo Jugador y Crear su Cuenta</h3>
+        <p style={{ fontSize: '0.85rem', color: 'var(--light-text-muted)', marginBottom: '1rem' }}>Llena todos los datos. El sistema le creará automáticamente una cuenta con la contraseña que elijas para que pueda iniciar sesión.</p>
         <form onSubmit={handleCreateNew} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          <input type="text" className="input-dark" placeholder="Nombre" value={newPlayer.firstName} onChange={e => setNewPlayer({...newPlayer, firstName: e.target.value})} style={{ flex: 1, minWidth: '120px' }} required />
+          <input type="text" className="input-dark" placeholder="Nombre (Req)" value={newPlayer.firstName} onChange={e => setNewPlayer({...newPlayer, firstName: e.target.value})} style={{ flex: 1, minWidth: '120px' }} required />
           <input type="text" className="input-dark" placeholder="Apellido" value={newPlayer.lastName} onChange={e => setNewPlayer({...newPlayer, lastName: e.target.value})} style={{ flex: 1, minWidth: '120px' }} />
           <input type="text" className="input-dark" placeholder="Apodo" value={newPlayer.nickname} onChange={e => setNewPlayer({...newPlayer, nickname: e.target.value})} style={{ flex: 1, minWidth: '100px' }} />
-          <input type="email" className="input-dark" placeholder="Email" value={newPlayer.email} onChange={e => setNewPlayer({...newPlayer, email: e.target.value})} style={{ flex: 1, minWidth: '150px' }} />
+          <input type="email" className="input-dark" placeholder="Email (Req)" value={newPlayer.email} onChange={e => setNewPlayer({...newPlayer, email: e.target.value})} style={{ flex: 1, minWidth: '150px' }} required />
+          <input type="text" className="input-dark" placeholder="Contraseña (Req)" value={newPlayer.password} onChange={e => setNewPlayer({...newPlayer, password: e.target.value})} style={{ flex: 1, minWidth: '150px' }} required minLength={6} />
           
           <select className="input-dark" value={newPlayer.position || 'MCO'} onChange={e => setNewPlayer({...newPlayer, position: e.target.value})} style={{ flex: 0.5, minWidth: '90px' }}>
             <option value="POR">POR</option>
