@@ -90,8 +90,8 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
       {(activeSession && activeSession.status !== 'closed' && activeSession.status !== 'locked') && (
         <>
 
-      {!isAdmin && !loggedInPlayer && (
-        <div className="glass-panel-dark" style={{ border: '2px solid var(--accent-warning)', background: 'rgba(255, 193, 7, 0.1)' }}>
+      {!loggedInPlayer && (
+        <div className="glass-panel-dark" style={{ border: '2px solid var(--accent-warning)', background: 'rgba(255,193,7,0.1)' }}>
           <h2 className="title-main" style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--accent-warning)', margin: 0, marginBottom: '1rem' }}>
             <LinkIcon size={28} /> Vincula tu Perfil
           </h2>
@@ -112,7 +112,7 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
         </div>
       )}
 
-      {!isAdmin && loggedInPlayer && (
+      {loggedInPlayer && (
         <div className="glass-panel-light" style={{ textAlign: 'center', padding: '3rem 1rem' }}>
           <div className="avatar-placeholder" style={{ width: '80px', height: '80px', fontSize: '2.5rem', margin: '0 auto 1.5rem auto', boxShadow: '0 0 20px var(--accent-neon)' }}>
             {loggedInPlayer.firstName.charAt(0)}
