@@ -237,17 +237,70 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
     })
     .sort((a, b) => a.firstName.localeCompare(b.firstName));
 
+  const handleSyncFromSupabase = () => {
+    if (!profiles || profiles.length === 0) {
+      alert("Esperando que carguen los perfiles de Supabase. Intenta de nuevo en unos segundos.");
+      return;
+    }
+
+    const newPlayers = [];
+    profiles.forEach(prof => {
+      if (!prof.email) return;
+      const exists = allPlayers.find(p => p.email && p.email.toLowerCase().trim() === prof.email.toLowerCase().trim());
+      if (!exists) {
+        const newId = Date.now() + Math.floor(Math.random() * 1000);
+        const nameParts = (prof.full_name || '').split(' ');
+        const fName = nameParts[0] || 'Desconocido';
+        const lName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+
+        newPlayers.push({
+          id: newId,
+          firstName: fName.toUpperCase(),
+          lastName: lName.toUpperCase(),
+          nickname: '',
+          email: prof.email.toLowerCase().trim(),
+          position: 'MCO',
+          ratings: [],
+          historicalGoals: 0,
+          historicalAssists: 0,
+          historicalFouls: 0,
+          historicalChampionships: 0,
+          status: 'active',
+          stars: 3,
+          cardType: 'base',
+          photoUrl: ''
+        });
+      }
+    });
+
+    if (newPlayers.length > 0) {
+      setPlayersDB(prev => [...prev, ...newPlayers]);
+      alert(`¡Sincronización completa! Se agregaron ${newPlayers.length} jugadores desde Supabase que faltaban en la App.`);
+    } else {
+      alert('¡Todo está al día! Todos los usuarios de Supabase ya existen en la lista de jugadores de la App.');
+    }
+  };
+
   return (
     <div style={{ width: '100%', maxWidth: '900px', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
 
       <div className="glass-panel-dark">
-        <h2 className="title-main" style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: 0, marginBottom: '1rem' }}>
-          <Users color="var(--accent-primary)" /> Gestión de Jugadores ({allPlayers.length})
-        </h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
+          <h2 className="title-main" style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: 0 }}>
+            <Users color="var(--accent-primary)" /> Gestión de Jugadores ({allPlayers.length})
+          </h2>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button className="btn" style={{ background: 'var(--accent-warning)', color: 'black', padding: '0.5rem 1rem', fontSize: '0.8rem', fontWeight: 'bold' }} onClick={handleSyncFromSupabase} title="Sincronizar usuarios faltantes desde Supabase">
+              <RotateCcw size={16} /> Sincronizar Supabase
+            </button>
+            <button className="btn" style={{ background: 'var(--accent-primary)', color: 'white', padding: '0.5rem 1rem', fontSize: '0.8rem', fontWeight: 'bold' }} onClick={handleExportAllPDF}>
+              <FileDown size={16} /> Exportar a PDF
+            </button>
+          </div>
+        </div>
         <p style={{ color: 'var(--dark-text-muted)' }}>
           Aquí puedes clasificar a los jugadores por Bombos y subir sus fotos directamente.
         </p>
-      </div>
 
       <div className="glass-panel-light">
         <h3 style={{ margin: '0 0 1rem 0' }}>Agregar Nuevo Jugador y Crear su Cuenta</h3>
@@ -326,9 +379,6 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
           <h3 style={{ margin: 0, color: 'var(--accent-neon)' }}>Plantilla General (Todos los jugadores)</h3>
           
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', flex: 1, justifyContent: 'flex-end' }}>
-            <button className="btn btn-dark" onClick={handleExportAllPDF} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-warning)', border: '1px solid var(--accent-warning)' }}>
-              <FileDown size={18} /> Exportar PDF
-            </button>
             <input 
               type="text" 
               className="input-light" 
