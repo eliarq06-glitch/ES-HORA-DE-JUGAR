@@ -134,7 +134,7 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
               </p>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', width: '100%', maxWidth: '400px' }}>
+            <div style={{ margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', width: '100%', maxWidth: '400px' }}>
               <div style={{ background: 'rgba(255,193,7,0.1)', border: '1px solid var(--accent-warning)', padding: '1rem', borderRadius: '8px', color: 'var(--accent-warning)', fontSize: '0.85rem', textAlign: 'center' }}>
                 <strong>⚽ OJO CON TU POSICIÓN:</strong> Tu ubicación final (Titular o Alterno) dependerá de tu Estado en la base de datos. ¡Tendrán preferencia los verdaderos elementos que han <strong>"Tomado Biela"</strong> religiosamente! Los que recién asoman, no beben o están castigados irán al fondo de la lista 😂🍻
               </div>
