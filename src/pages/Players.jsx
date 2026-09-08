@@ -42,33 +42,22 @@ export default function Players({ players }) {
             else cardTheme = 'bronze';
           }
 
-          let bgImage = '/card_gold.png';
+          let bgImage = `/cards/${cardTheme}.png`;
           let textColor = '#3b2511';
-          let statsColor = '#3b2511';
           
           if (cardTheme === 'blue') {
-            bgImage = '/card_toty.png';
-            textColor = '#c9b065';
-            statsColor = '#c9b065';
+            textColor = '#e8c678';
           } else if (cardTheme === 'white') {
-            bgImage = '/card_legend.png';
-            textColor = '#886d34';
-            statsColor = '#886d34';
+            textColor = '#b9975b';
           } else if (cardTheme === 'black') {
-            bgImage = '/card_silver.png';
-            textColor = '#e2e8f0';
-            statsColor = '#94a3b8';
+            textColor = '#d4af37';
           } else if (cardTheme === 'gold') {
-            bgImage = '/card_gold.png';
             textColor = '#4a3810';
-            statsColor = '#3b2511';
           } else if (cardTheme === 'bronze') {
-            bgImage = '/card_bronze.png';
             textColor = '#4a3810';
-            statsColor = '#3b2511';
           }
 
-          const extraStyle = cardTheme === 'black' ? { filter: 'brightness(0.3) contrast(1.2)' } : {};
+          const extraStyle = {};
 
           const ovr = Math.round((player.stars / 5) * 99) || 50;
           const pos = player.position || 'MCO';
@@ -85,7 +74,10 @@ export default function Players({ players }) {
           return (
           <div key={player.id} className="fifa-card">
             <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundImage: `url(${bgImage})`, backgroundSize: '100% 100%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', zIndex: 1, ...extraStyle }}></div>
-            <div className="fifa-card-content">
+            {/* Eraser Overlay for baked-in text */}
+            <div style={{ position: 'absolute', top: '48%', left: '10%', width: '80%', height: '45%', background: cardTheme === 'white' ? 'linear-gradient(to bottom, rgba(255,255,255,0.7), rgba(255,255,255,1))' : 'linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.95))', backdropFilter: 'blur(4px)', borderRadius: '10px', zIndex: 1 }}></div>
+
+            <div className="fifa-card-content" style={{ zIndex: 2 }}>
               
               {/* Top Left OVR & Position */}
               <div className="fifa-card-top-left" style={{ color: textColor }}>
@@ -99,7 +91,7 @@ export default function Players({ players }) {
                 {player.photoUrl ? (
                   <img src={player.photoUrl} alt={player.firstName} />
                 ) : (
-                  <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', color: textColor, fontWeight: 'bold' }}>
+                  <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', color: textColor, fontWeight: 'bold' }}>
                     {player.firstName[0]}
                   </div>
                 )}
@@ -107,10 +99,12 @@ export default function Players({ players }) {
 
               {/* Name & Stats */}
               <div className="fifa-card-bottom-new">
-                <div className="fifa-card-name-new" style={{ color: textColor }}>{player.firstName} {player.lastName}</div>
+                <div className="fifa-card-name-new" style={{ color: cardTheme === 'white' ? '#886d34' : 'white', textShadow: cardTheme === 'white' ? 'none' : '0 2px 4px rgba(0,0,0,0.8)' }}>
+                  {player.firstName} {player.lastName}
+                </div>
                 
                 {/* Stats Grid */}
-                <div className="fifa-card-stats-grid" style={{ color: statsColor }}>
+                <div className="fifa-card-stats-grid" style={{ color: cardTheme === 'white' ? '#886d34' : 'white', textShadow: cardTheme === 'white' ? 'none' : '0 1px 3px rgba(0,0,0,0.8)' }}>
                   <div className="stat-col">
                     <div className="stat-row"><span>{pac}</span> <span>RIT</span></div>
                     <div className="stat-row"><span>{sho}</span> <span>TIR</span></div>
