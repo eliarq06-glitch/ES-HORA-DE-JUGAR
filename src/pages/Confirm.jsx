@@ -411,30 +411,31 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
         </div>
       )}
 
-        {/* Activity Log / Feed */}
-        <div className="glass-panel-dark" style={{ background: 'rgba(15,23,42,0.8)' }}>
-          <h3 className="title-main" style={{ fontSize: '1.2rem', margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <MessageSquare size={20} color="var(--accent-neon)" /> Actividad Reciente
-          </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '300px', overflowY: 'auto', paddingRight: '10px' }}>
-            {(!activityLog || activityLog.length === 0) ? (
-              <p style={{ color: 'var(--dark-text-muted)', fontSize: '0.9rem', textAlign: 'center' }}>No hay actividad reciente en esta jornada.</p>
-            ) : (
-              activityLog.map((log) => {
-                const displayText = (isAdmin && log.adminAction) 
-                  ? `⚽ El Administrador (${log.adminName.split('@')[0]}) confirmó a ${log.playerName}.`
-                  : log.text;
+        {isAdmin && (
+          <div className="glass-panel-dark" style={{ background: 'rgba(15,23,42,0.8)' }}>
+            <h3 className="title-main" style={{ fontSize: '1.2rem', margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <MessageSquare size={20} color="var(--accent-neon)" /> Actividad Reciente
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '300px', overflowY: 'auto', paddingRight: '10px' }}>
+              {(!activityLog || activityLog.length === 0) ? (
+                <p style={{ color: 'var(--dark-text-muted)', fontSize: '0.9rem', textAlign: 'center' }}>No hay actividad reciente en esta jornada.</p>
+              ) : (
+                activityLog.map((log) => {
+                  const displayText = (log.adminAction) 
+                    ? `⚽ El Administrador (${log.adminName?.split('@')[0]}) confirmó a ${log.playerName}.`
+                    : log.text;
 
-                return (
-                  <div key={log.id} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '8px' }}>
-                    <div style={{ color: 'var(--accent-warning)', fontSize: '0.7rem', minWidth: '45px', paddingTop: '2px' }}>{log.time}</div>
-                    <div style={{ color: 'var(--light-text)', fontSize: '0.9rem', flex: 1 }}>{displayText}</div>
-                  </div>
-                );
-              })
-            )}
+                  return (
+                    <div key={log.id} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '8px' }}>
+                      <div style={{ color: 'var(--accent-warning)', fontSize: '0.7rem', minWidth: '45px', paddingTop: '2px' }}>{log.time}</div>
+                      <div style={{ color: 'var(--light-text)', fontSize: '0.9rem', flex: 1 }}>{displayText}</div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         </>
         )}
