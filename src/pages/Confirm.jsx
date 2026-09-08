@@ -6,6 +6,7 @@ import autoTable from 'jspdf-autotable';
 
 export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers, allPlayers, updateConfirmedPlayers, setPlayersDB }) {
   const [selectedPlayerId, setSelectedPlayerId] = useState('');
+  const [searchPlayerText, setSearchPlayerText] = useState('');
   const [linkPlayerId, setLinkPlayerId] = useState('');
   const [justConfirmed, setJustConfirmed] = useState(false);
   const [newPlayer, setNewPlayer] = useState({ firstName: '', lastName: '', nickname: '' });
@@ -127,19 +128,30 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
 
   const handleConfirmExisting = (e) => {
     e.preventDefault();
-    if (!selectedPlayerId) return;
-    const pid = parseInt(selectedPlayerId);
-    const p = allPlayers.find(pl => pl.id === pid);
-    if (p && p.status === 'injured') {
+    if (!searchPlayerText) return;
+    
+    // El value del datalist será: "Nombre Apellido - Apodo"
+    const p = allPlayers.find(pl => {
+      const matchStr = `${pl.firstName} ${pl.lastName} ${pl.nickname ? `- ${pl.nickname}` : ''}`.trim();
+      return matchStr === searchPlayerText;
+    });
+
+    if (!p) {
+      alert('Por favor, selecciona un jugador de las sugerencias de la lista.');
+      return;
+    }
+
+    const pid = p.id;
+    if (p.status === 'injured') {
       alert('Este jugador está marcado como LESIONADO o AUSENTE y no puede ser convocado.');
       return;
     }
     const confirmedIdsStr = (activeSession.confirmedIds || []).map(String);
     if (!confirmedIdsStr.includes(String(pid))) {
       updateConfirmedPlayers([...(activeSession.confirmedIds || []), pid]);
-      if (p) logActivity(`⚽ El Administrador confirmó a ${p.firstName} ${p.lastName}.`);
+      logActivity(`⚽ El Administrador confirmó a ${p.firstName} ${p.lastName}.`);
       setJustConfirmed(true);
-      setSelectedPlayerId('');
+      setSearchPlayerText('');
       setTimeout(() => setJustConfirmed(false), 2000);
     } else {
       alert('¡Este jugador ya está confirmado en la lista!');
@@ -244,18 +256,23 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
 
           <h4 style={{ marginBottom: '1rem', color: 'var(--light-text)' }}>Seleccionar jugador:</h4>
           <form onSubmit={handleConfirmExisting} style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
-            <select 
+            <input 
+              list="players-list"
               className="input-dark" 
               style={{ flex: 1, minWidth: '200px' }}
-              value={selectedPlayerId}
-              onChange={(e) => setSelectedPlayerId(e.target.value)}
-            >
-              <option value="">Seleccionar jugador existente...</option>
-              {allPlayers.filter(p => p.status !== 'injured' && !(activeSession?.confirmedIds || []).map(String).includes(String(p.id))).sort((a,b) => a.firstName.localeCompare(b.firstName)).map(p => (
-                <option key={p.id} value={p.id}>{p.firstName} {p.lastName} {p.nickname ? `"${p.nickname}"` : ''}</option>
-              ))}
-            </select>
-            <button type="submit" className="btn btn-dark" disabled={!selectedPlayerId} style={{ minWidth: '120px' }}>
+              placeholder="Escribe el nombre o apodo para buscar..."
+              value={searchPlayerText}
+              onChange={(e) => setSearchPlayerText(e.target.value)}
+            />
+            <datalist id="players-list">
+              {allPlayers
+                .filter(p => p.status !== 'injured' && !(activeSession?.confirmedIds || []).map(String).includes(String(p.id)))
+                .sort((a,b) => a.firstName.localeCompare(b.firstName))
+                .map(p => (
+                  <option key={p.id} value={`${p.firstName} ${p.lastName} ${p.nickname ? `- ${p.nickname}` : ''}`.trim()} />
+                ))}
+            </datalist>
+            <button type="submit" className="btn btn-dark" disabled={!searchPlayerText} style={{ minWidth: '120px' }}>
               Confirmar
             </button>
           </form>
