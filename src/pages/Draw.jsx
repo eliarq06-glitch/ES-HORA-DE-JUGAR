@@ -317,12 +317,12 @@ export default function Draw({ players, teams, setTeams }) {
         marginBottom: '2rem' 
       }}>
         {teams.map((team, index) => {
-          let epicImage = null;
+          let epicImage = getCaptainImage(team.name);
           let capPlayer = null;
           const caps = captains[index] || [];
           if (caps.length > 0) {
               capPlayer = players.find(p => p.id === caps[0]);
-              if (capPlayer) {
+              if (capPlayer && !epicImage) {
                   epicImage = getCaptainImage(capPlayer.firstName);
               }
           }
