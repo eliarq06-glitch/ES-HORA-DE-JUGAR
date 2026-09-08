@@ -116,7 +116,7 @@ export default function Players({ players }) {
                     <div className="stat-row"><span>{sho}</span> <span>TIR</span></div>
                     <div className="stat-row"><span>{pas}</span> <span>PAS</span></div>
                   </div>
-                  <div className="stat-divider" style={{ background: statsColor }}></div>
+                  <div className="stat-divider" style={{ background: textColor }}></div>
                   <div className="stat-col">
                     <div className="stat-row"><span>{dri}</span> <span>REG</span></div>
                     <div className="stat-row"><span>{def}</span> <span>DEF</span></div>
