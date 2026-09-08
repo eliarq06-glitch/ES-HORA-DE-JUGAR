@@ -4,22 +4,17 @@ import { supabase } from '../lib/supabase';
 import { useSupabaseConfig } from '../hooks/useSupabase';
 
 export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }) {
-  const [newPlayer, setNewPlayer] = useState({ firstName: '', lastName: '', nickname: '', email: '', photoUrl: '', stars: 3 });
+  const [newPlayer, setNewPlayer] = useState({ firstName: '', lastName: '', nickname: '', email: '', photoUrl: '', stars: 3, status: 'active' });
   const [editingId, setEditingId] = useState(null);
-  const [editData, setEditData] = useState({ firstName: '', lastName: '', nickname: '', email: '', photoUrl: '', stars: 3 });
+  const [editData, setEditData] = useState({ firstName: '', lastName: '', nickname: '', email: '', photoUrl: '', stars: 3, status: 'active' });
   const [profiles, setProfiles] = useState([]);
   const [sponsorsConfig, setSponsorsConfig] = useSupabaseConfig('sponsors', []);
 
   useEffect(() => {
     if (isGlobalAdmin) {
-      fetchProfiles();
+      supabase.from('profiles').select('*').then(({ data }) => setProfiles(data || []));
     }
   }, [isGlobalAdmin]);
-
-  const fetchProfiles = async () => {
-    const { data } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
-    if (data) setProfiles(data);
-  };
 
   const handleUploadPhoto = async (e, isNew) => {
     const file = e.target.files[0];
@@ -75,7 +70,7 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
       ratings: [] 
     };
     setPlayersDB(prev => [...prev, playerObj]);
-    setNewPlayer({ firstName: '', lastName: '', nickname: '', email: '', photoUrl: '', stars: 3 });
+    setNewPlayer({ firstName: '', lastName: '', nickname: '', email: '', photoUrl: '', stars: 3, status: 'active' });
   };
 
   const handleStartEdit = (p) => {
@@ -87,6 +82,7 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
       email: p.email || '', 
       photoUrl: p.photoUrl || '', 
       stars: p.stars || 3,
+      status: p.status || 'active',
       historicalGoals: p.historicalGoals || 0,
       historicalAssists: p.historicalAssists || 0,
       historicalChampionships: p.historicalChampionships || 0
@@ -101,6 +97,7 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
       lastName: editData.lastName.toUpperCase(),
       nickname: formatTitleCase(editData.nickname),
       stars: parseInt(editData.stars),
+      status: editData.status,
       historicalGoals: parseInt(editData.historicalGoals) || 0,
       historicalAssists: parseInt(editData.historicalAssists) || 0,
       historicalChampionships: parseInt(editData.historicalChampionships) || 0
@@ -275,6 +272,14 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
                   <div style={{ flex: 1, minWidth: '100px' }}><label style={{fontSize:'0.7rem', color:'gray'}}>Hist. Campeón</label><input type="number" min="0" className="input-dark" value={editData.historicalChampionships} onChange={e => setEditData({...editData, historicalChampionships: e.target.value})} style={{ width: '100%' }} /></div>
 
                   <div style={{ flex: 1.5, minWidth: '150px' }}><label style={{fontSize:'0.7rem', color:'gray'}}>Email Vinculado</label><input type="email" className="input-dark" placeholder="Email vinculado" value={editData.email} onChange={e => setEditData({...editData, email: e.target.value})} style={{ width: '100%' }} /></div>
+
+                  <div style={{ flex: 1, minWidth: '100px' }}>
+                    <label style={{fontSize:'0.7rem', color:'gray'}}>Estado</label>
+                    <select className="input-dark" value={editData.status || 'active'} onChange={e => setEditData({...editData, status: e.target.value})} style={{ width: '100%' }}>
+                      <option value="active">Activo</option>
+                      <option value="injured">Lesionado / Ausente</option>
+                    </select>
+                  </div>
                   
                   <div style={{ flex: 1, minWidth: '180px' }}>
                     <label style={{fontSize:'0.7rem', color:'gray'}}>Actualizar Foto</label>

@@ -21,11 +21,11 @@ export default function Login({ onBack, allPlayers = [], setPlayersDB, activeSes
 
     try {
       if (isRegistering) {
-        if (!selectedPlayerId) {
-          throw new Error('Debes seleccionar quién eres en la liga. Si no estás en la lista, un Admin debe agregarte a la Plantilla General primero.');
+        const player = allPlayers.find(p => p.email && p.email.toLowerCase().trim() === email.toLowerCase().trim());
+        if (!player) {
+          throw new Error('No autorizado. El Administrador (Lucho/Víctor) debe crear tu perfil y vincular este correo en la Plantilla General antes de registrarte.');
         }
         
-        const player = allPlayers.find(p => p.id === parseInt(selectedPlayerId));
         const derivedFullName = `${player.firstName} ${player.lastName}`.trim().toUpperCase();
 
         // Registro
@@ -38,10 +38,17 @@ export default function Login({ onBack, allPlayers = [], setPlayersDB, activeSes
             }
           }
         });
-        if (signUpError) throw signUpError;
         
+        if (signUpError) {
+          if (signUpError.message.includes('already registered')) {
+            throw new Error('Este correo ya está registrado. Por favor selecciona la opción "Inicia sesión".');
+          }
+          throw signUpError;
+        }
+        
+        // Actualizamos la posición si la cambiaron al registrarse
         if (setPlayersDB) {
-           setPlayersDB(prev => prev.map(p => p.id === player.id ? { ...p, email, position } : p));
+           setPlayersDB(prev => prev.map(p => p.id === player.id ? { ...p, position } : p));
         }
 
         // AUTO-CONFIRM IN ACTIVE SESSION
@@ -51,7 +58,7 @@ export default function Login({ onBack, allPlayers = [], setPlayersDB, activeSes
            }
         }
 
-        alert('¡Registro exitoso! Has sido confirmado automáticamente para la jornada.');
+        alert('¡Registro exitoso! Has sido confirmado automáticamente para la jornada si hay una activa.');
         setIsRegistering(false);
       } else {
         // Login
@@ -108,21 +115,11 @@ export default function Login({ onBack, allPlayers = [], setPlayersDB, activeSes
         
         {isRegistering && (
           <div className="form-group" style={{ margin: 0, textAlign: 'left' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--dark-text-muted)' }}><User size={16} /> Selecciona tu Jugador</label>
-            <select
-              className="input-dark" 
-              value={selectedPlayerId} 
-              onChange={(e) => setSelectedPlayerId(e.target.value)} 
-              required={isRegistering}
-              style={{ width: '100%', marginBottom: '1rem' }}
-            >
-              <option value="">-- ¿Quién eres en la liga? --</option>
-              {allPlayers.filter(p => !p.email).sort((a,b) => a.firstName.localeCompare(b.firstName)).map(p => (
-                <option key={p.id} value={p.id}>{p.firstName} {p.lastName} {p.nickname ? `("${p.nickname}")` : ''}</option>
-              ))}
-            </select>
+            <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px dashed var(--accent-warning)', padding: '1rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.85rem', color: 'var(--accent-warning)' }}>
+              <strong>Aviso:</strong> Para poder registrarte, el Administrador debe haber creado tu perfil en la Plantilla General y haber vinculado tu correo electrónico exacto.
+            </div>
             
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--dark-text-muted)' }}><User size={16} /> Tu Posición en la Cancha</label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--dark-text-muted)' }}><User size={16} /> Tu Posición Principal</label>
             <select
               className="input-dark" 
               value={position} 

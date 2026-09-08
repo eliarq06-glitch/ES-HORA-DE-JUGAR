@@ -21,6 +21,10 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
 
   const handleSelfConfirm = () => {
     if (!loggedInPlayer) return;
+    if (loggedInPlayer.status === 'injured') {
+      alert('Actualmente estás marcado como LESIONADO o AUSENTE por el Administrador. No puedes confirmar tu asistencia.');
+      return;
+    }
     if (!activeSession.confirmedIds.includes(loggedInPlayer.id)) {
       updateConfirmedPlayers([...activeSession.confirmedIds, loggedInPlayer.id]);
       setJustConfirmed(true);
@@ -32,6 +36,11 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
     e.preventDefault();
     if (!selectedPlayerId) return;
     const pid = parseInt(selectedPlayerId);
+    const p = allPlayers.find(pl => pl.id === pid);
+    if (p && p.status === 'injured') {
+      alert('Este jugador está marcado como LESIONADO o AUSENTE y no puede ser convocado.');
+      return;
+    }
     if (!activeSession.confirmedIds.includes(pid)) {
       updateConfirmedPlayers([...activeSession.confirmedIds, pid]);
       setJustConfirmed(true);
@@ -142,13 +151,13 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
           <h4 style={{ marginBottom: '1rem', color: 'var(--light-text)' }}>Seleccionar jugador:</h4>
           <form onSubmit={handleConfirmExisting} style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
             <select 
-              className="input-light" 
+              className="input-dark" 
               style={{ flex: 1, minWidth: '200px' }}
               value={selectedPlayerId}
               onChange={(e) => setSelectedPlayerId(e.target.value)}
             >
               <option value="">Seleccionar jugador existente...</option>
-              {allPlayers.filter(p => !activeSession?.confirmedIds.includes(p.id)).sort((a,b) => a.firstName.localeCompare(b.firstName)).map(p => (
+              {allPlayers.filter(p => p.status !== 'injured' && !activeSession?.confirmedIds.includes(p.id)).sort((a,b) => a.firstName.localeCompare(b.firstName)).map(p => (
                 <option key={p.id} value={p.id}>{p.firstName} {p.lastName} {p.nickname ? `"${p.nickname}"` : ''}</option>
               ))}
             </select>
