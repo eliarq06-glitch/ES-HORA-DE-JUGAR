@@ -146,6 +146,86 @@ export default function Players({ players }) {
         })}
       </div>
 
+      {/* ═══════════════ CAPTAINS SECTION ═══════════════ */}
+      <div style={{ marginTop: '4rem', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 10px 40px rgba(0,0,0,0.6)' }}>
+        
+        {/* HEADER */}
+        <div style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)', padding: '3rem 2rem', textAlign: 'center' }}>
+          <h3 style={{ fontFamily: 'var(--font-heading)', textTransform: 'uppercase', marginBottom: '0.5rem', letterSpacing: '4px', fontSize: '2.5rem', fontWeight: '900', color: '#e1c16e', textShadow: '0 4px 20px rgba(225,193,110,0.3)' }}>
+            ⚽ LOS CAPITANES ⚽
+          </h3>
+          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1rem', letterSpacing: '2px', textTransform: 'uppercase', margin: 0 }}>Los pilares de La Catedral del Fútbol</p>
+        </div>
+
+        {/* C1 — FABRICIO SÁNCHEZ (Negro) */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)' }}>
+          <div style={{ flex: '1 1 300px', minHeight: '400px' }}>
+            <img src="/captains/fabricio.jpg" alt="Fabricio Sánchez" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
+          <div style={{ flex: '1 1 300px', padding: '2.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+              <span style={{ background: '#e1c16e', color: 'black', padding: '4px 12px', borderRadius: '6px', fontWeight: '900', fontFamily: 'var(--font-heading)', fontSize: '1.2rem' }}>C1</span>
+              <h4 style={{ margin: 0, fontSize: '1.8rem', fontWeight: '900', color: '#e1c16e', fontFamily: 'var(--font-heading)', textTransform: 'uppercase' }}>FABRICIO SÁNCHEZ</h4>
+            </div>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', fontStyle: 'italic', marginBottom: '1rem', letterSpacing: '1px' }}>🎙️ Voz engolada, con pausas dramáticas y arrastrando las 'rr'</p>
+            <p style={{ color: 'rgba(255,255,255,0.9)', lineHeight: '1.7', fontSize: '0.95rem', margin: 0 }}>
+              "¡Atención, Ecuador! ¡Aquí está Fabricio Sánchez, señoras y señores! No es un simple mortal, ¡es <strong style={{ color: '#e1c16e' }}>'RAUNALDO'</strong>, el titán que viste la túnica de la noche! Es el <strong style={{ color: '#e1c16e' }}>'Artillero del Gol'</strong>, poseedor de una paciencia inquebrantable, una fe que mueve montañas. ¿Y qué si de cien intentos, la pelota solo besa la red una vez? <strong style={{ color: '#e1c16e' }}>¡Ese único grito sagrado vale por una epopeya entera!</strong> Porque cuando 'Raunaldo' la emboca, no es un gol cualquiera, ¡es un <strong style={{ color: '#e1c16e' }}>GOL CON BIGOTE!</strong> Un grito con jerarquía, un testarazo al destino que lleva la estampa de la virilidad balompédica. Moldeado en el crisol del sufrimiento y la disciplina por el <strong style={{ color: '#e1c16e' }}>Profe Dave</strong> —ese escultor de músculos y voluntades—, y bendecido por los lazos sagrados de la administración. Fabricio Sánchez, <strong style={{ color: '#e1c16e' }}>¡UNA LEYENDA QUE SE ESCRIBE GOL A GOL, AUNQUE EL CAMINO SEA LARGO!</strong>"
+            </p>
+          </div>
+        </div>
+
+        {/* C2 — SANTIAGO ICAZA (Verde) */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', background: 'linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%)', flexDirection: 'row-reverse' }}>
+          <div style={{ flex: '1 1 300px', minHeight: '400px' }}>
+            <img src="/captains/santiago.jpg" alt="Santiago Icaza" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
+          <div style={{ flex: '1 1 300px', padding: '2.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+              <span style={{ background: '#e1c16e', color: 'black', padding: '4px 12px', borderRadius: '6px', fontWeight: '900', fontFamily: 'var(--font-heading)', fontSize: '1.2rem' }}>C2</span>
+              <h4 style={{ margin: 0, fontSize: '1.8rem', fontWeight: '900', color: '#e1c16e', fontFamily: 'var(--font-heading)', textTransform: 'uppercase' }}>SANTIAGO ICAZA</h4>
+            </div>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', fontStyle: 'italic', marginBottom: '1rem', letterSpacing: '1px' }}>🎙️ Tono solemne, reverente, casi poético</p>
+            <p style={{ color: 'rgba(255,255,255,0.9)', lineHeight: '1.7', fontSize: '0.95rem', margin: 0 }}>
+              "¡Pónganse de pie para recibir a Santiago Icaza! Envuélvete, cantera, en el manto verde de la esperanza, porque aquí camina <strong style={{ color: '#e1c16e' }}>'El Santi'</strong>. No busquen simplemente a un futbolista; busquen al <strong style={{ color: '#e1c16e' }}>CAPITÁN POR EXCELENCIA</strong>. Un señor, un lord de la cancha, un caballero que trata a la pelota con la dulzura de un primer amor y al rival con el respeto de un viejo amigo. Icaza es el faro en la tormenta, la palabra calma en la batalla. De sus labios brotó la sentencia más noble, el himno de los soñadores: <strong style={{ color: '#e1c16e' }}>'AUNQUE SEAMOS MALITOS, AQUÍ VENIMOS TODOS A DESESTRESARNOS'</strong>. ¡Qué frase, Dios mío, qué declaración de amor puro al juego! Es entender que la victoria no está en el marcador, sino en el abrazo fraterno tras el pitazo final. <strong style={{ color: '#e1c16e' }}>¡SANTIAGO ICAZA, EL ALMA MISMA DE ESTE DEPORTE!</strong>"
+            </p>
+          </div>
+        </div>
+
+        {/* C3 — CARLOS RAÚL ALVARADO (Azul) */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', background: 'linear-gradient(135deg, #0a1172 0%, #1338be 100%)' }}>
+          <div style={{ flex: '1 1 300px', minHeight: '400px' }}>
+            <img src="/captains/carlos.jpg" alt="Carlos Raúl Alvarado" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
+          <div style={{ flex: '1 1 300px', padding: '2.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+              <span style={{ background: '#e1c16e', color: 'black', padding: '4px 12px', borderRadius: '6px', fontWeight: '900', fontFamily: 'var(--font-heading)', fontSize: '1.2rem' }}>C3</span>
+              <h4 style={{ margin: 0, fontSize: '1.8rem', fontWeight: '900', color: '#e1c16e', fontFamily: 'var(--font-heading)', textTransform: 'uppercase' }}>CARLOS RAÚL ALVARADO</h4>
+            </div>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', fontStyle: 'italic', marginBottom: '1rem', letterSpacing: '1px' }}>🎙️ Tono pasional, crescendo vocal, casi agónico</p>
+            <p style={{ color: 'rgba(255,255,255,0.9)', lineHeight: '1.7', fontSize: '0.95rem', margin: 0 }}>
+              "¡Escuchen ese estruendo! ¡Es Carlos Raúl Alvarado, <strong style={{ color: '#e1c16e' }}>'EL GRITO DEL GOL'</strong>! Un hombre que no juega al fútbol, <strong style={{ color: '#e1c16e' }}>¡LO PADECE, LO SUFRE, LO GRITA DESDE LAS ENTRAÑAS!</strong> Su garganta es un volcán en erupción que se anticipa a la jugada, un trueno que resuena antes que el balón toque la red. ¿Cabello? ¡Bah, detalles! Su pasión es tan inmensa que la melena le queda chica. Dicen los puristas que tiene el alma dividida, que su espíritu está más cerca del silbato del árbitro que del botín del goleador. Un visionario de las faltas, un <strong style={{ color: '#e1c16e' }}>PROFETA DEL OFFSIDE</strong> que imparte justicia a viva voz mientras corre detrás de la de gajos. <strong style={{ color: '#e1c16e' }}>¡CARLOS RAÚL ALVARADO, EL GRITO QUE DESGARRA LA TARDE, LA PASIÓN DESBOCADA QUE NOS RECUERDA QUE EL FÚTBOL ES SENTIMIENTO PURO!</strong>"
+            </p>
+          </div>
+        </div>
+
+        {/* C4 — LUCHO PULLEY (Concho de vino) */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', background: 'linear-gradient(135deg, #4a1942 0%, #6b2d5b 100%)', flexDirection: 'row-reverse' }}>
+          <div style={{ flex: '1 1 300px', minHeight: '400px' }}>
+            <img src="/captains/lucho.jpg" alt="Lucho Pulley" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
+          <div style={{ flex: '1 1 300px', padding: '2.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+              <span style={{ background: '#e1c16e', color: 'black', padding: '4px 12px', borderRadius: '6px', fontWeight: '900', fontFamily: 'var(--font-heading)', fontSize: '1.2rem' }}>C4</span>
+              <h4 style={{ margin: 0, fontSize: '1.8rem', fontWeight: '900', color: '#e1c16e', fontFamily: 'var(--font-heading)', textTransform: 'uppercase' }}>LUCHO PULLEY</h4>
+            </div>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', fontStyle: 'italic', marginBottom: '1rem', letterSpacing: '1px' }}>🎙️ Tono misterioso, con un toque de complicidad y humor</p>
+            <p style={{ color: 'rgba(255,255,255,0.9)', lineHeight: '1.7', fontSize: '0.95rem', margin: 0 }}>
+              "¡Abran paso, que llega el <strong style={{ color: '#e1c16e' }}>'INFANTINO DEL PELOTEO'</strong>! Lucho Pulley, envuelto en el color concho de vino de las grandes gestas y las mejores cosechas. Un estratega del destino, señoras y señores. Es esa fuerza magnética donde el azar y la 'casualidad' se rinden ante su presencia. ¿Un rebote extraño? Va a los pies de Lucho. ¿Una falta dudosa? Siempre a favor del Infantino. Todo conspira, todo se alinea para que su equipo sonría. Pero no se confundan, detrás de ese misticismo dirigencial, late un <strong style={{ color: '#e1c16e' }}>CORAZÓN DE ORO</strong>, una bondad inabarcable que solo se compara con su amor por el deporte... <strong style={{ color: '#e1c16e' }}>¡Y POR UN BUEN CORTE DE CARNE A LA PARRILLA!</strong> Lucho Pulley, el hombre que domina el reglamento con una mano y el asador con la otra. <strong style={{ color: '#e1c16e' }}>¡UN MITO VIVIENTE!</strong>"
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* SPONSORS SECTION - VIP BANNER */}
       <div style={{ marginTop: '4rem', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 10px 40px rgba(0,0,0,0.6)' }}>
         
