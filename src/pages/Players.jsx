@@ -99,7 +99,7 @@ export default function Players({ players }) {
                 {player.photoUrl ? (
                   <img src={player.photoUrl} alt={player.firstName} />
                 ) : (
-                  <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', color: textColor, fontWeight: 'bold' }}>
+                  <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', color: textColor, fontWeight: 'bold' }}>
                     {player.firstName[0]}
                   </div>
                 )}
