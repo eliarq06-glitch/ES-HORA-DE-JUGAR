@@ -94,7 +94,7 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
         id: newId, 
         firstName: newPlayer.firstName.toUpperCase(),
         lastName: newPlayer.lastName.toUpperCase(),
-        nickname: formatTitleCase(newPlayer.nickname),
+        nickname: newPlayer.nickname ? newPlayer.nickname.toUpperCase() : '',
         email: newPlayer.email.toLowerCase().trim(),
         ratings: [] 
       };
@@ -161,7 +161,7 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
       ...editData, 
       firstName: editData.firstName.toUpperCase(),
       lastName: editData.lastName.toUpperCase(),
-      nickname: formatTitleCase(editData.nickname),
+      nickname: editData.nickname ? editData.nickname.toUpperCase() : '',
       stars: parseInt(editData.stars),
       status: editData.status,
       cardType: editData.cardType,
