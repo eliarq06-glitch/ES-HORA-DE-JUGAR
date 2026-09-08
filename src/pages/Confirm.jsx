@@ -308,13 +308,13 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
               if (isLentote) { badgeColor = 'var(--accent-danger)'; badgeText = 'LENTOTE 😂'; }
 
               return (
-              <div key={player.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'rgba(0,0,0,0.03)', borderRadius: '16px', border: '1px solid rgba(0,0,0,0.05)' }}>
+              <div key={player.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
                 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div style={{ fontWeight: 'bold', color: 'var(--light-text-muted)', width: '25px', textAlign: 'right' }}>#{index + 1}</div>
-                  <div className="avatar-placeholder">{player.firstName.charAt(0)}</div>
+                  <div style={{ fontWeight: 'bold', color: 'var(--dark-text-muted)', width: '25px', textAlign: 'right' }}>#{index + 1}</div>
+                  <div className="avatar-placeholder" style={{ background: 'rgba(255,255,255,0.1)' }}>{player.firstName.charAt(0)}</div>
                   <div>
-                    <div style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--light-text)' }}>
+                    <div style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--dark-text)' }}>
                       {player.firstName} {player.nickname ? <span style={{ color: 'var(--accent-warning)' }}>"{player.nickname}"</span> : ''} {player.lastName}
                     </div>
                     <div style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
