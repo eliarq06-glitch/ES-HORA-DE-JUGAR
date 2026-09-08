@@ -69,6 +69,25 @@ export default function Login({ onBack, allPlayers = [], setPlayersDB, activeSes
     }
   };
 
+  const handleResetPassword = async () => {
+    if (!email) {
+      alert("Por favor, ingresa tu correo arriba primero para enviarte el enlace de recuperación.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin,
+      });
+      if (error) throw error;
+      alert("¡Enlace de recuperación enviado! Revisa tu bandeja de entrada o la carpeta de Spam.");
+    } catch (err) {
+      alert("Error enviando enlace: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="glass-panel-dark login-panel" style={{ width: '100%', maxWidth: '400px', textAlign: 'center' }}>
       <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
@@ -151,21 +170,27 @@ export default function Login({ onBack, allPlayers = [], setPlayersDB, activeSes
           />
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
-          <button type="submit" className="btn btn-neon" disabled={loading}>
-            {loading ? 'Procesando...' : (isRegistering ? 'Registrarme' : 'Ingresar')}
-          </button>
-          
-          <button type="button" className="btn btn-dark" style={{ background: 'transparent', fontSize: '0.9rem' }} onClick={() => setIsRegistering(!isRegistering)}>
-            {isRegistering ? '¿Ya tienes cuenta? Inicia sesión' : '¿No tienes cuenta? Regístrate'}
-          </button>
-
-          {onBack && (
-            <button type="button" className="btn btn-dark" style={{ background: 'transparent', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem' }} onClick={onBack}>
-              Volver al Inicio
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+            <button type="submit" className="btn btn-neon" disabled={loading}>
+              {loading ? 'Procesando...' : (isRegistering ? 'Registrarme' : 'Ingresar')}
             </button>
-          )}
-        </div>
+            
+            <button type="button" className="btn btn-dark" style={{ background: 'transparent', fontSize: '0.9rem' }} onClick={() => setIsRegistering(!isRegistering)}>
+              {isRegistering ? '¿Ya tienes cuenta? Inicia sesión' : '¿No tienes cuenta? Regístrate'}
+            </button>
+
+            {!isRegistering && (
+              <button type="button" className="btn btn-dark" style={{ background: 'transparent', fontSize: '0.8rem', color: 'var(--dark-text-muted)', textDecoration: 'underline' }} onClick={handleResetPassword}>
+                ¿Olvidaste tu contraseña?
+              </button>
+            )}
+  
+            {onBack && (
+              <button type="button" className="btn btn-dark" style={{ background: 'transparent', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem' }} onClick={onBack}>
+                Volver al Inicio
+              </button>
+            )}
+          </div>
       </form>
     </div>
   );

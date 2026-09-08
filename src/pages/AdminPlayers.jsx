@@ -80,7 +80,17 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
 
   const handleStartEdit = (p) => {
     setEditingId(p.id);
-    setEditData({ firstName: p.firstName, lastName: p.lastName, nickname: p.nickname || '', email: p.email || '', photoUrl: p.photoUrl || '', stars: p.stars || 3 });
+    setEditData({ 
+      firstName: p.firstName, 
+      lastName: p.lastName, 
+      nickname: p.nickname || '', 
+      email: p.email || '', 
+      photoUrl: p.photoUrl || '', 
+      stars: p.stars || 3,
+      historicalGoals: p.historicalGoals || 0,
+      historicalAssists: p.historicalAssists || 0,
+      historicalChampionships: p.historicalChampionships || 0
+    });
   };
 
   const handleSaveEdit = (id) => {
@@ -90,7 +100,10 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
       firstName: editData.firstName.toUpperCase(),
       lastName: editData.lastName.toUpperCase(),
       nickname: formatTitleCase(editData.nickname),
-      stars: parseInt(editData.stars) 
+      stars: parseInt(editData.stars),
+      historicalGoals: parseInt(editData.historicalGoals) || 0,
+      historicalAssists: parseInt(editData.historicalAssists) || 0,
+      historicalChampionships: parseInt(editData.historicalChampionships) || 0
     } : p));
     setEditingId(null);
   };
@@ -108,50 +121,9 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
   // Ordenar alfabéticamente
   const sortedPlayers = [...allPlayers].sort((a, b) => a.firstName.localeCompare(b.firstName));
 
-  const handleRescuePlayers = () => {
-    try {
-      const oldStr = localStorage.getItem('players');
-      if (!oldStr) {
-        alert("No se encontró ningún respaldo de jugadores en la memoria local de tu navegador. Deberás volver a ingresarlos manualmente.");
-        return;
-      }
-      const parsed = JSON.parse(oldStr);
-      if (parsed && Array.isArray(parsed) && parsed.length > 0) {
-        const merged = [...allPlayers];
-        let added = 0;
-        parsed.forEach(oldP => {
-          if (!merged.find(p => p.id === oldP.id)) {
-            merged.push(oldP);
-            added++;
-          }
-        });
-        if (added > 0) {
-          setPlayersDB(merged);
-          alert(`¡Éxito! Se han rescatado ${added} jugadores desde tu respaldo local.`);
-        } else {
-          alert("Los jugadores del respaldo local ya se encuentran en la base de datos, no hay nada nuevo que rescatar.");
-        }
-      } else {
-        alert("El respaldo local existe pero está vacío o corrupto.");
-      }
-    } catch(err) {
-      alert("Error rescatando jugadores: " + err.message);
-    }
-  };
-
   return (
     <div style={{ width: '100%', maxWidth: '900px', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       
-      <div style={{ background: 'var(--accent-danger)', color: 'black', padding: '1.5rem', borderRadius: '12px', fontWeight: 'bold' }}>
-        <h3 style={{ margin: '0 0 1rem 0' }}>¿Faltan jugadores en tu lista?</h3>
-        <p style={{ margin: '0 0 1rem 0', fontWeight: 'normal' }}>
-          Si tenías una lista de jugadores guardada en las pruebas anteriores, presiona este botón para rescatarlos e ingresarlos a la base de datos oficial. (Solo agregará los que falten).
-        </p>
-        <button className="btn btn-dark" style={{ background: 'black', color: 'var(--accent-warning)', border: '1px solid var(--accent-warning)' }} onClick={handleRescuePlayers}>
-          <Upload size={18} /> RESCATAR JUGADORES (Desde Memoria Local)
-        </button>
-      </div>
-
       {isGlobalAdmin && (
         <div className="glass-panel-dark" style={{ border: '2px solid var(--accent-neon)' }}>
           <h2 className="title-main" style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: 0, marginBottom: '1rem', color: 'var(--accent-neon)' }}>
@@ -298,6 +270,10 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
                     </select>
                   </div>
                   
+                  <div style={{ flex: 1, minWidth: '100px' }}><label style={{fontSize:'0.7rem', color:'gray'}}>Hist. Goles</label><input type="number" min="0" className="input-dark" value={editData.historicalGoals} onChange={e => setEditData({...editData, historicalGoals: e.target.value})} style={{ width: '100%' }} /></div>
+                  <div style={{ flex: 1, minWidth: '100px' }}><label style={{fontSize:'0.7rem', color:'gray'}}>Hist. Asist.</label><input type="number" min="0" className="input-dark" value={editData.historicalAssists} onChange={e => setEditData({...editData, historicalAssists: e.target.value})} style={{ width: '100%' }} /></div>
+                  <div style={{ flex: 1, minWidth: '100px' }}><label style={{fontSize:'0.7rem', color:'gray'}}>Hist. Campeón</label><input type="number" min="0" className="input-dark" value={editData.historicalChampionships} onChange={e => setEditData({...editData, historicalChampionships: e.target.value})} style={{ width: '100%' }} /></div>
+
                   <div style={{ flex: 1.5, minWidth: '150px' }}><label style={{fontSize:'0.7rem', color:'gray'}}>Email Vinculado</label><input type="email" className="input-dark" placeholder="Email vinculado" value={editData.email} onChange={e => setEditData({...editData, email: e.target.value})} style={{ width: '100%' }} /></div>
                   
                   <div style={{ flex: 1, minWidth: '180px' }}>
