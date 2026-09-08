@@ -1,15 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { UserPlus, Save, Trash2, Edit2, Shield, Users, ShieldAlert, Image as ImageIcon, Upload } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { supabase, supabaseUrl, supabaseAnonKey } from '../lib/supabase';
 import { createClient } from '@supabase/supabase-js';
 import { useSupabaseConfig } from '../hooks/useSupabase';
-
-// Cliente secundario para no cerrar la sesión del admin al crear usuarios
-const authClient = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY,
-  { auth: { persistSession: false, autoRefreshToken: false } }
-);
 
 export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }) {
   const [newPlayer, setNewPlayer] = useState({ firstName: '', lastName: '', nickname: '', email: '', password: '', photoUrl: '', stars: 3, status: 'active' });
@@ -74,6 +67,13 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
     }
 
     try {
+      // Cliente secundario para no cerrar la sesión del admin al crear usuarios
+      const authClient = createClient(
+        supabaseUrl,
+        supabaseAnonKey,
+        { auth: { persistSession: false, autoRefreshToken: false } }
+      );
+
       // 1. Crear el usuario en Supabase Auth silenciosamente
       const { data: authData, error: authError } = await authClient.auth.signUp({
         email: newPlayer.email.toLowerCase().trim(),
