@@ -90,6 +90,12 @@ export default function Players({ players }) {
           else if(pos==='MCO' || pos==='MC' || pos==='MI' || pos==='MD') { pas=getStat(10); dri=getStat(8); sho=getStat(5); def=getStat(-5); }
           else if(pos==='MCD' || pos==='DEF' || pos==='DFC' || pos==='LI' || pos==='LD') { def=getStat(12); phy=getStat(10); pac=getStat(-5); sho=getStat(-15); }
           else if(pos==='POR' || pos==='PO') { pac=getStat(-10); sho=getStat(-20); pas=getStat(5); dri=getStat(15); def=getStat(5); phy=getStat(5); }
+          
+          const fullName = `${player.firstName} ${player.lastName}`.trim();
+          const nameLen = fullName.length;
+          let nameFontSize = 'clamp(0.9rem, 4vw, 1.3rem)';
+          if (nameLen > 18) nameFontSize = 'clamp(0.65rem, 2.5vw, 0.9rem)';
+          else if (nameLen > 14) nameFontSize = 'clamp(0.75rem, 3vw, 1.05rem)';
 
           return (
           <div 
@@ -126,8 +132,8 @@ export default function Players({ players }) {
 
               {/* Name & Stats */}
               <div className="fifa-card-bottom-new">
-                <div className="fifa-card-name-new" style={{ color: cardTheme === 'white' ? '#886d34' : 'white', textShadow: cardTheme === 'white' ? 'none' : '0 2px 4px rgba(0,0,0,0.8)' }}>
-                  {player.firstName} {player.lastName}
+                <div className="fifa-card-name-new" style={{ fontSize: nameFontSize, color: cardTheme === 'white' ? '#886d34' : 'white', textShadow: cardTheme === 'white' ? 'none' : '0 2px 4px rgba(0,0,0,0.8)' }}>
+                  {fullName}
                 </div>
                 
                 {/* Stats Grid */}
