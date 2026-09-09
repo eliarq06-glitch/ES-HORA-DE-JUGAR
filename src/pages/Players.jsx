@@ -17,14 +17,27 @@ export default function Players({ players }) {
 
       <div className="glass-panel-dark" style={{ marginBottom: '3rem', padding: '1.5rem', border: '1px solid rgba(204, 255, 0, 0.2)' }}>
         <h3 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-neon)' }}>
-          <Zap size={20} /> ¿Cómo funciona el Ranking?
+          <Zap size={20} /> Guía del Ranking y Cartas
         </h3>
         <ul style={{ margin: 0, paddingLeft: '1.5rem', color: 'white', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <li>
-            <strong>OVR (Nivel General):</strong> Va del 1 al 99. Sube o baja dependiendo de tu rendimiento en la cancha. Al final de cada jornada cerrada, el administrador asigna estrellas (1 a 5) en base a la votación del equipo. Mientras mejores notas saques consistentemente, más alto será tu OVR.
+            <strong>OVR (Nivel General):</strong> Va del 1 al 99. Sube o baja dependiendo de tu rendimiento en la cancha. Al final de cada jornada cerrada, el administrador asigna estrellas (1 a 5) en base a la votación del equipo. Mientras mejores notas saques consistentemente, más alto será tu OVR. ¡A esforzarse en la cancha!
           </li>
           <li>
-            <strong>Goles y Asistencias:</strong> Se suman automáticamente de todas las jornadas oficiales gracias a los registros del VAR en vivo. ¡Cada gol cuenta para la bota de oro!
+            <strong>Bombos (Grupos de Sorteo):</strong> Aseguran que los equipos queden equilibrados. El <strong>Bombo 1 (5 Estrellas)</strong> agrupa a los jugadores de élite, y así sucesivamente hasta el <strong>Bombo 5 (1 Estrella)</strong>. ¡Juega bien en los partidos, gana el MVP, y subirás de Bombo y de OVR!
+          </li>
+          <li>
+            <strong>Significado de los Colores (Cartas):</strong> El color de tu carta refleja tu clasificación de Bombo actual:
+            <ul style={{ marginTop: '0.5rem', listStyleType: 'circle', paddingLeft: '1.5rem', color: 'var(--dark-text-muted)' }}>
+              <li><strong style={{ color: '#00ccff' }}>Carta Azul (Ultimate):</strong> Exclusiva para el Bombo 1 (Élite).</li>
+              <li><strong style={{ color: 'white' }}>Carta Blanca (Icon):</strong> Exclusiva para el Bombo 2.</li>
+              <li><strong style={{ color: '#d4af37' }}>Carta Negra (TOTW):</strong> Exclusiva para el Bombo 3.</li>
+              <li><strong style={{ color: '#ffd700' }}>Carta Oro (Rare):</strong> Exclusiva para el Bombo 4.</li>
+              <li><strong style={{ color: '#cd7f32' }}>Carta Bronce:</strong> Asignada al Bombo 5.</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Goles y Asistencias:</strong> Se suman automáticamente de todas las jornadas oficiales gracias a los registros del VAR en vivo. ¡Cada estadística cuenta para la gala de premios de fin de año!
           </li>
         </ul>
       </div>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Calendar, Plus, Trash2, Check, Trophy, ChevronDown, ChevronUp, Crown, Activity, Star, Lock, Unlock } from 'lucide-react';
 
-export default function Sessions({ sessions, setSessions, activeSessionId, setActiveSessionId, historicalTournaments = [], teams = [] }) {
+export default function Sessions({ sessions, setSessions, activeSessionId, setActiveSessionId, historicalTournaments = [], teams = [], isGlobalAdmin }) {
   const [newSessionName, setNewSessionName] = useState('');
   const [newSessionDate, setNewSessionDate] = useState('');
   const [expandedHistoryId, setExpandedHistoryId] = useState(null);
@@ -74,11 +74,16 @@ export default function Sessions({ sessions, setSessions, activeSessionId, setAc
               )}
               <button 
                 className="btn btn-dark" 
-                style={{ border: s.status === 'locked' ? '1px solid var(--accent-danger)' : '1px solid var(--accent-warning)', color: s.status === 'locked' ? 'var(--accent-danger)' : 'var(--accent-warning)', padding: '0.75rem', opacity: (s.status === 'locked' && hasDrawnTeams) ? 0.5 : 1, cursor: (s.status === 'locked' && hasDrawnTeams) ? 'not-allowed' : 'pointer' }} 
+                style={{ border: s.status === 'locked' ? '1px solid var(--accent-danger)' : '1px solid var(--accent-warning)', color: s.status === 'locked' ? 'var(--accent-danger)' : 'var(--accent-warning)', padding: '0.75rem', opacity: (s.status === 'locked' && hasDrawnTeams && !isGlobalAdmin) ? 0.5 : 1, cursor: (s.status === 'locked' && hasDrawnTeams && !isGlobalAdmin) ? 'not-allowed' : 'pointer' }} 
                 onClick={() => {
-                  if (s.status === 'locked' && hasDrawnTeams) {
+                  if (s.status === 'locked' && hasDrawnTeams && !isGlobalAdmin) {
                     alert('No puedes reabrir esta convocatoria porque ya se han sorteado los equipos para jugar.');
                     return;
+                  }
+                  if (s.status === 'locked' && hasDrawnTeams && isGlobalAdmin) {
+                    if (!window.confirm("¡ATENCIÓN SUPER ADMIN! Ya se han sorteado equipos. ¿Estás seguro de que deseas forzar la reapertura de la convocatoria? Esto podría afectar el sorteo actual.")) {
+                      return;
+                    }
                   }
                   setSessions(sessions.map(sess => sess.id === s.id ? { ...sess, status: sess.status === 'locked' ? 'open' : 'locked' } : sess));
                 }}
