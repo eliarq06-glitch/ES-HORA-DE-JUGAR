@@ -135,7 +135,11 @@ function App() {
       const fouls = (p.historicalFouls || 0) + events.filter(e => e.type === 'foul').length;
       const championships = p.historicalChampionships || 0;
 
-      return { ...p, ovr, stars: Math.round(avgRating / 2), goals, assists, fouls };
+      // Keep manually-set stars (from admin). Only auto-calc if player has ratings.
+      const autoStars = validRatings.length > 0 ? Math.max(1, Math.min(5, Math.round(avgRating / 2))) : null;
+      const stars = p.stars || autoStars || 3;
+
+      return { ...p, ovr, stars, goals, assists, fouls };
     });
   };
 
