@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserPlus, Trash2, Edit2, CheckCircle2, Shield, Link as LinkIcon, MessageSquare, FileDown } from 'lucide-react';
+import { UserPlus, Trash2, Edit2, CheckCircle2, Shield, Link as LinkIcon, MessageSquare, FileDown, ChevronUp, ChevronDown } from 'lucide-react';
 import { useSupabaseConfig } from '../hooks/useSupabase';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -195,6 +195,24 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
     updateConfirmedPlayers(activeSession.confirmedIds.filter(pid => Number(pid) !== Number(id)));
   };
 
+  const handleMoveUp = (index) => {
+    if (index === 0) return;
+    const ids = [...activeSession.confirmedIds];
+    [ids[index - 1], ids[index]] = [ids[index], ids[index - 1]];
+    updateConfirmedPlayers(ids);
+  };
+
+  const handleMoveDown = (index) => {
+    if (index >= activeSession.confirmedIds.length - 1) return;
+    const ids = [...activeSession.confirmedIds];
+    [ids[index], ids[index + 1]] = [ids[index + 1], ids[index]];
+    updateConfirmedPlayers(ids);
+  };
+
+  const handleChangeStatus = (playerId, newStatus) => {
+    setPlayersDB(prev => prev.map(p => p.id === playerId ? { ...p, status: newStatus } : p));
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '100%', maxWidth: '600px' }}>
       
@@ -383,8 +401,31 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
                 </div>
                 
                 {isAdmin && (
-                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <button className="btn" style={{ padding: '0.5rem', background: selectedCaptains.includes(player.id) ? 'var(--accent-neon)' : 'transparent', color: selectedCaptains.includes(player.id) ? 'black' : 'var(--light-text-muted)', border: '1px solid var(--accent-neon)', fontSize: '0.7rem', fontWeight: 'bold' }} onClick={() => {
+                  <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                    {/* Reorder buttons */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', marginRight: '4px' }}>
+                      <button className="btn" style={{ padding: '2px 4px', background: index === 0 ? 'transparent' : 'rgba(255,255,255,0.1)', color: index === 0 ? 'rgba(255,255,255,0.2)' : 'white', border: 'none', cursor: index === 0 ? 'default' : 'pointer', borderRadius: '4px 4px 0 0' }}
+                        onClick={() => handleMoveUp(index)} disabled={index === 0} title="Subir">
+                        <ChevronUp size={14} />
+                      </button>
+                      <button className="btn" style={{ padding: '2px 4px', background: index >= confirmedPlayers.length - 1 ? 'transparent' : 'rgba(255,255,255,0.1)', color: index >= confirmedPlayers.length - 1 ? 'rgba(255,255,255,0.2)' : 'white', border: 'none', cursor: index >= confirmedPlayers.length - 1 ? 'default' : 'pointer', borderRadius: '0 0 4px 4px' }}
+                        onClick={() => handleMoveDown(index)} disabled={index >= confirmedPlayers.length - 1} title="Bajar">
+                        <ChevronDown size={14} />
+                      </button>
+                    </div>
+                    {/* Status dropdown */}
+                    <select
+                      value={player.status || 'active'}
+                      onChange={(e) => handleChangeStatus(player.id, e.target.value)}
+                      style={{ padding: '4px 6px', fontSize: '0.7rem', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', cursor: 'pointer', maxWidth: '90px' }}
+                    >
+                      <option value="active">Activo</option>
+                      <option value="frequent">🍻 Biela</option>
+                      <option value="occasional">🚫 Castigo</option>
+                      <option value="injured">🏥 Lesión</option>
+                    </select>
+                    {/* Captain button */}
+                    <button className="btn" style={{ padding: '0.4rem', background: selectedCaptains.includes(player.id) ? 'var(--accent-neon)' : 'transparent', color: selectedCaptains.includes(player.id) ? 'black' : 'var(--light-text-muted)', border: '1px solid var(--accent-neon)', fontSize: '0.65rem', fontWeight: 'bold' }} onClick={() => {
                       if (selectedCaptains.includes(player.id)) {
                         setSelectedCaptains(selectedCaptains.filter(id => id !== player.id));
                       } else {
@@ -392,10 +433,11 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
                         setSelectedCaptains([...selectedCaptains, player.id]);
                       }
                     }}>
-                      ⭐ {selectedCaptains.includes(player.id) ? 'CAPITÁN' : 'Hacer Capitán'}
+                      ⭐ {selectedCaptains.includes(player.id) ? 'CAP' : 'Cap'}
                     </button>
-                    <button className="btn" style={{ padding: '0.5rem', background: 'transparent', color: 'var(--accent-danger)' }} onClick={() => handleRemove(player.id)}>
-                      <Trash2 size={20} />
+                    {/* Delete button */}
+                    <button className="btn" style={{ padding: '0.4rem', background: 'transparent', color: 'var(--accent-danger)' }} onClick={() => handleRemove(player.id)}>
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 )}
