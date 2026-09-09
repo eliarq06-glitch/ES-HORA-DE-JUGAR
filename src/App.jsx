@@ -395,7 +395,7 @@ function App() {
           {route === 'match' && isAdmin && <Match activeSession={activeSession} teams={teams} matchEvents={matchEvents} setMatchEvents={setMatchEvents} updateSession={updateSession} matches={matches} setMatches={setMatches} />}
           {route === 'champion' && isAdmin && <Champion teams={teams} matches={matches} matchEvents={matchEvents} onFinalize={handleCloseTournament} />}
           {route === 'ratings' && isAdmin && <Ratings players={confirmedPlayers} updatePlayerRating={updatePlayerRating} matchEvents={matchEvents} activeSessionId={activeSessionId} />}
-          {route === 'players' && <Players players={allPlayers} />}
+          {route === 'players' && <Players players={allPlayers} isGlobalAdmin={isGlobalAdmin} setPlayersDB={setPlayersDB} />}
           {route === 'history' && <History players={allPlayers} historicalTournaments={historicalTournaments} />}
           {route === 'mvp' && <MVP isAdmin={isAdmin} historicalTournaments={historicalTournaments} setHistoricalTournaments={setHistoricalTournaments} mvpVotes={mvpVotes} setMvpVotes={setMvpVotes} mvpClosed={mvpClosed} setMvpClosed={setMvpClosed} />}
           {route === 'admin-menu' && isAdmin && (

@@ -19,7 +19,7 @@ const getOvr = (player) => Math.round((player.stars || 3) / 5 * 99) || 50;
 
 const CARD_LABELS = { white: 'Blanca (Icon)', blue: 'Azul (Ultimate)', black: 'Negra (TOTW)', gold: 'Oro (Rare)', bronze: 'Bronce' };
 
-export default function Players({ players }) {
+export default function Players({ players, isGlobalAdmin, setPlayersDB }) {
   const [sponsorsConfig] = useSupabaseConfig('sponsors', []);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [searchText, setSearchText] = useState('');
@@ -253,7 +253,7 @@ export default function Players({ players }) {
             key={player.id} 
             className="fifa-card" 
             onClick={() => setSelectedPlayer(player)}
-            style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
+            style={{ cursor: 'pointer', transition: 'transform 0.2s', marginBottom: isGlobalAdmin ? '30px' : '0', position: 'relative' }}
             onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
             onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
           >
@@ -319,6 +319,26 @@ export default function Players({ players }) {
               </div>
               
             </div>
+
+            {/* Super Admin: Star/Card Assignment */}
+            {isGlobalAdmin && setPlayersDB && (
+              <div style={{ position: 'absolute', bottom: '-30px', left: 0, right: 0, display: 'flex', justifyContent: 'center', zIndex: 10 }} onClick={(e) => e.stopPropagation()}>
+                <select
+                  value={String(player.stars || 3)}
+                  onChange={(e) => {
+                    const newStars = parseInt(e.target.value);
+                    setPlayersDB(prev => prev.map(p => p.id === player.id ? { ...p, stars: newStars, cardType: 'default' } : p));
+                  }}
+                  style={{ padding: '3px 6px', fontSize: '0.7rem', background: 'rgba(0,0,0,0.85)', color: 'var(--accent-neon)', border: '1px solid var(--accent-neon)', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
+                >
+                  <option value="5">⭐5 Blanca</option>
+                  <option value="4">⭐4 Azul</option>
+                  <option value="3">⭐3 Negra</option>
+                  <option value="2">⭐2 Oro</option>
+                  <option value="1">⭐1 Bronce</option>
+                </select>
+              </div>
+            )}
           </div>
           );
         })}
