@@ -1,13 +1,81 @@
-import React, { useState } from 'react';
-import { Star, Shield, Zap } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Star, Shield, Zap, Search, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
 import { useSupabaseConfig } from '../hooks/useSupabase';
+
+const getCardTheme = (player) => {
+  const stars = player.stars || 3;
+  let ct = player.cardType || 'default';
+  if (ct === 'default') {
+    if (stars >= 5) ct = 'white';
+    else if (stars === 4) ct = 'blue';
+    else if (stars === 3) ct = 'black';
+    else if (stars === 2) ct = 'gold';
+    else ct = 'bronze';
+  }
+  return ct;
+};
+
+const getOvr = (player) => Math.round((player.stars || 3) / 5 * 99) || 50;
+
+const CARD_LABELS = { white: 'Blanca (Icon)', blue: 'Azul (Ultimate)', black: 'Negra (TOTW)', gold: 'Oro (Rare)', bronze: 'Bronce' };
 
 export default function Players({ players }) {
   const [sponsorsConfig] = useSupabaseConfig('sponsors', []);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
-  
-  // Stats are already calculated and included in the players array
-  const playerStats = players;
+  const [searchText, setSearchText] = useState('');
+  const [filterCard, setFilterCard] = useState('all');
+  const [filterPos, setFilterPos] = useState('all');
+  const [sortBy, setSortBy] = useState('name');
+  const [showFilters, setShowFilters] = useState(false);
+
+  const allPositions = useMemo(() => [...new Set(players.map(p => p.position || 'MCO'))].sort(), [players]);
+
+  const filteredPlayers = useMemo(() => {
+    let list = [...players];
+
+    // Search
+    if (searchText.trim()) {
+      const q = searchText.toLowerCase().trim();
+      list = list.filter(p => {
+        const full = `${p.firstName} ${p.lastName} ${p.nickname || ''}`.toLowerCase();
+        return full.includes(q);
+      });
+    }
+
+    // Filter by card type
+    if (filterCard !== 'all') {
+      list = list.filter(p => getCardTheme(p) === filterCard);
+    }
+
+    // Filter by position
+    if (filterPos !== 'all') {
+      list = list.filter(p => (p.position || 'MCO') === filterPos);
+    }
+
+    // Sort
+    list.sort((a, b) => {
+      if (sortBy === 'name') return a.firstName.localeCompare(b.firstName);
+      if (sortBy === 'ovr_desc') return getOvr(b) - getOvr(a);
+      if (sortBy === 'ovr_asc') return getOvr(a) - getOvr(b);
+      if (sortBy === 'goals') return (b.historicalGoals || 0) - (a.historicalGoals || 0);
+      if (sortBy === 'assists') return (b.historicalAssists || 0) - (a.historicalAssists || 0);
+      if (sortBy === 'championships') return (b.historicalChampionships || 0) - (a.historicalChampionships || 0);
+      if (sortBy === 'stars_desc') return (b.stars || 3) - (a.stars || 3);
+      return 0;
+    });
+
+    return list;
+  }, [players, searchText, filterCard, filterPos, sortBy]);
+
+  // Suggestions for smart search
+  const suggestions = useMemo(() => {
+    if (searchText.trim().length < 2) return [];
+    const q = searchText.toLowerCase().trim();
+    return players
+      .filter(p => `${p.firstName} ${p.lastName} ${p.nickname || ''}`.toLowerCase().includes(q))
+      .slice(0, 5)
+      .map(p => ({ id: p.id, label: `${p.firstName} ${p.lastName}${p.nickname ? ` "${p.nickname}"` : ''}` }));
+  }, [players, searchText]);
 
   return (
     <div style={{ width: '100%', maxWidth: '1200px' }}>
@@ -43,8 +111,91 @@ export default function Players({ players }) {
         </ul>
       </div>
 
+      {/* Search & Filter Bar */}
+      <div className="glass-panel-dark" style={{ marginBottom: '1.5rem', padding: '1rem 1.5rem' }}>
+        {/* Search with suggestions */}
+        <div style={{ position: 'relative', marginBottom: showFilters ? '1rem' : 0 }}>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            <div style={{ flex: 1, position: 'relative' }}>
+              <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--dark-text-muted)' }} />
+              <input
+                className="input-dark"
+                placeholder="Buscar jugador por nombre o apodo..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                style={{ paddingLeft: '36px', width: '100%' }}
+              />
+              {/* Suggestions dropdown */}
+              {suggestions.length > 0 && (
+                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--dark-bg)', border: '1px solid var(--dark-glass-border)', borderRadius: '8px', zIndex: 50, marginTop: '4px', overflow: 'hidden', boxShadow: '0 8px 24px rgba(0,0,0,0.6)' }}>
+                  {suggestions.map(s => (
+                    <div key={s.id} style={{ padding: '10px 14px', cursor: 'pointer', color: 'white', fontSize: '0.9rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}
+                      onClick={() => { setSearchText(s.label); }}
+                      onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                      onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                    >
+                      {s.label}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <button className="btn btn-dark" style={{ padding: '0.6rem 1rem', border: '1px solid var(--dark-glass-border)', display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }} onClick={() => setShowFilters(!showFilters)}>
+              <SlidersHorizontal size={16} /> Filtros
+            </button>
+          </div>
+        </div>
+
+        {/* Expanded Filters */}
+        {showFilters && (
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, minWidth: '140px' }}>
+              <label style={{ fontSize: '0.7rem', color: 'var(--dark-text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>Tipo de Carta</label>
+              <select className="input-dark" value={filterCard} onChange={(e) => setFilterCard(e.target.value)} style={{ padding: '0.5rem' }}>
+                <option value="all">Todas</option>
+                <option value="white">⚪ Blanca (Icon) – Bombo 1</option>
+                <option value="blue">🔵 Azul (Ultimate) – Bombo 2</option>
+                <option value="black">⚫ Negra (TOTW) – Bombo 3</option>
+                <option value="gold">🟡 Oro (Rare) – Bombo 4</option>
+                <option value="bronze">🟤 Bronce – Bombo 5</option>
+              </select>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, minWidth: '120px' }}>
+              <label style={{ fontSize: '0.7rem', color: 'var(--dark-text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>Posición</label>
+              <select className="input-dark" value={filterPos} onChange={(e) => setFilterPos(e.target.value)} style={{ padding: '0.5rem' }}>
+                <option value="all">Todas</option>
+                {allPositions.map(pos => <option key={pos} value={pos}>{pos}</option>)}
+              </select>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, minWidth: '160px' }}>
+              <label style={{ fontSize: '0.7rem', color: 'var(--dark-text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>Ordenar por</label>
+              <select className="input-dark" value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ padding: '0.5rem' }}>
+                <option value="name">Nombre (A–Z)</option>
+                <option value="ovr_desc">OVR (Mayor a Menor)</option>
+                <option value="ovr_asc">OVR (Menor a Mayor)</option>
+                <option value="stars_desc">Estrellas (Mayor)</option>
+                <option value="goals">Más Goles</option>
+                <option value="assists">Más Asistencias</option>
+                <option value="championships">Más Campeonatos</option>
+              </select>
+            </div>
+            {(filterCard !== 'all' || filterPos !== 'all' || searchText) && (
+              <button className="btn" style={{ background: 'var(--accent-danger)', color: 'white', padding: '0.5rem 1rem', fontSize: '0.8rem', marginTop: '16px' }}
+                onClick={() => { setFilterCard('all'); setFilterPos('all'); setSearchText(''); setSortBy('name'); }}>
+                Limpiar Filtros
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Results count */}
+        <div style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: 'var(--dark-text-muted)' }}>
+          Mostrando {filteredPlayers.length} de {players.length} jugadores
+        </div>
+      </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '2rem', padding: '1rem' }}>
-        {playerStats.map((player) => {
+        {filteredPlayers.map((player) => {
           const stars = player.stars || 3;
           let cardTheme = player.cardType || 'default';
           
