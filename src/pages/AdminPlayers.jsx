@@ -243,7 +243,10 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
       return;
     }
 
+    const emailsInSupabase = profiles.map(p => p.email?.toLowerCase().trim()).filter(Boolean);
     const newPlayers = [];
+
+    // 1. Encontrar los que están en Supabase pero faltan en la App
     profiles.forEach(prof => {
       if (!prof.email) return;
       const exists = allPlayers.find(p => p.email && p.email.toLowerCase().trim() === prof.email.toLowerCase().trim());
@@ -273,11 +276,33 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
       }
     });
 
-    if (newPlayers.length > 0) {
-      setPlayersDB(prev => [...prev, ...newPlayers]);
-      alert(`¡Sincronización completa! Se agregaron ${newPlayers.length} jugadores desde Supabase que faltaban en la App.`);
-    } else {
-      alert('¡Todo está al día! Todos los usuarios de Supabase ya existen en la lista de jugadores de la App.');
+    // 2. Encontrar los que están en la App pero ya NO están en Supabase
+    const playerIdsToDelete = [];
+    allPlayers.forEach(p => {
+      if (p.email === 'eli.arq.06@gmail.com' || p.firstName === 'Víctor' || p.firstName === 'Victor') return; // Nunca borrar al admin
+      if (p.email && p.email.trim() !== '') {
+        const emailLower = p.email.toLowerCase().trim();
+        if (!emailsInSupabase.includes(emailLower)) {
+          playerIdsToDelete.push(p.id);
+        }
+      }
+    });
+
+    if (newPlayers.length === 0 && playerIdsToDelete.length === 0) {
+      alert('¡Todo está al día! Las cuentas de Supabase y la App están perfectamente sincronizadas.');
+      return;
+    }
+
+    let message = 'Resumen de Sincronización:\n';
+    if (newPlayers.length > 0) message += `- ${newPlayers.length} agregados (Estaban en Supabase pero no en la App).\n`;
+    if (playerIdsToDelete.length > 0) message += `- ${playerIdsToDelete.length} eliminados (Estaban en la App pero ya no en Supabase).\n`;
+    
+    if (window.confirm(message + '\n¿Deseas aplicar estos cambios?')) {
+      setPlayersDB(prev => {
+        let updatedList = prev.filter(p => !playerIdsToDelete.includes(p.id));
+        updatedList = [...updatedList, ...newPlayers];
+        return updatedList;
+      });
     }
   };
 
