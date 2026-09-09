@@ -30,9 +30,9 @@ export default function Players({ players }) {
           <li>
             <strong>Significado de los Colores (Cartas):</strong> El color de tu carta refleja tu clasificación de Bombo actual:
             <ul style={{ marginTop: '0.5rem', listStyleType: 'circle', paddingLeft: '1.5rem', color: 'var(--dark-text-muted)' }}>
-              <li><strong style={{ color: '#00ccff' }}>Carta Azul (Ultimate):</strong> Exclusiva para el Bombo 1 (Élite).</li>
-              <li><strong style={{ color: 'white' }}>Carta Blanca (Icon):</strong> Exclusiva para el Bombo 2.</li>
-              <li><strong style={{ color: '#d4af37' }}>Carta Negra (TOTW):</strong> Exclusiva para el Bombo 3.</li>
+              <li><strong style={{ color: 'white' }}>Carta Blanca (Icon):</strong> Exclusiva para el Bombo 1 (Élite).</li>
+              <li><strong style={{ color: '#00ccff' }}>Carta Azul (Ultimate):</strong> Exclusiva para el Bombo 2.</li>
+              <li><strong style={{ color: '#a0a0a0' }}>Carta Negra (TOTW):</strong> Exclusiva para el Bombo 3.</li>
               <li><strong style={{ color: '#ffd700' }}>Carta Oro (Rare):</strong> Exclusiva para el Bombo 4.</li>
               <li><strong style={{ color: '#cd7f32' }}>Carta Bronce:</strong> Asignada al Bombo 5.</li>
             </ul>
@@ -49,8 +49,8 @@ export default function Players({ players }) {
           let cardTheme = player.cardType || 'default';
           
           if (cardTheme === 'default') {
-            if (stars >= 5) cardTheme = 'blue';
-            else if (stars === 4) cardTheme = 'white';
+            if (stars >= 5) cardTheme = 'white';
+            else if (stars === 4) cardTheme = 'blue';
             else if (stars === 3) cardTheme = 'black';
             else if (stars === 2) cardTheme = 'gold';
             else cardTheme = 'bronze';
@@ -60,15 +60,15 @@ export default function Players({ players }) {
           let textColor = '#3b2511';
           let maskGradient = 'linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.95))';
           
-          if (cardTheme === 'blue') {
+          if (cardTheme === 'white') {
+            textColor = '#333333';
+            maskGradient = 'linear-gradient(to bottom, rgba(255,255,255,0.7), rgba(255,255,255,1))';
+          } else if (cardTheme === 'blue') {
             textColor = '#e8c678';
             maskGradient = 'linear-gradient(to bottom, rgba(15,24,71,0.8), rgba(10,15,40,0.95))';
-          } else if (cardTheme === 'white') {
-            textColor = '#b9975b';
-            maskGradient = 'linear-gradient(to bottom, rgba(255,255,255,0.7), rgba(255,255,255,1))';
           } else if (cardTheme === 'black') {
-            textColor = '#d4af37';
-            maskGradient = 'linear-gradient(to bottom, rgba(20,20,20,0.8), rgba(0,0,0,0.95))';
+            textColor = '#cccccc';
+            maskGradient = 'linear-gradient(to bottom, rgba(30,30,30,0.8), rgba(10,10,10,0.95))';
           } else if (cardTheme === 'gold') {
             textColor = '#4a3810';
             maskGradient = 'linear-gradient(to bottom, rgba(220,180,80,0.8), rgba(200,160,60,0.95))';
@@ -132,12 +132,12 @@ export default function Players({ players }) {
 
               {/* Name & Stats */}
               <div className="fifa-card-bottom-new">
-                <div className="fifa-card-name-new" style={{ fontSize: nameFontSize, color: cardTheme === 'white' ? '#886d34' : 'white', textShadow: cardTheme === 'white' ? 'none' : '0 2px 4px rgba(0,0,0,0.8)' }}>
+                <div className="fifa-card-name-new" style={{ fontSize: nameFontSize, color: cardTheme === 'white' ? '#222' : 'white', textShadow: cardTheme === 'white' ? 'none' : '0 2px 4px rgba(0,0,0,0.8)' }}>
                   {fullName}
                 </div>
                 
                 {/* Stats Grid */}
-                <div className="fifa-card-stats-grid" style={{ color: cardTheme === 'white' ? '#886d34' : 'white', textShadow: cardTheme === 'white' ? 'none' : '0 1px 3px rgba(0,0,0,0.8)' }}>
+                <div className="fifa-card-stats-grid" style={{ color: textColor, textShadow: cardTheme === 'white' ? 'none' : '0 1px 3px rgba(0,0,0,0.8)' }}>
                   <div className="stat-col">
                     <div className="stat-row"><span>{pac}</span> <span>RIT</span></div>
                     <div className="stat-row"><span>{sho}</span> <span>TIR</span></div>
