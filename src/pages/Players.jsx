@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Star, Shield, Zap } from 'lucide-react';
 import { useSupabaseConfig } from '../hooks/useSupabase';
 
 export default function Players({ players }) {
   const [sponsorsConfig] = useSupabaseConfig('sponsors', []);
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
   
   // Stats are already calculated and included in the players array
   const playerStats = players;
@@ -72,8 +73,8 @@ export default function Players({ players }) {
             textColor = '#4a3810';
             maskGradient = 'linear-gradient(to bottom, rgba(220,180,80,0.8), rgba(200,160,60,0.95))';
           } else if (cardTheme === 'bronze') {
-            textColor = '#4a3810';
-            maskGradient = 'linear-gradient(to bottom, rgba(160,110,80,0.8), rgba(130,80,50,0.95))';
+            textColor = '#4a2511';
+            maskGradient = 'linear-gradient(to bottom, rgba(150,80,40,0.8), rgba(100,50,20,0.95))';
           }
 
           const extraStyle = {};
@@ -91,7 +92,14 @@ export default function Players({ players }) {
           else if(pos==='POR' || pos==='PO') { pac=getStat(-10); sho=getStat(-20); pas=getStat(5); dri=getStat(15); def=getStat(5); phy=getStat(5); }
 
           return (
-          <div key={player.id} className="fifa-card">
+          <div 
+            key={player.id} 
+            className="fifa-card" 
+            onClick={() => setSelectedPlayer(player)}
+            style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
+            onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+            onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          >
             <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundImage: `url(${bgImage})`, backgroundSize: '100% 100%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', zIndex: 1, ...extraStyle }}></div>
             {/* Eraser Overlay for baked-in text */}
             <div style={{ position: 'absolute', top: '48%', left: '10%', width: '80%', height: '45%', background: maskGradient, backdropFilter: 'blur(4px)', borderRadius: '10px', zIndex: 1 }}></div>
@@ -273,6 +281,51 @@ export default function Players({ players }) {
           </div>
         </div>
       </div>
+
+      {/* Modal de Estadísticas */}
+      {selectedPlayer && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(8px)' }} onClick={() => setSelectedPlayer(null)}>
+          <div style={{ background: 'var(--dark-glass)', border: '1px solid var(--accent-neon)', borderRadius: '16px', padding: '2rem', maxWidth: '400px', width: '100%', position: 'relative', boxShadow: '0 10px 40px rgba(0,0,0,0.8)' }} onClick={e => e.stopPropagation()}>
+            <button style={{ position: 'absolute', top: '15px', right: '15px', background: 'transparent', border: 'none', color: 'white', fontSize: '1.8rem', cursor: 'pointer', opacity: 0.8 }} onClick={() => setSelectedPlayer(null)}>×</button>
+            
+            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+              {selectedPlayer.photoUrl ? (
+                <img src={selectedPlayer.photoUrl} alt={selectedPlayer.firstName} style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--accent-neon)', marginBottom: '1rem' }} />
+              ) : (
+                <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', color: 'var(--accent-neon)', fontWeight: 'bold', margin: '0 auto 1rem auto', border: '3px solid var(--accent-neon)' }}>
+                  {selectedPlayer.firstName[0]}
+                </div>
+              )}
+              <h3 style={{ margin: 0, color: 'white', fontSize: '1.8rem', textTransform: 'uppercase' }}>{selectedPlayer.firstName} {selectedPlayer.lastName}</h3>
+              {selectedPlayer.nickname && <p style={{ margin: 0, color: 'var(--accent-neon)', fontSize: '1.1rem', fontStyle: 'italic' }}>"{selectedPlayer.nickname}"</p>}
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.8rem 1.2rem', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: '4px solid var(--accent-neon)' }}>
+                <span style={{ color: 'var(--dark-text-muted)', fontSize: '0.9rem' }}>Posición Principal</span>
+                <span style={{ color: 'white', fontWeight: 'bold', fontSize: '1.1rem' }}>{selectedPlayer.position || 'MCO'}</span>
+              </div>
+              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.8rem 1.2rem', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: 'var(--dark-text-muted)', fontSize: '0.9rem' }}>Partidos Jugados (Valorados)</span>
+                <span style={{ color: 'white', fontWeight: 'bold', fontSize: '1.1rem' }}>{selectedPlayer.ratings?.length || 0}</span>
+              </div>
+              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.8rem 1.2rem', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: 'var(--dark-text-muted)', fontSize: '0.9rem' }}>Goles Históricos</span>
+                <span style={{ color: 'white', fontWeight: 'bold', fontSize: '1.1rem' }}>{selectedPlayer.historicalGoals || 0} ⚽</span>
+              </div>
+              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.8rem 1.2rem', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: 'var(--dark-text-muted)', fontSize: '0.9rem' }}>Asistencias Totales</span>
+                <span style={{ color: 'white', fontWeight: 'bold', fontSize: '1.1rem' }}>{selectedPlayer.historicalAssists || 0} 👟</span>
+              </div>
+              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.8rem 1.2rem', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRight: '4px solid var(--accent-warning)' }}>
+                <span style={{ color: 'var(--accent-warning)', fontSize: '0.9rem', fontWeight: 'bold' }}>Campeonatos</span>
+                <span style={{ color: 'var(--accent-warning)', fontWeight: 'bold', fontSize: '1.2rem' }}>{selectedPlayer.historicalChampionships || 0} 🏆</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
