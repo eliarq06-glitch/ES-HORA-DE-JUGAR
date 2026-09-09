@@ -11,7 +11,7 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
   const [justConfirmed, setJustConfirmed] = useState(false);
   const [newPlayer, setNewPlayer] = useState({ firstName: '', lastName: '', nickname: '' });
   const [activityLog, setActivityLog] = useSupabaseConfig('activityLog', []);
-  const [selectedCaptains, setSelectedCaptains] = useState([]);
+  const [selectedCaptains, setSelectedCaptains] = useSupabaseConfig('selectedCaptains', []);
 
   const CAPTAINS = ['LUIS', 'SANTIAGO', 'FABRICIO', 'CARLOS'];
 
