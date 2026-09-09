@@ -289,48 +289,86 @@ export default function Players({ players }) {
       </div>
 
       {/* Modal de Estadísticas */}
-      {selectedPlayer && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(8px)' }} onClick={() => setSelectedPlayer(null)}>
-          <div style={{ background: 'var(--dark-glass)', border: '1px solid var(--accent-neon)', borderRadius: '16px', padding: '2rem', maxWidth: '400px', width: '100%', position: 'relative', boxShadow: '0 10px 40px rgba(0,0,0,0.8)' }} onClick={e => e.stopPropagation()}>
-            <button style={{ position: 'absolute', top: '15px', right: '15px', background: 'transparent', border: 'none', color: 'white', fontSize: '1.8rem', cursor: 'pointer', opacity: 0.8 }} onClick={() => setSelectedPlayer(null)}>×</button>
-            
-            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-              {selectedPlayer.photoUrl ? (
-                <img src={selectedPlayer.photoUrl} alt={selectedPlayer.firstName} style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--accent-neon)', marginBottom: '1rem' }} />
-              ) : (
-                <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', color: 'var(--accent-neon)', fontWeight: 'bold', margin: '0 auto 1rem auto', border: '3px solid var(--accent-neon)' }}>
-                  {selectedPlayer.firstName[0]}
-                </div>
-              )}
-              <h3 style={{ margin: 0, color: 'white', fontSize: '1.8rem', textTransform: 'uppercase' }}>{selectedPlayer.firstName} {selectedPlayer.lastName}</h3>
-              {selectedPlayer.nickname && <p style={{ margin: 0, color: 'var(--accent-neon)', fontSize: '1.1rem', fontStyle: 'italic' }}>"{selectedPlayer.nickname}"</p>}
-            </div>
+      {selectedPlayer && (() => {
+        const stars = selectedPlayer.stars || 3;
+        let cardTheme = selectedPlayer.cardType || 'default';
+        if (cardTheme === 'default') {
+          if (stars >= 5) cardTheme = 'white';
+          else if (stars === 4) cardTheme = 'blue';
+          else if (stars === 3) cardTheme = 'black';
+          else if (stars === 2) cardTheme = 'gold';
+          else cardTheme = 'bronze';
+        }
+        
+        let modalBg = 'var(--dark-glass)';
+        let accentColor = 'var(--accent-neon)';
+        let textColor = 'white';
+        let secondaryBg = 'rgba(255,255,255,0.05)';
+        let mutedText = 'var(--dark-text-muted)';
+        
+        if (cardTheme === 'white') {
+          modalBg = 'rgba(245, 245, 245, 0.95)';
+          accentColor = '#b9975b';
+          textColor = '#222';
+          secondaryBg = 'rgba(0,0,0,0.05)';
+          mutedText = '#666';
+        } else if (cardTheme === 'blue') {
+          modalBg = 'rgba(10, 15, 40, 0.95)';
+          accentColor = '#00ccff';
+        } else if (cardTheme === 'black') {
+          modalBg = 'rgba(20, 20, 20, 0.95)';
+          accentColor = '#a0a0a0';
+        } else if (cardTheme === 'gold') {
+          modalBg = 'rgba(40, 30, 10, 0.95)';
+          accentColor = '#ffd700';
+        } else if (cardTheme === 'bronze') {
+          modalBg = 'rgba(50, 25, 10, 0.95)';
+          accentColor = '#cd7f32';
+        }
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.8rem 1.2rem', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: '4px solid var(--accent-neon)' }}>
-                <span style={{ color: 'var(--dark-text-muted)', fontSize: '0.9rem' }}>Posición Principal</span>
-                <span style={{ color: 'white', fontWeight: 'bold', fontSize: '1.1rem' }}>{selectedPlayer.position || 'MCO'}</span>
+        return (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(8px)' }} onClick={() => setSelectedPlayer(null)}>
+            <div style={{ background: modalBg, border: `1px solid ${accentColor}`, borderRadius: '16px', padding: '2rem', maxWidth: '400px', width: '100%', position: 'relative', boxShadow: `0 10px 40px rgba(0,0,0,0.8)` }} onClick={e => e.stopPropagation()}>
+              <button style={{ position: 'absolute', top: '15px', right: '15px', background: 'transparent', border: 'none', color: textColor, fontSize: '1.8rem', cursor: 'pointer', opacity: 0.8 }} onClick={() => setSelectedPlayer(null)}>×</button>
+              
+              <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                {selectedPlayer.photoUrl ? (
+                  <img src={selectedPlayer.photoUrl} alt={selectedPlayer.firstName} style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', border: `3px solid ${accentColor}`, marginBottom: '1rem' }} />
+                ) : (
+                  <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: secondaryBg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', color: accentColor, fontWeight: 'bold', margin: '0 auto 1rem auto', border: `3px solid ${accentColor}` }}>
+                    {selectedPlayer.firstName[0]}
+                  </div>
+                )}
+                <h3 style={{ margin: 0, color: textColor, fontSize: '1.8rem', textTransform: 'uppercase' }}>{selectedPlayer.firstName} {selectedPlayer.lastName}</h3>
+                {selectedPlayer.nickname && <p style={{ margin: 0, color: accentColor, fontSize: '1.1rem', fontStyle: 'italic' }}>"{selectedPlayer.nickname}"</p>}
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.8rem 1.2rem', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: 'var(--dark-text-muted)', fontSize: '0.9rem' }}>Partidos Jugados (Valorados)</span>
-                <span style={{ color: 'white', fontWeight: 'bold', fontSize: '1.1rem' }}>{selectedPlayer.ratings?.length || 0}</span>
-              </div>
-              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.8rem 1.2rem', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: 'var(--dark-text-muted)', fontSize: '0.9rem' }}>Goles Históricos</span>
-                <span style={{ color: 'white', fontWeight: 'bold', fontSize: '1.1rem' }}>{selectedPlayer.historicalGoals || 0} ⚽</span>
-              </div>
-              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.8rem 1.2rem', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: 'var(--dark-text-muted)', fontSize: '0.9rem' }}>Asistencias Totales</span>
-                <span style={{ color: 'white', fontWeight: 'bold', fontSize: '1.1rem' }}>{selectedPlayer.historicalAssists || 0} 👟</span>
-              </div>
-              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.8rem 1.2rem', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRight: '4px solid var(--accent-warning)' }}>
-                <span style={{ color: 'var(--accent-warning)', fontSize: '0.9rem', fontWeight: 'bold' }}>Campeonatos</span>
-                <span style={{ color: 'var(--accent-warning)', fontWeight: 'bold', fontSize: '1.2rem' }}>{selectedPlayer.historicalChampionships || 0} 🏆</span>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div style={{ background: secondaryBg, padding: '0.8rem 1.2rem', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: `4px solid ${accentColor}` }}>
+                  <span style={{ color: mutedText, fontSize: '0.9rem' }}>Posición Principal</span>
+                  <span style={{ color: textColor, fontWeight: 'bold', fontSize: '1.1rem' }}>{selectedPlayer.position || 'MCO'}</span>
+                </div>
+                <div style={{ background: secondaryBg, padding: '0.8rem 1.2rem', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: mutedText, fontSize: '0.9rem' }}>Partidos Jugados (Valorados)</span>
+                  <span style={{ color: textColor, fontWeight: 'bold', fontSize: '1.1rem' }}>{selectedPlayer.ratings?.length || 0}</span>
+                </div>
+                <div style={{ background: secondaryBg, padding: '0.8rem 1.2rem', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: mutedText, fontSize: '0.9rem' }}>Goles Históricos</span>
+                  <span style={{ color: textColor, fontWeight: 'bold', fontSize: '1.1rem' }}>{selectedPlayer.historicalGoals || 0} ⚽</span>
+                </div>
+                <div style={{ background: secondaryBg, padding: '0.8rem 1.2rem', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: mutedText, fontSize: '0.9rem' }}>Asistencias Totales</span>
+                  <span style={{ color: textColor, fontWeight: 'bold', fontSize: '1.1rem' }}>{selectedPlayer.historicalAssists || 0} 👟</span>
+                </div>
+                <div style={{ background: secondaryBg, padding: '0.8rem 1.2rem', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRight: `4px solid ${cardTheme === 'white' ? '#d4af37' : 'var(--accent-warning)'}` }}>
+                  <span style={{ color: cardTheme === 'white' ? '#d4af37' : 'var(--accent-warning)', fontSize: '0.9rem', fontWeight: 'bold' }}>Campeonatos</span>
+                  <span style={{ color: cardTheme === 'white' ? '#d4af37' : 'var(--accent-warning)', fontWeight: 'bold', fontSize: '1.2rem' }}>{selectedPlayer.historicalChampionships || 0} 🏆</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
     </div>
   );
