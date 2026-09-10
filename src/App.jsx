@@ -13,8 +13,9 @@ import Tournament from './pages/Tournament';
 import Champion from './pages/Champion';
 import Finances from './pages/Finances';
 import AdminPlayers from './pages/AdminPlayers';
+import Tribunal from './pages/Tribunal';
 import Landing from './pages/Landing';
-import { DollarSign, Loader, Activity, Shield } from 'lucide-react';
+import { DollarSign, Loader, Activity, Shield, Gavel } from 'lucide-react';
 import { useSupabaseTable, useSupabaseConfig, useSupabaseAuth, useSupabasePresence } from './hooks/useSupabase';
 import { supabase } from './lib/supabase';
 
@@ -364,6 +365,9 @@ function App() {
           <button className={`btn ${route === 'mvp' ? 'btn-neon' : 'btn-dark'}`} style={{ justifyContent: 'flex-start' }} onClick={() => setRoute('mvp')}>
             <Award size={18} /> Votar MVP
           </button>
+          <button className={`btn ${route === 'tribunal' ? 'btn-neon' : 'btn-dark'}`} style={{ justifyContent: 'flex-start' }} onClick={() => setRoute('tribunal')}>
+            <Gavel size={18} color={route === 'tribunal' ? 'black' : 'var(--accent-danger)'} /> Tribunal
+          </button>
 
           {isAdmin && (
             <>
@@ -428,6 +432,7 @@ function App() {
           {route === 'players' && <Players players={allPlayers} isGlobalAdmin={isGlobalAdmin} setPlayersDB={setPlayersDB} />}
           {route === 'history' && <History players={allPlayers} historicalTournaments={historicalTournaments} />}
           {route === 'mvp' && <MVP isAdmin={isAdmin} historicalTournaments={historicalTournaments} setHistoricalTournaments={setHistoricalTournaments} mvpVotes={mvpVotes} setMvpVotes={setMvpVotes} mvpClosed={mvpClosed} setMvpClosed={setMvpClosed} />}
+          {route === 'tribunal' && <Tribunal players={allPlayers} />}
           {route === 'admin-menu' && isAdmin && (
             <div className="glass-panel-dark" style={{ width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.5rem' }}>
               <h2 className="title-main" style={{ color: 'var(--accent-danger)', textAlign: 'center', marginBottom: '1rem' }}><Shield size={28} style={{ verticalAlign: 'middle', marginRight: '8px' }} /> Panel de Control</h2>
@@ -458,6 +463,10 @@ function App() {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: route === 'history' ? 'var(--accent-neon)' : 'var(--dark-text-muted)', cursor: 'pointer' }} onClick={() => setRoute('history')}>
           <BarChart3 size={24} />
           <span style={{ fontSize: '0.7rem', marginTop: '4px' }}>Historial</span>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: route === 'tribunal' ? 'var(--accent-danger)' : 'var(--dark-text-muted)', cursor: 'pointer' }} onClick={() => setRoute('tribunal')}>
+          <Gavel size={24} />
+          <span style={{ fontSize: '0.7rem', marginTop: '4px' }}>Tribunal</span>
         </div>
         {isAdmin && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: route === 'admin-menu' ? 'var(--accent-danger)' : 'var(--dark-text-muted)', cursor: 'pointer' }} onClick={() => setRoute('admin-menu')}>

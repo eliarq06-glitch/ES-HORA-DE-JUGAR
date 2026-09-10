@@ -482,6 +482,11 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
                       <option value="banned">⛔ BANEADO (Suspendido)</option>
                     </select>
                   </div>
+
+                  <div style={{ flex: 1.5, minWidth: '150px' }}>
+                    <label style={{fontSize:'0.7rem', color:'gray'}}>Motivo de Estado / Sanción</label>
+                    <input type="text" className="input-dark" placeholder="Razón (opcional)" value={editData.statusReason || ''} onChange={e => setEditData({...editData, statusReason: e.target.value})} style={{ width: '100%' }} />
+                  </div>
                   
                   <div style={{ flex: 1, minWidth: '100px' }}>
                     <label style={{fontSize:'0.7rem', color:'gray'}}>Carta FIFA</label>
