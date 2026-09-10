@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Calendar, Plus, Trash2, Check, Trophy, ChevronDown, ChevronUp, Crown, Activity, Star, Lock, Unlock, Image as ImageIcon, Edit2, X } from 'lucide-react';
 import FlyerModal from '../components/FlyerModal';
-import supabase from '../supabaseClient';
+import { supabase } from '../lib/supabase';
 
 export default function Sessions({ sessions, setSessions, activeSessionId, setActiveSessionId, historicalTournaments = [], teams = [], isGlobalAdmin }) {
   const [newSessionName, setNewSessionName] = useState('');
