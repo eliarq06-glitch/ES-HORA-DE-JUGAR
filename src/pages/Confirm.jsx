@@ -296,7 +296,14 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
                 <div style={{ fontSize: '3.5rem', fontWeight: '900', color: 'var(--accent-neon)', lineHeight: '1', textShadow: '0 0 20px rgba(232,185,49,0.5)', fontFamily: 'monospace' }}>
                   {timeString}
                 </div>
-                <p style={{ color: 'var(--light-text)', margin: 0, fontSize: '0.9rem' }}>¡Mantente atento para asegurar tu puesto!</p>
+                <p style={{ color: 'var(--light-text)', margin: 0, fontSize: '1rem', fontStyle: 'italic', lineHeight: '1.6', textAlign: 'center' }}>
+                  Atento como <strong style={{ fontStyle: 'normal', color: 'var(--accent-warning)' }}>GELO</strong>, 
+                  veloz como <strong style={{ fontStyle: 'normal', color: 'var(--accent-warning)' }}>BOCHITO</strong>, 
+                  fuerte como <strong style={{ fontStyle: 'normal', color: 'var(--accent-warning)' }}>AGUCHO</strong>, 
+                  y sobre todo <strong style={{ fontStyle: 'normal', color: 'var(--accent-warning)' }}>JAMÁS BAJES LAS MANOS</strong> 
+                  (dijo el maestrito), porque te puedes quedar fuera! <br/><br/>
+                  <strong style={{ fontStyle: 'normal', color: 'var(--accent-danger)', fontSize: '1.2rem', textTransform: 'uppercase' }}>¡PONTE PILAS PICANTE!</strong>
+                </p>
               </div>
             ) : (
               <div style={{ margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', width: '100%', maxWidth: '400px' }}>

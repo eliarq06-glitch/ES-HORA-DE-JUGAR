@@ -17,7 +17,7 @@ export default function FlyerModal({ session, onClose }) {
   if (!session) return null;
 
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.9)', zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.9)', zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem', overflow: 'auto' }}>
       
       {/* Container to be captured */}
       <div 
@@ -25,6 +25,7 @@ export default function FlyerModal({ session, onClose }) {
         style={{ 
           width: '400px', 
           height: '600px', 
+          flexShrink: 0, // Prevent distortion on narrow mobile screens
           backgroundColor: '#111827',
           position: 'relative', 
           overflow: 'hidden',
@@ -68,9 +69,16 @@ export default function FlyerModal({ session, onClose }) {
           </div>
         </div>
 
-        <p style={{ position: 'absolute', bottom: '30px', margin: 0, fontSize: '0.8rem', color: 'gray', textTransform: 'uppercase', letterSpacing: '1px', zIndex: 2 }}>
-          Asegura tu puesto en la app
-        </p>
+        <div style={{ position: 'absolute', bottom: '35px', width: '85%', textAlign: 'center', zIndex: 2 }}>
+          <p style={{ margin: 0, fontSize: '0.75rem', color: '#cbd5e1', fontStyle: 'italic', lineHeight: '1.4' }}>
+            Atento como <strong style={{ fontStyle: 'normal', color: 'var(--accent-warning)' }}>GELO</strong>, 
+            veloz como <strong style={{ fontStyle: 'normal', color: 'var(--accent-warning)' }}>BOCHITO</strong>, 
+            fuerte como <strong style={{ fontStyle: 'normal', color: 'var(--accent-warning)' }}>AGUCHO</strong>, 
+            y sobre todo <strong style={{ fontStyle: 'normal', color: 'var(--accent-warning)' }}>JAMÁS BAJES LAS MANOS</strong> 
+            (dijo el maestrito), porque te puedes quedar fuera! <br/><br/>
+            <strong style={{ fontStyle: 'normal', color: 'var(--accent-danger)', fontSize: '0.95rem', textTransform: 'uppercase' }}>¡PONTE PILAS PICANTE!</strong>
+          </p>
+        </div>
       </div>
 
       <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
