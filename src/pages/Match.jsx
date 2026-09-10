@@ -122,8 +122,13 @@ export default function Match({ teams, matchEvents, setMatchEvents, matches, set
     setSelectedPlayer(null); // Reset
   };
 
-  const removeEvent = (id) => {
+  const removeEvent = async (id) => {
     setMatchEvents(matchEvents.filter(e => e.id !== id));
+    try {
+      await supabase.from('match_events').delete().eq('id', id);
+    } catch(e) {
+      console.error(e);
+    }
   };
 
   if (!matches || matches.length === 0) {

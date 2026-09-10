@@ -311,14 +311,9 @@ function mapFromDB(tableName, rows) {
 // Sync: App format -> DB rows (upsert)
 // ============================================================
 async function syncToDB(tableName, items) {
-  if (!Array.isArray(items)) return;
-  
-  // Para arrays vacíos, borramos todo el contenido de la tabla, 
-  // EXCEPTO si son tablas críticas, para evitar wipeouts accidentales.
-  if (items.length === 0) {
-    if (tableName !== 'players' && tableName !== 'historical_tournaments') {
-      await supabase.from(tableName).delete().neq('id', 0);
-    }
+  if (!Array.isArray(items) || items.length === 0) {
+    // PROTECCIÓN CRÍTICA: Nunca procesar sincronizaciones masivas vacías.
+    // Si el estado local está vacío, simplemente abortamos la sincronización.
     return;
   }
 
@@ -326,34 +321,14 @@ async function syncToDB(tableName, items) {
   
   if (rows.length === 0) return;
 
-  // Upsert todos los registros
+  // Upsert todos los registros (Insertar o Actualizar)
+  // NUNCA borrar registros automáticamente desde esta función.
   const { error } = await supabase
     .from(tableName)
     .upsert(rows, { onConflict: 'id', ignoreDuplicates: false });
 
   if (error) {
     console.error(`Supabase sync error for ${tableName}:`, error);
-  }
-
-  // Borrar registros que ya no existen (solo si NO son tablas críticas como players)
-  if (tableName === 'players' || tableName === 'historical_tournaments') {
-    // NUNCA borrar jugadores masivamente desde la sincronización automática.
-    // Solo permitir UPSERTS para estas tablas para evitar pérdida de datos por race conditions.
-    return;
-  }
-
-  const currentIds = rows.map(r => r.id);
-  
-  if (currentIds.length > 0) {
-    const { error: delError } = await supabase
-      .from(tableName)
-      .delete()
-      .not('id', 'in', `(${currentIds.join(',')})`);
-    
-    if (delError) console.error(`Delete error in ${tableName}:`, delError);
-  } else {
-    // Si la lista está vacía pero intentamos borrar todo lo que no esté ahí
-    await supabase.from(tableName).delete().neq('id', 0);
   }
 }
 

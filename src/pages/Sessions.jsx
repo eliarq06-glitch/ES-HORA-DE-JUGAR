@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Calendar, Plus, Trash2, Check, Trophy, ChevronDown, ChevronUp, Crown, Activity, Star, Lock, Unlock, Image as ImageIcon, Edit2, X } from 'lucide-react';
 import FlyerModal from '../components/FlyerModal';
+import supabase from '../supabaseClient';
 
 export default function Sessions({ sessions, setSessions, activeSessionId, setActiveSessionId, historicalTournaments = [], teams = [], isGlobalAdmin }) {
   const [newSessionName, setNewSessionName] = useState('');
@@ -40,7 +41,16 @@ export default function Sessions({ sessions, setSessions, activeSessionId, setAc
     setNewSessionOpenTime('18:00');
   };
 
-  const handleDelete = (id) => { if (window.confirm('¿Seguro que deseas eliminar esta jornada de forma permanente?')) { setSessions(sessions.filter(s => s.id !== id)); } };
+  const handleDelete = async (id) => { 
+    if (window.confirm('¿Seguro que deseas eliminar esta jornada de forma permanente?')) { 
+      setSessions(sessions.filter(s => s.id !== id)); 
+      try {
+        await supabase.from('sessions').delete().eq('id', id);
+      } catch(e) {
+        console.error(e);
+      }
+    } 
+  };
 
   const getMatchScore = (matchId, t1Name, t2Name, matchEvents) => {
     const events = matchEvents.filter(e => e.matchId === matchId);
