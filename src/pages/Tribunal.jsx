@@ -26,9 +26,13 @@ export default function Tribunal({ players }) {
         </h3>
         
         <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.75rem', borderRadius: '8px', borderLeft: `3px solid ${color}` }}>
-          <div style={{ fontSize: '0.75rem', color: 'gray', textTransform: 'uppercase', marginBottom: '4px', fontWeight: 'bold' }}>Motivo de la Sanción / Estado:</div>
+          <div style={{ fontSize: '0.75rem', color: 'gray', textTransform: 'uppercase', marginBottom: '4px', fontWeight: 'bold' }}>Motivo:</div>
           <div style={{ color: 'white', fontSize: '0.95rem', lineHeight: '1.4' }}>
-            {player.statusReason || 'No se ha especificado un motivo.'}
+            {player.statusReason || (
+              player.status === 'banned' 
+                ? 'Suspendido por la directiva debido a incumplimiento de normativas, inasistencias injustificadas o faltas de respeto al grupo.' 
+                : 'Jugador con muy baja frecuencia de asistencia (ej. una vez cada dos meses). Pierde prioridad en las convocatorias.'
+            )}
           </div>
         </div>
       </div>
