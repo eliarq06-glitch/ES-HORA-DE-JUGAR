@@ -27,10 +27,7 @@ export default function Sessions({ sessions, setSessions, activeSessionId, setAc
     setNewSessionOpenTime('18:00');
   };
 
-  const handleDelete = (id) => {
-    setSessions(sessions.filter(s => s.id !== id));
-    if (activeSessionId === id) setActiveSessionId(sessions.find(s => s.id !== id)?.id || null);
-  };
+  const handleDelete = (id) => { if (window.confirm('¿Seguro que deseas eliminar esta jornada de forma permanente?')) { setSessions(sessions.filter(s => s.id !== id)); } };
 
   const getMatchScore = (matchId, t1Name, t2Name, matchEvents) => {
     const events = matchEvents.filter(e => e.matchId === matchId);
