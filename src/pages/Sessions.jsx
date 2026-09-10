@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Plus, Trash2, Check, Trophy, ChevronDown, ChevronUp, Crown, Activity, Star, Lock, Unlock, Image as ImageIcon } from 'lucide-react';
+import { Calendar, Plus, Trash2, Check, Trophy, ChevronDown, ChevronUp, Crown, Activity, Star, Lock, Unlock, Image as ImageIcon, Edit2, X } from 'lucide-react';
 import FlyerModal from '../components/FlyerModal';
 
 export default function Sessions({ sessions, setSessions, activeSessionId, setActiveSessionId, historicalTournaments = [], teams = [], isGlobalAdmin }) {
@@ -8,6 +8,19 @@ export default function Sessions({ sessions, setSessions, activeSessionId, setAc
   const [newSessionOpenTime, setNewSessionOpenTime] = useState('18:00');
   const [expandedHistoryId, setExpandedHistoryId] = useState(null);
   const [flyerSession, setFlyerSession] = useState(null);
+  const [editingSessionId, setEditingSessionId] = useState(null);
+  const [editSessionName, setEditSessionName] = useState('');
+
+  const handleEditClick = (session) => {
+    setEditingSessionId(session.id);
+    setEditSessionName(session.name);
+  };
+
+  const handleEditSave = (id) => {
+    if (!editSessionName.trim()) return;
+    setSessions(sessions.map(s => s.id === id ? { ...s, name: editSessionName.trim() } : s));
+    setEditingSessionId(null);
+  };
 
   const handleCreate = (e) => {
     e.preventDefault();
@@ -60,10 +73,34 @@ export default function Sessions({ sessions, setSessions, activeSessionId, setAc
           const hasDrawnTeams = activeSessionId === s.id && teams && teams.length > 0;
           return (
           <div key={s.id} className="glass-panel-dark" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: activeSessionId === s.id ? '2px solid var(--accent-neon)' : '1px solid var(--dark-glass-border)', opacity: s.status === 'closed' ? 0.7 : 1 }}>
-            <div>
-              <h3 style={{ fontSize: '1.25rem', margin: 0, color: 'white' }}>{s.name}</h3>
-              <p style={{ margin: '4px 0 0 0', color: 'var(--dark-text-muted)' }}>{s.date} {s.openTime ? ` • Abre a las ${s.openTime}` : ''} • {s.confirmedIds.length} Confirmados {s.status === 'locked' && <span style={{color: 'var(--accent-danger)'}}>(BLOQUEADA)</span>} {s.status === 'closed' && <span style={{color: 'gray'}}>(CERRADA)</span>}</p>
-            </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {editingSessionId === s.id ? (
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <input 
+                      type="text" 
+                      className="input" 
+                      value={editSessionName} 
+                      onChange={(e) => setEditSessionName(e.target.value)}
+                      style={{ padding: '0.25rem 0.5rem', fontSize: '1rem', width: '200px' }}
+                      autoFocus
+                    />
+                    <button className="btn btn-primary" style={{ padding: '0.25rem' }} onClick={() => handleEditSave(s.id)}>
+                      <Check size={18} />
+                    </button>
+                    <button className="btn btn-danger" style={{ padding: '0.25rem' }} onClick={() => setEditingSessionId(null)}>
+                      <X size={18} />
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <h3 style={{ fontSize: '1.25rem', margin: 0, color: 'white' }}>{s.name}</h3>
+                    <button onClick={() => handleEditClick(s)} style={{ background: 'none', border: 'none', color: 'var(--accent-warning)', cursor: 'pointer', padding: 0, display: 'flex' }}>
+                      <Edit2 size={16} />
+                    </button>
+                  </div>
+                )}
+                <p style={{ margin: '4px 0 0 0', color: 'var(--dark-text-muted)' }}>{s.date} {s.openTime ? ` • Abre a las ${s.openTime}` : ''} • {s.confirmedIds.length} Confirmados {s.status === 'locked' && <span style={{color: 'var(--accent-danger)'}}>(BLOQUEADA)</span>} {s.status === 'closed' && <span style={{color: 'gray'}}>(CERRADA)</span>}</p>
+              </div>
             
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
               <button className="btn btn-dark" style={{ border: '1px solid var(--accent-warning)', color: 'var(--accent-warning)' }} onClick={() => setFlyerSession(s)}>
