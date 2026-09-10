@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { Calendar, Plus, Trash2, Check, Trophy, ChevronDown, ChevronUp, Crown, Activity, Star, Lock, Unlock } from 'lucide-react';
+import { Calendar, Plus, Trash2, Check, Trophy, ChevronDown, ChevronUp, Crown, Activity, Star, Lock, Unlock, Image as ImageIcon } from 'lucide-react';
+import FlyerModal from '../components/FlyerModal';
 
 export default function Sessions({ sessions, setSessions, activeSessionId, setActiveSessionId, historicalTournaments = [], teams = [], isGlobalAdmin }) {
   const [newSessionName, setNewSessionName] = useState('');
   const [newSessionDate, setNewSessionDate] = useState('');
+  const [newSessionOpenTime, setNewSessionOpenTime] = useState('18:00');
   const [expandedHistoryId, setExpandedHistoryId] = useState(null);
+  const [flyerSession, setFlyerSession] = useState(null);
 
   const handleCreate = (e) => {
     e.preventDefault();
@@ -13,12 +16,14 @@ export default function Sessions({ sessions, setSessions, activeSessionId, setAc
       id: Date.now(),
       name: newSessionName,
       date: newSessionDate,
+      openTime: newSessionOpenTime,
       confirmedIds: [],
       status: 'open'
     };
     setSessions([newSession, ...sessions]);
     setNewSessionName('');
     setNewSessionDate('');
+    setNewSessionOpenTime('18:00');
   };
 
   const handleDelete = (id) => {
@@ -44,8 +49,9 @@ export default function Sessions({ sessions, setSessions, activeSessionId, setAc
         </h2>
         
         <form onSubmit={handleCreate} style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
-          <input className="input-dark" style={{ flex: 1, minWidth: '200px' }} placeholder="Nombre (ej. Revancha Sábado)" value={newSessionName} onChange={(e) => setNewSessionName(e.target.value)} required />
-          <input type="date" className="input-dark" value={newSessionDate} onChange={(e) => setNewSessionDate(e.target.value)} required />
+          <input className="input-dark" style={{ flex: 1, minWidth: '150px' }} placeholder="Nombre (ej. Revancha)" value={newSessionName} onChange={(e) => setNewSessionName(e.target.value)} required />
+          <input type="date" className="input-dark" style={{ flex: 1, minWidth: '120px' }} value={newSessionDate} onChange={(e) => setNewSessionDate(e.target.value)} required />
+          <input type="time" className="input-dark" style={{ width: '100px' }} value={newSessionOpenTime} onChange={(e) => setNewSessionOpenTime(e.target.value)} required title="Hora de apertura" />
           <button type="submit" className="btn btn-neon"><Plus size={20} /> Crear Jornada</button>
         </form>
       </div>
@@ -58,10 +64,13 @@ export default function Sessions({ sessions, setSessions, activeSessionId, setAc
           <div key={s.id} className="glass-panel-dark" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: activeSessionId === s.id ? '2px solid var(--accent-neon)' : '1px solid var(--dark-glass-border)' }}>
             <div>
               <h3 style={{ fontSize: '1.25rem', margin: 0, color: 'white' }}>{s.name}</h3>
-              <p style={{ margin: '4px 0 0 0', color: 'var(--dark-text-muted)' }}>{s.date} • {s.confirmedIds.length} Confirmados {s.status === 'locked' && <span style={{color: 'var(--accent-danger)'}}>(CERRADA)</span>}</p>
+              <p style={{ margin: '4px 0 0 0', color: 'var(--dark-text-muted)' }}>{s.date} {s.openTime ? `• Abre a las ${s.openTime}` : ''} • {s.confirmedIds.length} Confirmados {s.status === 'locked' && <span style={{color: 'var(--accent-danger)'}}>(CERRADA)</span>}</p>
             </div>
             
-            <div style={{ display: 'flex', gap: '1rem' }}>
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+              <button className="btn btn-dark" style={{ border: '1px solid var(--accent-warning)', color: 'var(--accent-warning)' }} onClick={() => setFlyerSession(s)}>
+                <ImageIcon size={18} /> Flyer
+              </button>
               {activeSessionId !== s.id && (
                 <button className="btn btn-dark" style={{ border: '1px solid var(--accent-neon)', color: 'var(--accent-neon)' }} onClick={() => setActiveSessionId(s.id)}>
                   Activar
@@ -221,6 +230,8 @@ export default function Sessions({ sessions, setSessions, activeSessionId, setAc
           </div>
         </div>
       )}
+
+      {flyerSession && <FlyerModal session={flyerSession} onClose={() => setFlyerSession(null)} />}
     </div>
   );
 }
