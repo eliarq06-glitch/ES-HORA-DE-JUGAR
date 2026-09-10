@@ -300,6 +300,32 @@ function App() {
     return <div className="night-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Login allPlayers={allPlayers} setPlayersDB={setPlayersDB} activeSession={activeSession} updateConfirmedPlayers={updateConfirmedPlayers} /></div>;
   }
 
+  const loggedInPlayer = allPlayers.find(p => p.email && p.email.toLowerCase() === user.email.toLowerCase());
+
+  if (loggedInPlayer && loggedInPlayer.status === 'banned') {
+    return (
+      <div className="night-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+        <div className="glass-panel-dark" style={{ border: '2px solid var(--accent-danger)', background: 'rgba(239,68,68,0.1)', maxWidth: '500px', textAlign: 'center', padding: '3rem 2rem' }}>
+          <h1 style={{ color: 'var(--accent-danger)', fontSize: '2.5rem', marginBottom: '1rem', fontWeight: '900', textTransform: 'uppercase' }}>⛔ ACCESO DENEGADO</h1>
+          <h2 style={{ color: 'white', fontSize: '1.4rem', marginBottom: '1.5rem', fontWeight: 'bold' }}>
+            TU CUENTA HA SIDO SUSPENDIDA
+          </h2>
+          <p style={{ color: 'var(--light-text)', fontSize: '1.1rem', marginBottom: '2rem', lineHeight: '1.6' }}>
+            Esta medida se ha tomado por incumplimiento de las normas o faltas de respeto hacia la directiva o el grupo.
+          </p>
+          <div style={{ background: 'rgba(0,0,0,0.4)', padding: '1.5rem', borderRadius: '12px', marginBottom: '2rem' }}>
+            <p style={{ color: 'var(--accent-warning)', fontSize: '1rem', margin: 0, fontWeight: 'bold' }}>
+              ⚠️ Para recuperar el acceso a la aplicación, deberás disculparte públicamente con el grupo o contactar a un Administrador.
+            </p>
+          </div>
+          <button className="btn btn-dark" style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }} onClick={handleLogout}>
+            Cerrar Sesión
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`app-container ${isPitch ? 'pitch-bg' : 'night-bg'}`}>
       

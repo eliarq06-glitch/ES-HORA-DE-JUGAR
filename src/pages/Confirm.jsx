@@ -396,6 +396,11 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
                            🚫 Castigado / Ocasional
                          </span>
                        )}
+                       {player.status === 'banned' && (
+                         <span style={{ background: 'rgba(239,68,68,0.4)', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '4px', border: '1px solid var(--accent-danger)' }}>
+                           ⛔ BANEADO
+                         </span>
+                       )}
                     </div>
                   </div>
                 </div>
@@ -423,6 +428,7 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
                       <option value="frequent">🍻 Biela</option>
                       <option value="occasional">🚫 Castigo</option>
                       <option value="injured">🏥 Lesión</option>
+                      <option value="banned">⛔ Baneado</option>
                     </select>
                     {/* Captain button */}
                     <button className="btn" style={{ padding: '0.4rem', background: selectedCaptains.includes(player.id) ? 'var(--accent-neon)' : 'transparent', color: selectedCaptains.includes(player.id) ? 'black' : 'var(--light-text-muted)', border: '1px solid var(--accent-neon)', fontSize: '0.65rem', fontWeight: 'bold' }} onClick={() => {

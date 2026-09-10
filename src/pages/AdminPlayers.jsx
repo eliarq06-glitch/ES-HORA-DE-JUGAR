@@ -479,6 +479,7 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
                       <option value="active">Activo (Normal)</option>
                       <option value="occasional">Ocasional (Ausente / Castigado)</option>
                       <option value="injured">Lesionado (Descartado)</option>
+                      <option value="banned">⛔ BANEADO (Suspendido)</option>
                     </select>
                   </div>
                   
