@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserPlus, Trash2, Edit2, CheckCircle2, Shield, Link as LinkIcon, MessageSquare, FileDown, ChevronUp, ChevronDown } from 'lucide-react';
 import { useSupabaseConfig } from '../hooks/useSupabase';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers, allPlayers, updateConfirmedPlayers, setPlayersDB }) {
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   const [selectedPlayerId, setSelectedPlayerId] = useState('');
   const [searchPlayerText, setSearchPlayerText] = useState('');
   const [linkPlayerId, setLinkPlayerId] = useState('');
@@ -244,11 +251,17 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
 
       {(loggedInPlayer && !isAdmin) && (() => {
         let isFuture = false;
+        let timeString = '';
         if (activeSession?.date && activeSession?.openTime) {
           if (activeSession.date.includes('-')) {
             const sessionDate = new Date(`${activeSession.date}T${activeSession.openTime}:00`);
-            if (new Date() < sessionDate) {
+            const diff = sessionDate - now;
+            if (diff > 0) {
               isFuture = true;
+              const hours = Math.floor(diff / (1000 * 60 * 60));
+              const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+              const secs = Math.floor((diff % (1000 * 60)) / 1000);
+              timeString = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
             }
           }
         }
@@ -279,9 +292,9 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
             ) : isFuture ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', background: 'rgba(255,255,255,0.05)', padding: '2rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
                 <div style={{ fontSize: '1.5rem', color: 'white', fontWeight: 'bold' }}>AÚN NO SE ABRE LA CONVOCATORIA</div>
-                <p style={{ color: 'var(--light-text-muted)', margin: 0, fontSize: '1.1rem' }}>Esta jornada abrirá sus inscripciones a las:</p>
-                <div style={{ fontSize: '3.5rem', fontWeight: '900', color: 'var(--accent-neon)', lineHeight: '1', textShadow: '0 0 20px rgba(232,185,49,0.5)' }}>
-                  {activeSession.openTime}
+                <p style={{ color: 'var(--light-text-muted)', margin: 0, fontSize: '1.1rem' }}>Esta jornada abrirá sus inscripciones en:</p>
+                <div style={{ fontSize: '3.5rem', fontWeight: '900', color: 'var(--accent-neon)', lineHeight: '1', textShadow: '0 0 20px rgba(232,185,49,0.5)', fontFamily: 'monospace' }}>
+                  {timeString}
                 </div>
                 <p style={{ color: 'var(--light-text)', margin: 0, fontSize: '0.9rem' }}>¡Mantente atento para asegurar tu puesto!</p>
               </div>

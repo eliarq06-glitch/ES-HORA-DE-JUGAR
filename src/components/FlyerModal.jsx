@@ -25,7 +25,7 @@ export default function FlyerModal({ session, onClose }) {
         style={{ 
           width: '400px', 
           height: '600px', 
-          background: 'linear-gradient(to bottom, #0f172a, #000000)', 
+          backgroundColor: '#111827',
           position: 'relative', 
           overflow: 'hidden',
           display: 'flex',
@@ -34,13 +34,12 @@ export default function FlyerModal({ session, onClose }) {
           justifyContent: 'center',
           color: 'white',
           boxShadow: '0 0 40px rgba(0,0,0,0.5)',
-          fontFamily: 'system-ui, sans-serif',
-          backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(232,185,49,0.2) 0%, transparent 50%)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundBlendMode: 'overlay'
+          fontFamily: 'system-ui, sans-serif'
         }}
       >
+        {/* Safe radial glow for html2canvas */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'radial-gradient(circle at 50% 20%, rgba(232,185,49,0.15) 0%, transparent 60%)', zIndex: 1 }}></div>
+
         <div style={{ position: 'absolute', top: '10px', left: '10px', right: '10px', bottom: '10px', border: '2px solid rgba(232,185,49,0.3)' }}></div>
         <div style={{ position: 'absolute', top: '20px', left: '20px', right: '20px', bottom: '20px', border: '1px solid rgba(232,185,49,0.1)' }}></div>
 
