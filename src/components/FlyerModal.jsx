@@ -24,7 +24,7 @@ export default function FlyerModal({ session, onClose }) {
         ref={flyerRef}
         style={{ 
           width: '400px', 
-          height: '600px', 
+          height: '700px', 
           flexShrink: 0, // Prevent distortion on narrow mobile screens
           backgroundColor: '#111827',
           position: 'relative', 
@@ -44,32 +44,32 @@ export default function FlyerModal({ session, onClose }) {
         <div style={{ position: 'absolute', top: '10px', left: '10px', right: '10px', bottom: '10px', border: '2px solid rgba(232,185,49,0.3)' }}></div>
         <div style={{ position: 'absolute', top: '20px', left: '20px', right: '20px', bottom: '20px', border: '1px solid rgba(232,185,49,0.1)' }}></div>
 
-        <img src="/logo.png" alt="LCDF" style={{ width: '150px', filter: 'drop-shadow(0 0 20px rgba(232,185,49,0.5))', marginBottom: '1rem', zIndex: 2 }} crossOrigin="anonymous" />
+        <img src="/logo.png" alt="LCDF" style={{ width: '130px', filter: 'drop-shadow(0 0 20px rgba(232,185,49,0.5))', marginBottom: '1rem', zIndex: 2 }} crossOrigin="anonymous" />
         
-        <h1 style={{ fontSize: '3rem', margin: 0, color: 'var(--accent-neon)', textTransform: 'uppercase', textShadow: '0 4px 20px rgba(232,185,49,0.5)', zIndex: 2, textAlign: 'center', lineHeight: '1' }}>
+        <h1 style={{ fontSize: '2.8rem', margin: 0, color: 'var(--accent-neon)', textTransform: 'uppercase', textShadow: '0 4px 20px rgba(232,185,49,0.5)', zIndex: 2, textAlign: 'center', lineHeight: '1' }}>
           ES HORA DE JUGAR
         </h1>
         
-        <div style={{ background: 'var(--accent-neon)', color: 'black', padding: '4px 12px', fontWeight: '900', letterSpacing: '2px', fontSize: '1rem', marginTop: '1rem', zIndex: 2, transform: 'skew(-10deg)' }}>
+        <div style={{ background: 'var(--accent-neon)', color: 'black', padding: '4px 12px', fontWeight: '900', letterSpacing: '2px', fontSize: '0.9rem', marginTop: '1rem', zIndex: 2, transform: 'skew(-10deg)' }}>
           <span style={{ display: 'block', transform: 'skew(10deg)' }}>LA CATEDRAL DEL FÚTBOL</span>
         </div>
 
-        <h2 style={{ fontSize: '2rem', marginTop: '2rem', marginBottom: '0.5rem', color: 'white', zIndex: 2, textAlign: 'center', textTransform: 'uppercase', fontWeight: '900' }}>
+        <h2 style={{ fontSize: '1.8rem', marginTop: '2rem', marginBottom: '0.5rem', color: 'white', zIndex: 2, textAlign: 'center', textTransform: 'uppercase', fontWeight: '900', padding: '0 10%' }}>
           {session.name}
         </h2>
         
-        <p style={{ fontSize: '1.2rem', color: '#e2e8f0', margin: '0 0 2rem 0', zIndex: 2, display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <p style={{ fontSize: '1.1rem', color: '#e2e8f0', margin: '0 0 1.5rem 0', zIndex: 2, display: 'flex', alignItems: 'center', gap: '8px' }}>
           📅 {session.date}
         </p>
 
-        <div style={{ background: 'rgba(0,0,0,0.6)', padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', zIndex: 2, width: '80%', textAlign: 'center' }}>
+        <div style={{ background: 'rgba(0,0,0,0.6)', padding: '1.2rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', zIndex: 2, width: '80%', textAlign: 'center', marginBottom: '1.5rem' }}>
           <p style={{ margin: '0 0 0.5rem 0', color: 'gray', textTransform: 'uppercase', fontSize: '0.9rem', fontWeight: 'bold' }}>Apertura de Convocatoria</p>
-          <div style={{ fontSize: '3.5rem', fontWeight: '900', color: 'white', lineHeight: '1', textShadow: '0 2px 10px rgba(0,0,0,0.8)' }}>
+          <div style={{ fontSize: '3rem', fontWeight: '900', color: 'white', lineHeight: '1', textShadow: '0 2px 10px rgba(0,0,0,0.8)' }}>
             {session.openTime || '18:00'}
           </div>
         </div>
 
-        <div style={{ position: 'absolute', bottom: '35px', width: '85%', textAlign: 'center', zIndex: 2 }}>
+        <div style={{ width: '85%', textAlign: 'center', zIndex: 2, padding: '0 10px' }}>
           <p style={{ margin: 0, fontSize: '0.75rem', color: '#cbd5e1', fontStyle: 'italic', lineHeight: '1.4' }}>
             Atento como <strong style={{ fontStyle: 'normal', color: 'var(--accent-warning)' }}>GELO</strong>, 
             veloz como <strong style={{ fontStyle: 'normal', color: 'var(--accent-warning)' }}>BOCHITO</strong>, 
