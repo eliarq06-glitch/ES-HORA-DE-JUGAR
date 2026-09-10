@@ -27,7 +27,7 @@ export default function Tribunal({ players }) {
         
         <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.75rem', borderRadius: '8px', borderLeft: `3px solid ${color}` }}>
           <div style={{ fontSize: '0.75rem', color: 'gray', textTransform: 'uppercase', marginBottom: '4px', fontWeight: 'bold' }}>Motivo de la Sanción / Estado:</div>
-          <div style={{ color: 'var(--light-text)' }}>
+          <div style={{ color: 'white', fontSize: '0.95rem', lineHeight: '1.4' }}>
             {player.statusReason || 'No se ha especificado un motivo.'}
           </div>
         </div>
