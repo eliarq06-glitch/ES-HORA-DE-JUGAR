@@ -281,33 +281,15 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
       }
     });
 
-    // 2. Encontrar los que están en la App pero ya NO están en Supabase
-    const playerIdsToDelete = [];
-    allPlayers.forEach(p => {
-      if (p.email === 'eli.arq.06@gmail.com' || p.firstName === 'Víctor' || p.firstName === 'Victor') return; // Nunca borrar al admin
-      if (p.email && p.email.trim() !== '') {
-        const emailLower = p.email.toLowerCase().trim();
-        if (!emailsInSupabase.includes(emailLower)) {
-          playerIdsToDelete.push(p.id);
-        }
-      }
-    });
-
-    if (newPlayers.length === 0 && playerIdsToDelete.length === 0) {
-      alert('¡Todo está al día! Las cuentas de Supabase y la App están perfectamente sincronizadas.');
+    if (newPlayers.length === 0) {
+      alert('¡Todo está al día! No hay cuentas nuevas en Supabase para agregar a la App.');
       return;
     }
 
-    let message = 'Resumen de Sincronización:\n';
-    if (newPlayers.length > 0) message += `- ${newPlayers.length} agregados (Estaban en Supabase pero no en la App).\n`;
-    if (playerIdsToDelete.length > 0) message += `- ${playerIdsToDelete.length} eliminados (Estaban en la App pero ya no en Supabase).\n`;
+    let message = `Resumen de Sincronización:\n- ${newPlayers.length} jugadores nuevos encontrados en Supabase.\n`;
     
-    if (window.confirm(message + '\n¿Deseas aplicar estos cambios?')) {
-      setPlayersDB(prev => {
-        let updatedList = prev.filter(p => !playerIdsToDelete.includes(p.id));
-        updatedList = [...updatedList, ...newPlayers];
-        return updatedList;
-      });
+    if (window.confirm(message + '\n¿Deseas agregarlos a tu lista general?')) {
+      setPlayersDB(prev => [...prev, ...newPlayers]);
     }
   };
 
