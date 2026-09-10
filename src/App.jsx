@@ -69,7 +69,8 @@ function App() {
   // Datos sincronizados con Supabase en tiempo real
   const [playersDB, setPlayersDB, loadingPlayers] = useSupabaseTable('players', []);
   const [sessions, setSessions, loadingSessions] = useSupabaseTable('sessions', []);
-  const [activeSessionId, setActiveSessionId] = useSupabaseConfig('activeSessionId', 1);
+  const activeSession = sessions.find(s => s.status !== 'closed') || null;
+const activeSessionId = activeSession ? activeSession.id : null;
   const [initialFund, setInitialFund] = useSupabaseConfig('initialFund', 0);
   const [teams, setTeams] = useSupabaseTable('teams', []);
   const [matchEvents, setMatchEvents] = useSupabaseTable('match_events', []);
@@ -178,9 +179,7 @@ function App() {
     }
 
     // Cambiar estado de la sesión a closed
-    if (activeSessionId) {
-      setSessions(sessions.map(s => s.id === activeSessionId ? { ...s, status: 'closed' } : s));
-    }
+    
 
     setTeams([]);
     setMatches([]);
@@ -192,14 +191,14 @@ function App() {
     if(window.confirm('¿Estás seguro de borrar todos los datos del torneo? Esto no se puede deshacer y borrará los equipos y goles.')) {
       setPlayersDB(MOCK_PLAYERS);
       setSessions([{ id: 1, name: 'Jornada Inaugural', date: new Date().toLocaleDateString(), confirmedIds: [1,2,3,4,5,6,7,8,9,10], status: 'open' }]);
-      setActiveSessionId(1);
+      
       setTeams([]);
       setMatchEvents([]);
       setMatches([]);
     }
   };
 
-  const activeSession = sessions.find(s => s.id === activeSessionId) || null;
+  
   const allPlayers = getPlayersWithStats();
   const getStatusWeight = (status) => {
     switch(status) {
@@ -286,7 +285,7 @@ function App() {
     localStorage.removeItem('ehdj_mvp_votes'); // Clean up votes for next time
     localStorage.setItem('ehdj_mvp_closed', 'false'); // Reset voting status
 
-    setActiveSessionId(sessions.find(s => s.status !== 'closed')?.id || 1);
+    
     
     alert('¡Torneo finalizado! El historial ha sido guardado. Ve a "Jornadas" para consultarlo.');
     setRoute('sessions');
