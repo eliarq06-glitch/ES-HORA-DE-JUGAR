@@ -207,7 +207,13 @@ export default function Players({ players, isGlobalAdmin, setPlayersDB }) {
             else cardTheme = 'bronze';
           }
 
-          let bgImage = `/cards/${cardTheme}.png`;
+          let bgImage = '/card_bronze.png';
+          if (cardTheme === 'white') bgImage = '/card_legend.png';
+          else if (cardTheme === 'blue') bgImage = '/card_toty.png';
+          else if (cardTheme === 'black') bgImage = '/card_silver.png';
+          else if (cardTheme === 'gold') bgImage = '/card_gold.png';
+          else bgImage = '/card_bronze.png';
+
           let textColor = '#3b2511';
           let maskGradient = 'linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.95))';
           
