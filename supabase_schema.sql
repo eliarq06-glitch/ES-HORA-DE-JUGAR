@@ -30,6 +30,7 @@ create table if not exists sessions (
   date text,
   confirmed_ids jsonb default '[]',
   status text default 'open',
+  open_time text default '',
   pitch_cost numeric default 0,
   player_cost numeric default 0,
   payments jsonb default '[]',
