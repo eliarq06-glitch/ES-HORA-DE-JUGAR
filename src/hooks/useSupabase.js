@@ -333,12 +333,18 @@ async function syncToDB(tableName, items) {
 
   // Borrar registros que ya no existen (sincronización)
   const currentIds = rows.map(r => r.id);
-  const { error: delError } = await supabase
-    .from(tableName)
-    .delete()
-    .not('id', 'in', currentIds);
   
-  if (delError) console.error(`Delete error in ${tableName}:`, delError);
+  if (currentIds.length > 0) {
+    const { error: delError } = await supabase
+      .from(tableName)
+      .delete()
+      .not('id', 'in', `(${currentIds.join(',')})`);
+    
+    if (delError) console.error(`Delete error in ${tableName}:`, delError);
+  } else {
+    // Si la lista está vacía pero intentamos borrar todo lo que no esté ahí
+    await supabase.from(tableName).delete().neq('id', 0);
+  }
 }
 
 function mapToDB(tableName, items) {
