@@ -212,19 +212,19 @@ export default function Players({ players, isGlobalAdmin, setPlayersDB }) {
           let maskGradient = 'linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.95))';
           
           if (cardTheme === 'white') {
-            textColor = '#333333';
+            textColor = '#222222';
             maskGradient = 'linear-gradient(to bottom, rgba(255,255,255,0.7), rgba(255,255,255,1))';
           } else if (cardTheme === 'blue') {
-            textColor = '#e8c678';
+            textColor = '#fde68a';
             maskGradient = 'linear-gradient(to bottom, rgba(15,24,71,0.8), rgba(10,15,40,0.95))';
           } else if (cardTheme === 'black') {
-            textColor = '#cccccc';
+            textColor = '#ffffff';
             maskGradient = 'linear-gradient(to bottom, rgba(30,30,30,0.8), rgba(10,10,10,0.95))';
           } else if (cardTheme === 'gold') {
-            textColor = '#4a3810';
+            textColor = '#1a1a1a'; // Pure dark for high contrast on gold
             maskGradient = 'linear-gradient(to bottom, rgba(220,180,80,0.8), rgba(200,160,60,0.95))';
           } else if (cardTheme === 'bronze') {
-            textColor = '#4a2511';
+            textColor = '#ffffff'; // Pure white for high contrast on bronze
             maskGradient = 'linear-gradient(to bottom, rgba(150,80,40,0.8), rgba(100,50,20,0.95))';
           }
 
@@ -283,12 +283,12 @@ export default function Players({ players, isGlobalAdmin, setPlayersDB }) {
 
               {/* Name & Stats */}
               <div className="fifa-card-bottom-new">
-                <div className="fifa-card-name-new" style={{ fontSize: nameFontSize, color: cardTheme === 'white' ? '#222' : 'white', textShadow: cardTheme === 'white' ? 'none' : '0 2px 4px rgba(0,0,0,0.8)' }}>
+                <div className="fifa-card-name-new" style={{ fontSize: nameFontSize, color: textColor, textShadow: (cardTheme === 'white' || cardTheme === 'gold') ? 'none' : '0 2px 4px rgba(0,0,0,0.8)' }}>
                   {fullName}
                 </div>
                 
                 {/* Stats Grid */}
-                <div className="fifa-card-stats-grid" style={{ color: textColor, textShadow: cardTheme === 'white' ? 'none' : '0 1px 3px rgba(0,0,0,0.8)' }}>
+                <div className="fifa-card-stats-grid" style={{ color: textColor, textShadow: (cardTheme === 'white' || cardTheme === 'gold') ? 'none' : '0 1px 3px rgba(0,0,0,0.8)' }}>
                   <div className="stat-col">
                     <div className="stat-row"><span>{pac}</span> <span>RIT</span></div>
                     <div className="stat-row"><span>{sho}</span> <span>TIR</span></div>
