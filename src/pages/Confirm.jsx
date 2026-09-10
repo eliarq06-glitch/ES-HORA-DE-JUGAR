@@ -242,45 +242,66 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
         </div>
       )}
 
-      {(loggedInPlayer && !isAdmin) && (
-        <div className="glass-panel-light" style={{ textAlign: 'center', padding: '3rem 1rem' }}>
-          <div className="avatar-placeholder" style={{ width: '80px', height: '80px', fontSize: '2.5rem', margin: '0 auto 1.5rem auto', boxShadow: '0 0 20px var(--accent-neon)' }}>
-            {loggedInPlayer.firstName.charAt(0)}
+      {(loggedInPlayer && !isAdmin) && (() => {
+        let isFuture = false;
+        if (activeSession?.date && activeSession?.openTime) {
+          if (activeSession.date.includes('-')) {
+            const sessionDate = new Date(`${activeSession.date}T${activeSession.openTime}:00`);
+            if (new Date() < sessionDate) {
+              isFuture = true;
+            }
+          }
+        }
+
+        return (
+          <div className="glass-panel-light" style={{ textAlign: 'center', padding: '3rem 1rem' }}>
+            <div className="avatar-placeholder" style={{ width: '80px', height: '80px', fontSize: '2.5rem', margin: '0 auto 1.5rem auto', boxShadow: '0 0 20px var(--accent-neon)' }}>
+              {loggedInPlayer.firstName.charAt(0)}
+            </div>
+            <h2 className="title-main" style={{ fontSize: '2rem', marginBottom: '0.5rem', margin: 0 }}>Hola, {loggedInPlayer.firstName}</h2>
+            <p className="subtitle" style={{ marginBottom: '2rem', color: 'var(--light-text-muted)' }}>Jornada: {activeSession?.name} ({activeSession?.date})</p>
+            
+            {activeSession.confirmedIds.includes(loggedInPlayer.id) ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', color: 'var(--accent-neon)', fontWeight: 'bold' }}>
+                <CheckCircle2 size={48} />
+                <span style={{ fontSize: '1.5rem', color: 'var(--accent-neon)' }}>¡Estás Confirmado!</span>
+                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '12px', border: `1px solid var(--accent-neon)`, width: '100%', maxWidth: '300px' }}>
+                  <p style={{ color: 'var(--light-text)', margin: 0 }}>Tu asistencia ha sido registrada exitosamente. ¡Nos vemos en la cancha!</p>
+                </div>
+                <p style={{ color: 'var(--light-text-muted)', fontWeight: 'normal', fontSize: '0.85rem', maxWidth: '400px', lineHeight: '1.4' }}>
+                  * Recuerda que tu ubicación final (Titular, Alterno o Suplente) dependerá de tu estricto cumplimiento con el Auditor de Disciplina Interno (Lucho). ¡Los verdaderos elementos tienen prioridad al armar la lista final!
+                </p>
+              </div>
+            ) : (activeSession.status === 'locked' || activeSession.status === 'closed') ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', color: 'var(--accent-danger)', fontWeight: 'bold', padding: '1rem', border: '2px dashed var(--accent-danger)', borderRadius: '16px', background: 'rgba(239, 68, 68, 0.05)' }}>
+                <div style={{ fontSize: '1.5rem' }}>¡CONVOCATORIA CERRADA! 🚫</div>
+              </div>
+            ) : isFuture ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', background: 'rgba(255,255,255,0.05)', padding: '2rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div style={{ fontSize: '1.5rem', color: 'white', fontWeight: 'bold' }}>AÚN NO SE ABRE LA CONVOCATORIA</div>
+                <p style={{ color: 'var(--light-text-muted)', margin: 0, fontSize: '1.1rem' }}>Esta jornada abrirá sus inscripciones a las:</p>
+                <div style={{ fontSize: '3.5rem', fontWeight: '900', color: 'var(--accent-neon)', lineHeight: '1', textShadow: '0 0 20px rgba(232,185,49,0.5)' }}>
+                  {activeSession.openTime}
+                </div>
+                <p style={{ color: 'var(--light-text)', margin: 0, fontSize: '0.9rem' }}>¡Mantente atento para asegurar tu puesto!</p>
+              </div>
+            ) : (
+              <div style={{ margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', width: '100%', maxWidth: '400px' }}>
+                <div style={{ background: 'rgba(255,193,7,0.1)', border: '1px solid var(--accent-warning)', padding: '1rem', borderRadius: '8px', color: 'var(--accent-warning)', fontSize: '0.85rem', textAlign: 'center' }}>
+                  <strong>⚽ OJO CON TU POSICIÓN:</strong> Tu ubicación final (Titular o Alterno) dependerá de tu Estado en la base de datos. ¡Tendrán preferencia los verdaderos elementos que han <strong>"Tomado Biela"</strong> religiosamente! Los que recién asoman, no beben o están castigados irán al fondo de la lista 😂🍻
+                </div>
+                <button 
+                  className="btn btn-neon" 
+                  style={{ fontSize: '1.5rem', padding: '1rem 2rem', width: '100%' }}
+                  onClick={handleSelfConfirm}
+                >
+                  Confirmar mi Asistencia
+                </button>
+              </div>
+            )}
           </div>
-          <h2 className="title-main" style={{ fontSize: '2rem', marginBottom: '0.5rem', margin: 0 }}>Hola, {loggedInPlayer.firstName}</h2>
-          <p className="subtitle" style={{ marginBottom: '2rem', color: 'var(--light-text-muted)' }}>Jornada: {activeSession?.name} ({activeSession?.date})</p>
-          
-          {activeSession.confirmedIds.includes(loggedInPlayer.id) ? (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', color: 'var(--accent-neon)', fontWeight: 'bold' }}>
-              <CheckCircle2 size={48} />
-              <span style={{ fontSize: '1.5rem', color: 'var(--accent-neon)' }}>¡Estás Confirmado!</span>
-              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '12px', border: `1px solid var(--accent-neon)`, width: '100%', maxWidth: '300px' }}>
-                <p style={{ color: 'var(--light-text)', margin: 0 }}>Tu asistencia ha sido registrada exitosamente. ¡Nos vemos en la cancha!</p>
-              </div>
-              <p style={{ color: 'var(--light-text-muted)', fontWeight: 'normal', fontSize: '0.85rem', maxWidth: '400px', lineHeight: '1.4' }}>
-                * Recuerda que tu ubicación final (Titular, Alterno o Suplente) dependerá de tu estricto cumplimiento con el Auditor de Disciplina Interno (Lucho). ¡Los verdaderos elementos tienen prioridad al armar la lista final!
-              </p>
-            </div>
-          ) : (activeSession.status === 'locked' || activeSession.status === 'closed') ? (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', color: 'var(--accent-danger)', fontWeight: 'bold', padding: '1rem', border: '2px dashed var(--accent-danger)', borderRadius: '16px', background: 'rgba(239, 68, 68, 0.05)' }}>
-              <div style={{ fontSize: '1.5rem' }}>¡CONVOCATORIA CERRADA! 🚫</div>
-            </div>
-          ) : (
-            <div style={{ margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', width: '100%', maxWidth: '400px' }}>
-              <div style={{ background: 'rgba(255,193,7,0.1)', border: '1px solid var(--accent-warning)', padding: '1rem', borderRadius: '8px', color: 'var(--accent-warning)', fontSize: '0.85rem', textAlign: 'center' }}>
-                <strong>⚽ OJO CON TU POSICIÓN:</strong> Tu ubicación final (Titular o Alterno) dependerá de tu Estado en la base de datos. ¡Tendrán preferencia los verdaderos elementos que han <strong>"Tomado Biela"</strong> religiosamente! Los que recién asoman, no beben o están castigados irán al fondo de la lista 😂🍻
-              </div>
-              <button 
-                className="btn btn-neon" 
-                style={{ fontSize: '1.5rem', padding: '1rem 2rem', width: '100%' }}
-                onClick={handleSelfConfirm}
-              >
-                Confirmar mi Asistencia
-              </button>
-            </div>
-          )}
-        </div>
-      )}
+        );
+      })()}
 
       {isAdmin && activeSession && activeSession.status !== 'closed' && activeSession.status !== 'locked' && (
         <div className="glass-panel-light">
