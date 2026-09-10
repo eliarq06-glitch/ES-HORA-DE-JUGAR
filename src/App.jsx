@@ -108,7 +108,11 @@ function App() {
   const handleActivateSession = (newId, force = false) => {
     if (newId !== activeSessionId) {
       if (force) {
-        setActiveSessionId(newId);
+        setSessions(sessions.map(s => {
+          if (s.id === newId) return { ...s, status: 'open' };
+          if (s.status !== 'closed') return { ...s, status: 'closed' };
+          return s;
+        }));
         setTeams([]);
         setMatches([]);
         setMatchEvents([]);
@@ -120,7 +124,11 @@ function App() {
         : 'Cambiar de jornada borrará los equipos y partidos del sorteo actual para empezar en blanco. ¿Deseas continuar?';
       
       if (window.confirm(confirmMsg)) {
-        setActiveSessionId(newId);
+        setSessions(sessions.map(s => {
+          if (s.id === newId) return { ...s, status: 'open' };
+          if (s.status !== 'closed') return { ...s, status: 'closed' };
+          return s;
+        }));
         setTeams([]);
         setMatches([]);
         setMatchEvents([]);
