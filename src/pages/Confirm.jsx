@@ -17,6 +17,10 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
   const [linkPlayerId, setLinkPlayerId] = useState('');
   const [justConfirmed, setJustConfirmed] = useState(false);
   const [newPlayer, setNewPlayer] = useState({ firstName: '', lastName: '', nickname: '' });
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [editFirstName, setEditFirstName] = useState('');
+  const [editLastName, setEditLastName] = useState('');
+  const [editNickname, setEditNickname] = useState('');
   const [activityLog, setActivityLog] = useSupabaseConfig('activityLog', []);
   const [selectedCaptains, setSelectedCaptains] = useSupabaseConfig('selectedCaptains', []);
 
@@ -223,7 +227,19 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '100%', maxWidth: '600px' }}>
       
-      {(!activeSession || activeSession.status === 'closed' || activeSession.status === 'locked') && !isAdmin && !loggedInPlayer && (
+      {!activeSession && !isAdmin && (
+        <div className="glass-panel-light" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+          <h2 className="title-main" style={{ fontSize: '2rem', marginBottom: '1rem', color: 'var(--light-text)' }}>SIN CONVOCATORIA ACTIVA</h2>
+          <p style={{ color: 'var(--light-text-muted)', fontSize: '1.2rem', marginBottom: '1rem' }}>
+            En este momento no hay ninguna jornada programada.
+          </p>
+          <p style={{ color: 'var(--light-text-muted)', fontSize: '1rem' }}>
+            Mantente atento a los grupos de WhatsApp. Cuando el administrador abra una nueva convocatoria, aquí aparecerá el contador regresivo. ¡Nos vemos en la cancha! ⚽
+          </p>
+        </div>
+      )}
+
+      {activeSession && (activeSession.status === 'closed' || activeSession.status === 'locked') && !isAdmin && !loggedInPlayer && (
         <div className="glass-panel-light" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
           <h2 className="title-main" style={{ fontSize: '2rem', marginBottom: '1rem', color: 'var(--light-text)' }}>CONVOCATORIA CERRADA</h2>
           <p style={{ color: 'var(--light-text-muted)', fontSize: '1.2rem', marginBottom: '2rem' }}>
@@ -319,6 +335,45 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
                 </button>
               </div>
             )}
+
+            {/* SECCIÓN: Editar Mi Perfil */}
+            <div style={{ marginTop: '1.5rem', width: '100%' }}>
+              <button 
+                onClick={() => {
+                  if (!editingProfile) {
+                    setEditFirstName(loggedInPlayer.firstName || '');
+                    setEditLastName(loggedInPlayer.lastName || '');
+                    setEditNickname(loggedInPlayer.nickname || '');
+                  }
+                  setEditingProfile(!editingProfile);
+                }}
+                style={{ background: 'none', border: 'none', color: 'var(--accent-warning)', cursor: 'pointer', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px', margin: '0 auto' }}
+              >
+                <Edit2 size={16} /> {editingProfile ? 'Cerrar edición' : '✏️ Editar mi Nombre / Apodo'}
+              </button>
+              {editingProfile && (
+                <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.15)' }}>
+                  <label style={{ color: 'var(--light-text-muted)', fontSize: '0.8rem' }}>Nombre</label>
+                  <input className="input-dark" value={editFirstName} onChange={e => setEditFirstName(e.target.value.toUpperCase())} placeholder="Tu nombre" style={{ padding: '0.5rem' }} />
+                  <label style={{ color: 'var(--light-text-muted)', fontSize: '0.8rem' }}>Apellido</label>
+                  <input className="input-dark" value={editLastName} onChange={e => setEditLastName(e.target.value.toUpperCase())} placeholder="Tu apellido" style={{ padding: '0.5rem' }} />
+                  <label style={{ color: 'var(--light-text-muted)', fontSize: '0.8rem' }}>Apodo</label>
+                  <input className="input-dark" value={editNickname} onChange={e => setEditNickname(e.target.value.toUpperCase())} placeholder="Tu apodo (ej: EL MAGO)" style={{ padding: '0.5rem' }} />
+                  <button 
+                    className="btn btn-neon" 
+                    style={{ marginTop: '0.5rem' }}
+                    onClick={() => {
+                      if (!editFirstName.trim()) return alert('El nombre no puede estar vacío.');
+                      setPlayersDB(prev => prev.map(p => p.id === loggedInPlayer.id ? { ...p, firstName: editFirstName.trim(), lastName: editLastName.trim(), nickname: editNickname.trim() } : p));
+                      alert('¡Perfil actualizado correctamente!');
+                      setEditingProfile(false);
+                    }}
+                  >
+                    Guardar Cambios
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         );
       })()}
