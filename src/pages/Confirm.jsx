@@ -249,14 +249,14 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
         </div>
       )}
 
-      {(loggedInPlayer && !isAdmin) && (() => {
+      {loggedInPlayer && (() => {
         let isFuture = false;
         let timeString = '';
         if (activeSession?.date && activeSession?.openTime) {
           if (activeSession.date.includes('-')) {
             const sessionDate = new Date(`${activeSession.date}T${activeSession.openTime}:00`);
             const diff = sessionDate - now;
-            if (diff > 0) {
+            if (diff > 0 && !isAdmin) {
               isFuture = true;
               const hours = Math.floor(diff / (1000 * 60 * 60));
               const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
