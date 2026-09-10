@@ -290,10 +290,10 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
                 <div style={{ fontSize: '1.5rem' }}>¡CONVOCATORIA CERRADA! 🚫</div>
               </div>
             ) : isFuture ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', background: 'rgba(255,255,255,0.05)', padding: '2rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', background: 'rgba(255,255,255,0.05)', padding: '2rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
                 <div style={{ fontSize: '1.5rem', color: 'white', fontWeight: 'bold' }}>AÚN NO SE ABRE LA CONVOCATORIA</div>
                 <p style={{ color: 'var(--light-text-muted)', margin: 0, fontSize: '1.1rem' }}>Esta jornada abrirá sus inscripciones en:</p>
-                <div style={{ fontSize: '3.5rem', fontWeight: '900', color: 'var(--accent-neon)', lineHeight: '1', textShadow: '0 0 20px rgba(232,185,49,0.5)', fontFamily: 'monospace' }}>
+                <div style={{ fontSize: 'clamp(2.5rem, 10vw, 3.5rem)', fontWeight: '900', color: 'var(--accent-neon)', lineHeight: '1', textShadow: '0 0 20px rgba(232,185,49,0.5)', fontFamily: 'monospace' }}>
                   {timeString}
                 </div>
                 <p style={{ color: 'var(--light-text)', margin: 0, fontSize: '1rem', fontStyle: 'italic', lineHeight: '1.6', textAlign: 'center' }}>
