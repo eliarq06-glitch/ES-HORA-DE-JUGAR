@@ -57,15 +57,15 @@ export default function Sessions({ sessions, setSessions, activeSessionId, setAc
         </form>
       </div>
 
-      {/* Lista de Jornadas Abiertas */}
+      {/* Lista de Jornadas Abiertas y Cerradas */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '3rem' }}>
-        {sessions.filter(s => s.status !== 'closed').map(s => {
+        {sessions.map(s => {
           const hasDrawnTeams = activeSessionId === s.id && teams && teams.length > 0;
           return (
-          <div key={s.id} className="glass-panel-dark" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: activeSessionId === s.id ? '2px solid var(--accent-neon)' : '1px solid var(--dark-glass-border)' }}>
+          <div key={s.id} className="glass-panel-dark" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: activeSessionId === s.id ? '2px solid var(--accent-neon)' : '1px solid var(--dark-glass-border)', opacity: s.status === 'closed' ? 0.7 : 1 }}>
             <div>
               <h3 style={{ fontSize: '1.25rem', margin: 0, color: 'white' }}>{s.name}</h3>
-              <p style={{ margin: '4px 0 0 0', color: 'var(--dark-text-muted)' }}>{s.date} {s.openTime ? `• Abre a las ${s.openTime}` : ''} • {s.confirmedIds.length} Confirmados {s.status === 'locked' && <span style={{color: 'var(--accent-danger)'}}>(CERRADA)</span>}</p>
+              <p style={{ margin: '4px 0 0 0', color: 'var(--dark-text-muted)' }}>{s.date} {s.openTime ? ` • Abre a las ${s.openTime}` : ''} • {s.confirmedIds.length} Confirmados {s.status === 'locked' && <span style={{color: 'var(--accent-danger)'}}>(BLOQUEADA)</span>} {s.status === 'closed' && <span style={{color: 'gray'}}>(CERRADA)</span>}</p>
             </div>
             
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
@@ -79,7 +79,7 @@ export default function Sessions({ sessions, setSessions, activeSessionId, setAc
               )}
               {activeSessionId === s.id && (
                 <button className="btn" style={{ background: 'var(--accent-neon)', color: 'black', fontWeight: 'bold' }} onClick={() => setActiveSessionId(null)}>
-                  <Check size={18} style={{ marginRight: '5px' }} /> Activa (Ocultar)
+                  <Check size={18} style={{ marginRight: '5px' }} /> Activa (Desactivar)
                 </button>
               )}
               <button 
