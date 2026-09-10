@@ -223,7 +223,7 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '100%', maxWidth: '600px' }}>
       
-      {(!activeSession || activeSession.status === 'closed' || activeSession.status === 'locked') && !isAdmin && (
+      {(!activeSession || activeSession.status === 'closed' || activeSession.status === 'locked') && !isAdmin && !loggedInPlayer && (
         <div className="glass-panel-light" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
           <h2 className="title-main" style={{ fontSize: '2rem', marginBottom: '1rem', color: 'var(--light-text)' }}>CONVOCATORIA CERRADA</h2>
           <p style={{ color: 'var(--light-text-muted)', fontSize: '1.2rem', marginBottom: '2rem' }}>

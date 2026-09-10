@@ -21,6 +21,7 @@ export default function Sessions({ sessions, setSessions, activeSessionId, setAc
       status: 'open'
     };
     setSessions([newSession, ...sessions]);
+    setActiveSessionId(newSession.id, true);
     setNewSessionName('');
     setNewSessionDate('');
     setNewSessionOpenTime('18:00');

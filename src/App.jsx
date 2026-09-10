@@ -105,8 +105,16 @@ function App() {
 
   const isLoading = loadingPlayers || loadingSessions;
 
-  const handleActivateSession = (newId) => {
+  const handleActivateSession = (newId, force = false) => {
     if (newId !== activeSessionId) {
+      if (force) {
+        setActiveSessionId(newId);
+        setTeams([]);
+        setMatches([]);
+        setMatchEvents([]);
+        return;
+      }
+      
       const confirmMsg = newId === null 
         ? '¿Ocultar la jornada activa?' 
         : 'Cambiar de jornada borrará los equipos y partidos del sorteo actual para empezar en blanco. ¿Deseas continuar?';
