@@ -173,13 +173,18 @@ export default function AdminPlayers({ allPlayers, setPlayersDB, isGlobalAdmin }
     setEditingId(null);
   };
 
-  const handleDelete = (id, p) => {
-    if (p.firstName === 'Víctor' || p.firstName === 'Victor' || p.email === 'eli.arq.06@gmail.com') {
+  const handleDelete = async (id, p) => {
+    if (p && (p.firstName === 'Víctor' || p.firstName === 'Victor' || p.email === 'eli.arq.06@gmail.com')) {
       alert('¡Acción no permitida! No puedes eliminar al Administrador Global (Víctor).');
       return;
     }
     if(window.confirm('¿Estás seguro de eliminar este jugador? Perderá todos sus históricos y estadísticas.')) {
       setPlayersDB(prev => prev.filter(player => player.id !== id));
+      try {
+        await supabase.from('players').delete().eq('id', id);
+      } catch (e) {
+        console.error("Error eliminando jugador de Supabase:", e);
+      }
     }
   };
 

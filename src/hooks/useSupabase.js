@@ -313,9 +313,12 @@ function mapFromDB(tableName, rows) {
 async function syncToDB(tableName, items) {
   if (!Array.isArray(items)) return;
   
-  // Para arrays vacíos, borramos todo el contenido de la tabla
+  // Para arrays vacíos, borramos todo el contenido de la tabla, 
+  // EXCEPTO si son tablas críticas, para evitar wipeouts accidentales.
   if (items.length === 0) {
-    await supabase.from(tableName).delete().neq('id', 0);
+    if (tableName !== 'players' && tableName !== 'historical_tournaments') {
+      await supabase.from(tableName).delete().neq('id', 0);
+    }
     return;
   }
 
@@ -332,7 +335,13 @@ async function syncToDB(tableName, items) {
     console.error(`Supabase sync error for ${tableName}:`, error);
   }
 
-  // Borrar registros que ya no existen (sincronización)
+  // Borrar registros que ya no existen (solo si NO son tablas críticas como players)
+  if (tableName === 'players' || tableName === 'historical_tournaments') {
+    // NUNCA borrar jugadores masivamente desde la sincronización automática.
+    // Solo permitir UPSERTS para estas tablas para evitar pérdida de datos por race conditions.
+    return;
+  }
+
   const currentIds = rows.map(r => r.id);
   
   if (currentIds.length > 0) {
