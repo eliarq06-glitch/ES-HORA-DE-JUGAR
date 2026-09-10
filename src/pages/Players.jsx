@@ -207,31 +207,30 @@ export default function Players({ players, isGlobalAdmin, setPlayersDB }) {
             else cardTheme = 'bronze';
           }
 
-          let bgImage = '/card_bronze.png';
-          if (cardTheme === 'white') bgImage = '/card_legend.png';
-          else if (cardTheme === 'blue') bgImage = '/card_toty.png';
-          else if (cardTheme === 'black') bgImage = '/card_silver.png';
-          else if (cardTheme === 'gold') bgImage = '/card_gold.png';
-          else bgImage = '/card_bronze.png';
-
-          let textColor = '#3b2511';
-          let maskGradient = 'linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.95))';
+          let cardBg = '';
+          let textColor = '';
+          let innerBorder = '';
           
           if (cardTheme === 'white') {
-            textColor = '#222222';
-            maskGradient = 'linear-gradient(to bottom, rgba(255,255,255,0.7), rgba(255,255,255,1))';
+            cardBg = 'linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%)';
+            textColor = '#1e293b';
+            innerBorder = 'rgba(0,0,0,0.1)';
           } else if (cardTheme === 'blue') {
+            cardBg = 'linear-gradient(135deg, #1e3a8a 0%, #020617 100%)';
             textColor = '#fde68a';
-            maskGradient = 'linear-gradient(to bottom, rgba(15,24,71,0.8), rgba(10,15,40,0.95))';
+            innerBorder = 'rgba(253,230,138,0.3)';
           } else if (cardTheme === 'black') {
+            cardBg = 'linear-gradient(135deg, #334155 0%, #020617 100%)';
             textColor = '#ffffff';
-            maskGradient = 'linear-gradient(to bottom, rgba(30,30,30,0.8), rgba(10,10,10,0.95))';
+            innerBorder = 'rgba(255,255,255,0.2)';
           } else if (cardTheme === 'gold') {
-            textColor = '#1a1a1a'; // Pure dark for high contrast on gold
-            maskGradient = 'linear-gradient(to bottom, rgba(220,180,80,0.8), rgba(200,160,60,0.95))';
-          } else if (cardTheme === 'bronze') {
-            textColor = '#ffffff'; // Pure white for high contrast on bronze
-            maskGradient = 'linear-gradient(to bottom, rgba(150,80,40,0.8), rgba(100,50,20,0.95))';
+            cardBg = 'linear-gradient(135deg, #fde047 0%, #b45309 100%)';
+            textColor = '#1a1a1a';
+            innerBorder = 'rgba(0,0,0,0.2)';
+          } else { // bronze
+            cardBg = 'linear-gradient(135deg, #b45309 0%, #451a03 100%)';
+            textColor = '#fde68a'; // Gold-ish text on bronze
+            innerBorder = 'rgba(253,230,138,0.2)';
           }
 
           const extraStyle = {};
@@ -248,7 +247,7 @@ export default function Players({ players, isGlobalAdmin, setPlayersDB }) {
           else if(pos==='MCD' || pos==='DEF' || pos==='DFC' || pos==='LI' || pos==='LD') { def=getStat(12); phy=getStat(10); pac=getStat(-5); sho=getStat(-15); }
           else if(pos==='POR' || pos==='PO') { pac=getStat(-10); sho=getStat(-20); pas=getStat(5); dri=getStat(15); def=getStat(5); phy=getStat(5); }
           
-          const fullName = `${player.firstName} ${player.lastName}`.trim();
+          const fullName = `${player.firstName} ${player.lastName || ''}`.trim();
           const nameLen = fullName.length;
           let nameFontSize = 'clamp(0.9rem, 4vw, 1.3rem)';
           if (nameLen > 18) nameFontSize = 'clamp(0.65rem, 2.5vw, 0.9rem)';
@@ -259,14 +258,20 @@ export default function Players({ players, isGlobalAdmin, setPlayersDB }) {
             key={player.id} 
             className="fifa-card" 
             onClick={() => setSelectedPlayer(player)}
-            style={{ cursor: 'pointer', transition: 'transform 0.2s', marginBottom: isGlobalAdmin ? '30px' : '0', position: 'relative' }}
+            style={{ 
+              cursor: 'pointer', 
+              transition: 'transform 0.2s', 
+              marginBottom: isGlobalAdmin ? '30px' : '0', 
+              position: 'relative',
+              background: cardBg,
+              clipPath: 'polygon(10% 0, 90% 0, 100% 10%, 100% 85%, 50% 100%, 0 85%, 0 10%)',
+              filter: `drop-shadow(0 10px 15px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 5px ${innerBorder})`,
+              margin: '0 auto', // Center it on mobile
+              maxWidth: '280px' // Prevent massive stretching
+            }}
             onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
             onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
           >
-            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundImage: `url(${bgImage})`, backgroundSize: '100% 100%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', zIndex: 1, ...extraStyle }}></div>
-            {/* Eraser Overlay for baked-in text */}
-            <div style={{ position: 'absolute', top: '48%', left: '10%', width: '80%', height: '45%', background: maskGradient, backdropFilter: 'blur(4px)', borderRadius: '10px', zIndex: 1 }}></div>
-
             <div className="fifa-card-content" style={{ zIndex: 2 }}>
               
               {/* Top Left OVR & Position */}
