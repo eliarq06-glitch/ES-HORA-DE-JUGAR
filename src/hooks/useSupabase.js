@@ -69,15 +69,12 @@ export function useSupabaseTable(tableName, defaultValue = []) {
       if (JSON.stringify(newValue) === JSON.stringify(prevData)) return prevData; // Deep compare to prevent loops
       
       localStorage.setItem(`cache_${tableName}`, JSON.stringify(newValue));
-      
-      // Lanzar sync de fondo sin bloquear
       syncToDB(tableName, newValue).catch(e => console.error("Sync error:", e));
-      
       return newValue;
     });
   }, [tableName]);
 
-  return [data, setDataAndSync, loading];
+  return [data, setDataAndSync, loading, setData];
 }
 
 // ============================================================

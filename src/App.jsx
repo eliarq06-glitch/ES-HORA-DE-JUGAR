@@ -68,7 +68,7 @@ function App() {
   
   // Datos sincronizados con Supabase en tiempo real
   const [playersDB, setPlayersDB, loadingPlayers] = useSupabaseTable('players', []);
-  const [sessions, setSessions, loadingSessions] = useSupabaseTable('sessions', []);
+  const [sessions, setSessions, loadingSessions, setSessionsOnly] = useSupabaseTable('sessions', []);
   const activeSession = sessions.find(s => s.status !== 'closed') || null;
 const activeSessionId = activeSession ? activeSession.id : null;
   const [initialFund, setInitialFund] = useSupabaseConfig('initialFund', 0);
@@ -223,8 +223,19 @@ const activeSessionId = activeSession ? activeSession.id : null;
         })
     : [];
 
-  const updateConfirmedPlayers = (newIds) => {
-    setSessions(sessions.map(s => s.id === activeSessionId ? { ...s, confirmedIds: newIds } : s));
+  const updateConfirmedPlayers = async (newIdsOrUpdater) => {
+    try {
+      let newIds = newIdsOrUpdater;
+      
+      if (typeof newIdsOrUpdater === 'function') {
+        const { data } = await supabase.from('sessions').select('confirmed_ids').eq('id', activeSessionId).single();
+        const latestIds = data && data.confirmed_ids ? JSON.parse(data.confirmed_ids) : (activeSession?.confirmedIds || []);
+        newIds = newIdsOrUpdater(latestIds);
+      }
+
+      setSessionsOnly(prev => prev.map(s => s.id === activeSessionId ? { ...s, confirmedIds: newIds } : s));
+      await supabase.from('sessions').update({ confirmed_ids: JSON.stringify(newIds) }).eq('id', activeSessionId);
+    } catch (e) { console.error(e); }
   };
 
   const updatePlayerRating = (playerId, rating, sessionId) => {

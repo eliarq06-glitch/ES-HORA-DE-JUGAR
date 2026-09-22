@@ -140,7 +140,12 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
     }
     const confirmedIdsStr = (activeSession.confirmedIds || []).map(String);
     if (!confirmedIdsStr.includes(String(loggedInPlayer.id))) {
-      updateConfirmedPlayers([...(activeSession.confirmedIds || []), loggedInPlayer.id]);
+      updateConfirmedPlayers(latestIds => {
+        if (!latestIds.map(String).includes(String(loggedInPlayer.id))) {
+          return [...latestIds, loggedInPlayer.id];
+        }
+        return latestIds;
+      });
       logActivity(`⚽ ${loggedInPlayer.firstName} ${loggedInPlayer.lastName} acaba de confirmar su asistencia.`);
       setJustConfirmed(true);
       setTimeout(() => setJustConfirmed(false), 2000);
@@ -171,7 +176,10 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
     }
     const confirmedIdsStr = (activeSession.confirmedIds || []).map(String);
     if (!confirmedIdsStr.includes(String(pid))) {
-      updateConfirmedPlayers([...(activeSession.confirmedIds || []), pid]);
+      updateConfirmedPlayers(latestIds => {
+        if (!latestIds.map(String).includes(String(pid))) return [...latestIds, pid];
+        return latestIds;
+      });
       logActivity(`⚽ ${p.firstName} ${p.lastName} acaba de confirmar su asistencia.`, { 
         adminAction: true, 
         adminName: user.user_metadata?.full_name || user.email, 
@@ -191,7 +199,10 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
     const newId = Date.now();
     const playerObj = { id: newId, ...newPlayer, ratings: [] };
     setPlayersDB(prev => [...prev, playerObj]);
-    updateConfirmedPlayers([...activeSession.confirmedIds, newId]);
+    updateConfirmedPlayers(latestIds => {
+      if (!latestIds.includes(newId)) return [...latestIds, newId];
+      return latestIds;
+    });
     logActivity(`⚽ ${newPlayer.firstName} ${newPlayer.lastName} acaba de confirmar su asistencia.`, {
       adminAction: true,
       adminName: user.user_metadata?.full_name || user.email,
@@ -203,21 +214,31 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
   };
 
   const handleRemove = (id) => {
-    updateConfirmedPlayers(activeSession.confirmedIds.filter(pid => Number(pid) !== Number(id)));
+    updateConfirmedPlayers(latestIds => latestIds.filter(pid => Number(pid) !== Number(id)));
   };
 
-  const handleMoveUp = (index) => {
-    if (index === 0) return;
-    const ids = [...activeSession.confirmedIds];
-    [ids[index - 1], ids[index]] = [ids[index], ids[index - 1]];
-    updateConfirmedPlayers(ids);
+  const handleMoveUp = (id) => {
+    updateConfirmedPlayers(latestIds => {
+      const idx = latestIds.findIndex(pid => String(pid) === String(id));
+      if (idx > 0) {
+        const newIds = [...latestIds];
+        [newIds[idx - 1], newIds[idx]] = [newIds[idx], newIds[idx - 1]];
+        return newIds;
+      }
+      return latestIds;
+    });
   };
 
-  const handleMoveDown = (index) => {
-    if (index >= activeSession.confirmedIds.length - 1) return;
-    const ids = [...activeSession.confirmedIds];
-    [ids[index], ids[index + 1]] = [ids[index + 1], ids[index]];
-    updateConfirmedPlayers(ids);
+  const handleMoveDown = (id) => {
+    updateConfirmedPlayers(latestIds => {
+      const idx = latestIds.findIndex(pid => String(pid) === String(id));
+      if (idx !== -1 && idx < latestIds.length - 1) {
+        const newIds = [...latestIds];
+        [newIds[idx], newIds[idx + 1]] = [newIds[idx + 1], newIds[idx]];
+        return newIds;
+      }
+      return latestIds;
+    });
   };
 
   const handleChangeStatus = (playerId, newStatus) => {
@@ -506,11 +527,11 @@ export default function Confirm({ isAdmin, user, activeSession, confirmedPlayers
                     {/* Reorder buttons */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', marginRight: '4px' }}>
                       <button className="btn" style={{ padding: '2px 4px', background: index === 0 ? 'transparent' : 'rgba(255,255,255,0.1)', color: index === 0 ? 'rgba(255,255,255,0.2)' : 'white', border: 'none', cursor: index === 0 ? 'default' : 'pointer', borderRadius: '4px 4px 0 0' }}
-                        onClick={() => handleMoveUp(index)} disabled={index === 0} title="Subir">
+                        onClick={() => handleMoveUp(player.id)} disabled={index === 0} title="Subir">
                         <ChevronUp size={14} />
                       </button>
                       <button className="btn" style={{ padding: '2px 4px', background: index >= confirmedPlayers.length - 1 ? 'transparent' : 'rgba(255,255,255,0.1)', color: index >= confirmedPlayers.length - 1 ? 'rgba(255,255,255,0.2)' : 'white', border: 'none', cursor: index >= confirmedPlayers.length - 1 ? 'default' : 'pointer', borderRadius: '0 0 4px 4px' }}
-                        onClick={() => handleMoveDown(index)} disabled={index >= confirmedPlayers.length - 1} title="Bajar">
+                        onClick={() => handleMoveDown(player.id)} disabled={index >= confirmedPlayers.length - 1} title="Bajar">
                         <ChevronDown size={14} />
                       </button>
                     </div>
