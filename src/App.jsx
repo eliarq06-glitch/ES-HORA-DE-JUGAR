@@ -213,12 +213,17 @@ const activeSessionId = activeSession ? activeSession.id : null;
       
       if (typeof newIdsOrUpdater === 'function') {
         const { data } = await supabase.from('sessions').select('confirmed_ids').eq('id', activeSessionId).single();
-        const latestIds = data && data.confirmed_ids ? JSON.parse(data.confirmed_ids) : (activeSession?.confirmedIds || []);
+        let latestIds = data && data.confirmed_ids ? data.confirmed_ids : (activeSession?.confirmedIds || []);
+        
+        if (typeof latestIds === 'string') {
+          try { latestIds = JSON.parse(latestIds); } catch(e) { latestIds = []; }
+        }
+        
         newIds = newIdsOrUpdater(latestIds);
       }
 
       setSessionsOnly(prev => prev.map(s => s.id === activeSessionId ? { ...s, confirmedIds: newIds } : s));
-      await supabase.from('sessions').update({ confirmed_ids: JSON.stringify(newIds) }).eq('id', activeSessionId);
+      await supabase.from('sessions').update({ confirmed_ids: newIds }).eq('id', activeSessionId);
     } catch (e) { console.error(e); }
   };
 
