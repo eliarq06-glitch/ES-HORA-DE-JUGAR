@@ -57,8 +57,16 @@ export function useSupabaseTable(tableName, defaultValue = []) {
       })
       .subscribe();
 
+    // Refetch al detectar que el usuario inicia sesión (por el RLS)
+    const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN') {
+        fetchData();
+      }
+    });
+
     return () => {
       if (subscription) supabase.removeChannel(subscription);
+      authSub.unsubscribe();
     };
   }, [tableName]);
 

@@ -48,12 +48,19 @@ export default function Login({ onBack, allPlayers = [], setPlayersDB, activeSes
         }
 
         // Si el registro fue exitoso, creamos el jugador o actualizamos si ya existe
-        let player = allPlayers.find(p => p.email && p.email.toLowerCase().trim() === email.toLowerCase().trim());
-        
-        // Si no lo encuentra por correo, lo busca por Nombre y Apellido exactos (por si el admin lo creó manualmente)
-        if (!player) {
-           player = allPlayers.find(p => p.firstName.toUpperCase() === firstName.toUpperCase() && p.lastName.toUpperCase() === lastName.toUpperCase());
-        }
+        const { data: dbPlayers } = await supabase.from('players').select('*');
+const currentPlayers = dbPlayers ? dbPlayers.map(p => ({
+  id: p.id,
+  firstName: p.first_name,
+  lastName: p.last_name,
+  nickname: p.nickname,
+  email: p.email
+})) : allPlayers;
+
+let player = currentPlayers.find(p => p.email && p.email.toLowerCase().trim() === email.toLowerCase().trim());
+if (!player) {
+   player = currentPlayers.find(p => p.firstName.toUpperCase() === firstName.toUpperCase() && p.lastName.toUpperCase() === lastName.toUpperCase());
+}
 
         if (!player) {
            const newId = Date.now();
@@ -238,3 +245,4 @@ export default function Login({ onBack, allPlayers = [], setPlayersDB, activeSes
     </div>
   );
 }
+
