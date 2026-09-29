@@ -1,3 +1,4 @@
+import { supabase } from '../lib/supabase';
 import React, { useState } from 'react';
 import { DollarSign, AlertCircle, CheckCircle2, TrendingUp, TrendingDown, Lock, CreditCard, Users, Landmark } from 'lucide-react';
 
@@ -7,9 +8,16 @@ export default function Finances({ sessions, setSessions, activeSessionId, allPl
   const activeSession = sessions.find(s => s.id === activeSessionId);
   const confirmedPlayers = activeSession ? activeSession.confirmedIds.map(id => allPlayers.find(p => p.id === id)).filter(p => p) : [];
 
-  const updateActiveSession = (updatedData) => {
-    setSessions(sessions.map(s => s.id === activeSessionId ? { ...s, ...updatedData } : s));
-  };
+  const updateActiveSession = async (updatedData) => {
+  setSessions(sessions.map(s => s.id === activeSessionId ? { ...s, ...updatedData } : s));
+  try {
+    const dbData = {};
+    if (updatedData.pitchCost !== undefined) dbData.pitch_cost = updatedData.pitchCost;
+    if (updatedData.playerCost !== undefined) dbData.player_cost = updatedData.playerCost;
+    if (updatedData.payments !== undefined) dbData.payments = updatedData.payments;
+    await supabase.from('sessions').update(dbData).eq('id', activeSessionId);
+  } catch(e) { console.error(e); }
+}
 
   const handleUpdateCost = (cost) => {
     updateActiveSession({ pitchCost: parseFloat(cost) || 0 });
@@ -81,6 +89,11 @@ export default function Finances({ sessions, setSessions, activeSessionId, allPl
     }
 
     setSessions(newSessions);
+for (let session of closedSessions) {
+  try {
+    supabase.from('sessions').update({ payments: session.payments }).eq('id', session.id);
+  } catch(e) { console.error(e); }
+}
     alert('¡Abono registrado correctamente!');
   };
 
@@ -293,3 +306,5 @@ export default function Finances({ sessions, setSessions, activeSessionId, allPl
     </div>
   );
 }
+
+

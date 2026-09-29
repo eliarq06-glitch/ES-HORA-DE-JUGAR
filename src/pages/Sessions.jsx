@@ -17,13 +17,14 @@ export default function Sessions({ sessions, setSessions, activeSessionId, setAc
     setEditSessionName(session.name);
   };
 
-  const handleEditSave = (id) => {
+  const handleEditSave = async (id) => {
     if (!editSessionName.trim()) return;
     setSessions(sessions.map(s => s.id === id ? { ...s, name: editSessionName.trim() } : s));
     setEditingSessionId(null);
+    try { await supabase.from('sessions').update({ name: editSessionName.trim() }).eq('id', id); } catch(e) { console.error(e); }
   };
 
-  const handleCreate = (e) => {
+  const handleCreate = async (e) => {
     e.preventDefault();
     if (!newSessionName || !newSessionDate) return;
     const newSession = {
@@ -39,6 +40,16 @@ export default function Sessions({ sessions, setSessions, activeSessionId, setAc
     setNewSessionName('');
     setNewSessionDate('');
     setNewSessionOpenTime('18:00');
+    try {
+      await supabase.from('sessions').insert([{
+        id: newSession.id,
+        name: newSession.name,
+        date: newSession.date,
+        open_time: newSession.openTime,
+        confirmed_ids: [],
+        status: newSession.status
+      }]);
+    } catch(e) { console.error(e); }
   };
 
   const handleDelete = async (id) => { 
@@ -129,7 +140,7 @@ export default function Sessions({ sessions, setSessions, activeSessionId, setAc
               <button 
                 className="btn btn-dark" 
                 style={{ border: s.status === 'locked' ? '1px solid var(--accent-danger)' : '1px solid var(--accent-warning)', color: s.status === 'locked' ? 'var(--accent-danger)' : 'var(--accent-warning)', padding: '0.75rem', opacity: (s.status === 'locked' && hasDrawnTeams && !isGlobalAdmin) ? 0.5 : 1, cursor: (s.status === 'locked' && hasDrawnTeams && !isGlobalAdmin) ? 'not-allowed' : 'pointer' }} 
-                onClick={() => {
+                onClick={async () => {
                   if (s.status === 'locked' && hasDrawnTeams && !isGlobalAdmin) {
                     alert('No puedes reabrir esta convocatoria porque ya se han sorteado los equipos para jugar.');
                     return;
@@ -139,7 +150,9 @@ export default function Sessions({ sessions, setSessions, activeSessionId, setAc
                       return;
                     }
                   }
-                  setSessions(sessions.map(sess => sess.id === s.id ? { ...sess, status: sess.status === 'locked' ? 'open' : 'locked' } : sess));
+                  const newStatus = s.status === 'locked' ? 'open' : 'locked';
+setSessions(sessions.map(sess => sess.id === s.id ? { ...sess, status: newStatus } : sess));
+try { await supabase.from('sessions').update({ status: newStatus }).eq('id', s.id); } catch(e) { console.error(e); }
                 }}
                 title={s.status === 'locked' ? (hasDrawnTeams ? "Sorteo iniciado, no se puede reabrir" : "Abrir Inscripciones") : "Cerrar Convocatoria (Bloquear)"}
               >
@@ -280,3 +293,5 @@ export default function Sessions({ sessions, setSessions, activeSessionId, setAc
     </div>
   );
 }
+
+

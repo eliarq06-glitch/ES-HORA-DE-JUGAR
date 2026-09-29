@@ -106,10 +106,10 @@ const activeSessionId = activeSession ? activeSession.id : null;
 
   const isLoading = loadingPlayers || loadingSessions;
 
-  const handleActivateSession = (newId, force = false) => {
+  const handleActivateSession = async (newId, force = false) => {
     if (newId !== activeSessionId) {
-      if (force) {
-        setSessions(sessions.map(s => {
+      const doUpdate = async () => {
+        setSessionsOnly(sessions.map(s => {
           if (s.id === newId) return { ...s, status: 'open' };
           if (s.status !== 'closed') return { ...s, status: 'closed' };
           return s;
@@ -117,6 +117,18 @@ const activeSessionId = activeSession ? activeSession.id : null;
         setTeams([]);
         setMatches([]);
         setMatchEvents([]);
+        try {
+          if (newId) {
+            await supabase.from('sessions').update({ status: 'closed' }).neq('id', newId).neq('status', 'closed');
+            await supabase.from('sessions').update({ status: 'open' }).eq('id', newId);
+          } else {
+            await supabase.from('sessions').update({ status: 'closed' }).neq('status', 'closed');
+          }
+        } catch(e) { console.error(e); }
+      };
+
+      if (force) {
+        await doUpdate();
         return;
       }
       
@@ -125,20 +137,20 @@ const activeSessionId = activeSession ? activeSession.id : null;
         : 'Cambiar de jornada borrará los equipos y partidos del sorteo actual para empezar en blanco. ¿Deseas continuar?';
       
       if (window.confirm(confirmMsg)) {
-        setSessions(sessions.map(s => {
-          if (s.id === newId) return { ...s, status: 'open' };
-          if (s.status !== 'closed') return { ...s, status: 'closed' };
-          return s;
-        }));
-        setTeams([]);
-        setMatches([]);
-        setMatchEvents([]);
+        await doUpdate();
       }
     }
   };
 
-  const updateSession = (updatedSession) => {
-    setSessions(sessions.map(s => s.id === updatedSession.id ? updatedSession : s));
+  const updateSession = async (updatedSession) => {
+    setSessionsOnly(prev => prev.map(s => s.id === updatedSession.id ? updatedSession : s));
+    try {
+      await supabase.from('sessions').update({ 
+        pitch_cost: updatedSession.pitchCost,
+        player_cost: updatedSession.playerCost,
+        status: updatedSession.status
+      }).eq('id', updatedSession.id);
+    } catch(e) { console.error(e); }
   };
 
   const getPlayersWithStats = () => {
@@ -209,21 +221,52 @@ const activeSessionId = activeSession ? activeSession.id : null;
 
   const updateConfirmedPlayers = async (newIdsOrUpdater) => {
     try {
-      let newIds = newIdsOrUpdater;
-      
       if (typeof newIdsOrUpdater === 'function') {
-        const { data } = await supabase.from('sessions').select('confirmed_ids').eq('id', activeSessionId).single();
-        let latestIds = data && data.confirmed_ids ? data.confirmed_ids : (activeSession?.confirmedIds || []);
+        let success = false;
+        let attempts = 0;
         
-        if (typeof latestIds === 'string') {
-          try { latestIds = JSON.parse(latestIds); } catch(e) { latestIds = []; }
+        while (!success && attempts < 5) {
+          attempts++;
+          const { data } = await supabase.from('sessions').select('confirmed_ids').eq('id', activeSessionId).single();
+          let latestIds = data && data.confirmed_ids ? data.confirmed_ids : (activeSession?.confirmedIds || []);
+          
+          if (typeof latestIds === 'string') {
+            try { latestIds = JSON.parse(latestIds); } catch(e) { latestIds = []; }
+          }
+          
+          const newIds = newIdsOrUpdater(latestIds);
+          
+          // Si el updater determina que no hay cambios (ej. ya está confirmado), abortamos sin error
+          if (JSON.stringify(newIds) === JSON.stringify(latestIds)) {
+             return;
+          }
+          
+          const { data: updatedRows, error } = await supabase
+            .from('sessions')
+            .update({ confirmed_ids: newIds })
+            .eq('id', activeSessionId)
+            .eq('confirmed_ids', JSON.stringify(latestIds))
+            .select('id');
+            
+          if (error) throw error;
+          
+          if (updatedRows && updatedRows.length > 0) {
+            success = true;
+            setSessionsOnly(prev => prev.map(s => s.id === activeSessionId ? { ...s, confirmedIds: newIds } : s));
+          } else {
+            // Colisión, esperar unos milisegundos aleatorios y reintentar
+            await new Promise(r => setTimeout(r, Math.random() * 300 + 100));
+          }
         }
         
-        newIds = newIdsOrUpdater(latestIds);
+        if (!success) {
+          console.error("No se pudo confirmar después de 5 intentos por alta concurrencia.");
+          alert("El sistema está muy saturado en este segundo, por favor intenta confirmar de nuevo.");
+        }
+      } else {
+        setSessionsOnly(prev => prev.map(s => s.id === activeSessionId ? { ...s, confirmedIds: newIdsOrUpdater } : s));
+        await supabase.from('sessions').update({ confirmed_ids: newIdsOrUpdater }).eq('id', activeSessionId);
       }
-
-      setSessionsOnly(prev => prev.map(s => s.id === activeSessionId ? { ...s, confirmedIds: newIds } : s));
-      await supabase.from('sessions').update({ confirmed_ids: newIds }).eq('id', activeSessionId);
     } catch (e) { console.error(e); }
   };
 
@@ -437,8 +480,8 @@ const activeSessionId = activeSession ? activeSession.id : null;
         <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {route === 'confirm' && <Confirm isAdmin={isAdmin} user={user} activeSession={activeSession} confirmedPlayers={confirmedPlayers} allPlayers={allPlayers} updateConfirmedPlayers={updateConfirmedPlayers} setPlayersDB={setPlayersDB} />}
           {route === 'admin-players' && isAdmin && <AdminPlayers allPlayers={playersDB} setPlayersDB={setPlayersDB} isGlobalAdmin={isGlobalAdmin} />}
-          {route === 'sessions' && isAdmin && <Sessions sessions={sessions} setSessions={setSessions} activeSessionId={activeSessionId} setActiveSessionId={handleActivateSession} historicalTournaments={historicalTournaments} teams={teams} isGlobalAdmin={isGlobalAdmin} />}
-          {route === 'finances' && <Finances sessions={sessions} setSessions={setSessions} activeSessionId={activeSessionId} allPlayers={playersDB} initialFund={initialFund} setInitialFund={setInitialFund} />}
+          {route === 'sessions' && isAdmin && <Sessions sessions={sessions} setSessions={setSessionsOnly} activeSessionId={activeSessionId} setActiveSessionId={handleActivateSession} historicalTournaments={historicalTournaments} teams={teams} isGlobalAdmin={isGlobalAdmin} />}
+          {route === 'finances' && <Finances sessions={sessions} setSessions={setSessionsOnly} activeSessionId={activeSessionId} allPlayers={playersDB} initialFund={initialFund} setInitialFund={setInitialFund} />}
           {route === 'draw' && isAdmin && <Draw players={confirmedPlayers} activeSession={activeSession} teams={teams} setTeams={setTeams} />}
           {route === 'tournament' && isAdmin && <Tournament activeSession={activeSession} teams={teams} setTeams={setTeams} matchEvents={matchEvents} setMatchEvents={setMatchEvents} matches={matches} setMatches={setMatches} updateSession={updateSession} />}
           {route === 'match' && isAdmin && <Match activeSession={activeSession} teams={teams} matchEvents={matchEvents} setMatchEvents={setMatchEvents} updateSession={updateSession} matches={matches} setMatches={setMatches} />}
@@ -495,3 +538,4 @@ const activeSessionId = activeSession ? activeSession.id : null;
 }
 
 export default App;
+
